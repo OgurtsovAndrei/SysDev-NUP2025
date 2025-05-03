@@ -82,20 +82,24 @@ function updatePackageOptions() {
   currentOrder.packageType = packageType;
 
   // Hide all option sections
-  document.getElementById('mobileOptions').classList.add('d-none');
-  document.getElementById('broadbandOptions').classList.add('d-none');
-  document.getElementById('tabletOptions').classList.add('d-none');
+  document.getElementById('home_internet_options').classList.add('d-none');
+  document.getElementById('mobile_hotspot_options').classList.add('d-none');
+  document.getElementById('mobile_no_hotspot_options').classList.add('d-none');
+  document.getElementById('mobile_combo_options').classList.add('d-none');
 
   // Show the relevant section based on selection
-  if (packageType === 'mobile') {
-    document.getElementById('mobileOptions').classList.remove('d-none');
-    populateMobileOptions();
-  } else if (packageType === 'broadband') {
-    document.getElementById('broadbandOptions').classList.remove('d-none');
-    populateBroadbandOptions();
-  } else if (packageType === 'tablet') {
-    document.getElementById('tabletOptions').classList.remove('d-none');
-    populateTabletOptions();
+  if (packageType === 'home_internet') {
+    document.getElementById('home_internet_options').classList.remove('d-none');
+    populateHomeInternetOptions();
+  } else if (packageType === 'mobile_hotspot') {
+    document.getElementById('mobile_hotspot_options').classList.remove('d-none');
+    populateMobileHotspotOptions();
+  } else if (packageType === 'mobile_no_hotspot') {
+    document.getElementById('mobile_no_hotspot_options').classList.remove('d-none');
+    populateMobileNoHotspotOptions();
+  } else if (packageType === 'mobile_combo') {
+    document.getElementById('mobile_combo_options').classList.remove('d-none');
+    populateMobileComboOptions();
   }
 
   // Reset current order options
@@ -106,26 +110,39 @@ function updatePackageOptions() {
   updateOrderSummary();
 }
 
-// Populate mobile options
-function populateMobileOptions() {
-  // Populate phone models
-  const phoneModelSelect = document.getElementById('phoneModel');
-  while (phoneModelSelect.options.length > 1) {
-    phoneModelSelect.remove(1);
+// Populate Home Internet options
+function populateHomeInternetOptions() {
+  // Populate internet speeds
+  const speedSelect = document.getElementById('internetSpeed');
+  while (speedSelect.options.length > 1) {
+    speedSelect.remove(1);
   }
 
-  mockData.packageOptions.mobile.phoneModels.forEach(model => {
+  mockData.packageOptions.home_internet.speeds.forEach(speed => {
     const option = document.createElement('option');
-    option.value = model.id;
-    option.textContent = `${model.name} (+$${model.price.toFixed(2)})`;
-    phoneModelSelect.appendChild(option);
+    option.value = speed.id;
+    option.textContent = `${speed.name} (+$${speed.price.toFixed(2)})`;
+    speedSelect.appendChild(option);
+  });
+
+  // Populate router options
+  const routerSelect = document.getElementById('routerOption');
+  while (routerSelect.options.length > 1) {
+    routerSelect.remove(1);
+  }
+
+  mockData.packageOptions.home_internet.routers.forEach(router => {
+    const option = document.createElement('option');
+    option.value = router.id;
+    option.textContent = `${router.name} ${router.price > 0 ? '(+$' + router.price.toFixed(2) + ')' : '(Included)'}`;
+    routerSelect.appendChild(option);
   });
 
   // Populate add-ons
-  const addOnsContainer = document.getElementById('mobileAddOns');
+  const addOnsContainer = document.getElementById('homeInternetAddOns');
   addOnsContainer.innerHTML = '';
 
-  mockData.packageOptions.mobile.addOns.forEach(addon => {
+  mockData.packageOptions.home_internet.addOns.forEach(addon => {
     const checkboxDiv = document.createElement('div');
     checkboxDiv.className = 'form-check';
 
@@ -147,58 +164,139 @@ function populateMobileOptions() {
   });
 }
 
-// Populate broadband options
-function populateBroadbandOptions() {
-  const routerSelect = document.getElementById('routerOption');
-  while (routerSelect.options.length > 1) {
-    routerSelect.remove(1);
-  }
-
-  mockData.packageOptions.broadband.routers.forEach(router => {
-    const option = document.createElement('option');
-    option.value = router.id;
-    option.textContent = `${router.name} ${router.price > 0 ? '(+$' + router.price.toFixed(2) + ')' : '(Included)'}`;
-    routerSelect.appendChild(option);
-  });
-}
-
-// Populate tablet options
-function populateTabletOptions() {
-  // Populate tablet models
-  const tabletModelSelect = document.getElementById('tabletModel');
-  while (tabletModelSelect.options.length > 1) {
-    tabletModelSelect.remove(1);
-  }
-
-  mockData.packageOptions.tablet.models.forEach(model => {
-    const option = document.createElement('option');
-    option.value = model.id;
-    option.textContent = `${model.name} (+$${model.price.toFixed(2)})`;
-    tabletModelSelect.appendChild(option);
-  });
-
+// Populate Mobile Internet with Hotspot options
+function populateMobileHotspotOptions() {
   // Populate data plans
-  const dataPlanSelect = document.getElementById('dataPlan');
+  const dataPlanSelect = document.getElementById('hotspotDataPlan');
   while (dataPlanSelect.options.length > 1) {
     dataPlanSelect.remove(1);
   }
 
-  mockData.packageOptions.tablet.dataPlans.forEach(plan => {
+  mockData.packageOptions.mobile_hotspot.dataPlans.forEach(plan => {
     const option = document.createElement('option');
     option.value = plan.id;
     option.textContent = `${plan.name} (+$${plan.price.toFixed(2)})`;
     dataPlanSelect.appendChild(option);
+  });
+
+  // Populate add-ons
+  const addOnsContainer = document.getElementById('mobileHotspotAddOns');
+  addOnsContainer.innerHTML = '';
+
+  mockData.packageOptions.mobile_hotspot.addOns.forEach(addon => {
+    const checkboxDiv = document.createElement('div');
+    checkboxDiv.className = 'form-check';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'form-check-input';
+    checkbox.id = `addon-hotspot-${addon.id}`;
+    checkbox.value = addon.id;
+    checkbox.onchange = updateOrderSummary;
+
+    const label = document.createElement('label');
+    label.className = 'form-check-label';
+    label.htmlFor = `addon-hotspot-${addon.id}`;
+    label.textContent = `${addon.name} (+$${addon.price.toFixed(2)})`;
+
+    checkboxDiv.appendChild(checkbox);
+    checkboxDiv.appendChild(label);
+    addOnsContainer.appendChild(checkboxDiv);
+  });
+}
+
+// Populate Mobile Internet without Hotspot options
+function populateMobileNoHotspotOptions() {
+  // Populate data plans
+  const dataPlanSelect = document.getElementById('noHotspotDataPlan');
+  while (dataPlanSelect.options.length > 1) {
+    dataPlanSelect.remove(1);
+  }
+
+  mockData.packageOptions.mobile_no_hotspot.dataPlans.forEach(plan => {
+    const option = document.createElement('option');
+    option.value = plan.id;
+    option.textContent = `${plan.name} (+$${plan.price.toFixed(2)})`;
+    dataPlanSelect.appendChild(option);
+  });
+
+  // Populate add-ons
+  const addOnsContainer = document.getElementById('mobileNoHotspotAddOns');
+  addOnsContainer.innerHTML = '';
+
+  mockData.packageOptions.mobile_no_hotspot.addOns.forEach(addon => {
+    const checkboxDiv = document.createElement('div');
+    checkboxDiv.className = 'form-check';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'form-check-input';
+    checkbox.id = `addon-no-hotspot-${addon.id}`;
+    checkbox.value = addon.id;
+    checkbox.onchange = updateOrderSummary;
+
+    const label = document.createElement('label');
+    label.className = 'form-check-label';
+    label.htmlFor = `addon-no-hotspot-${addon.id}`;
+    label.textContent = `${addon.name} (+$${addon.price.toFixed(2)})`;
+
+    checkboxDiv.appendChild(checkbox);
+    checkboxDiv.appendChild(label);
+    addOnsContainer.appendChild(checkboxDiv);
+  });
+}
+
+// Populate Mobile Combo options
+function populateMobileComboOptions() {
+  // Populate plans
+  const planSelect = document.getElementById('comboPlan');
+  while (planSelect.options.length > 1) {
+    planSelect.remove(1);
+  }
+
+  mockData.packageOptions.mobile_combo.plans.forEach(plan => {
+    const option = document.createElement('option');
+    option.value = plan.id;
+    option.textContent = `${plan.name} (+$${plan.price.toFixed(2)})`;
+    planSelect.appendChild(option);
+  });
+
+  // Populate add-ons
+  const addOnsContainer = document.getElementById('mobileComboAddOns');
+  addOnsContainer.innerHTML = '';
+
+  mockData.packageOptions.mobile_combo.addOns.forEach(addon => {
+    const checkboxDiv = document.createElement('div');
+    checkboxDiv.className = 'form-check';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'form-check-input';
+    checkbox.id = `addon-combo-${addon.id}`;
+    checkbox.value = addon.id;
+    checkbox.onchange = updateOrderSummary;
+
+    const label = document.createElement('label');
+    label.className = 'form-check-label';
+    label.htmlFor = `addon-combo-${addon.id}`;
+    label.textContent = `${addon.name} (+$${addon.price.toFixed(2)})`;
+
+    checkboxDiv.appendChild(checkbox);
+    checkboxDiv.appendChild(label);
+    addOnsContainer.appendChild(checkboxDiv);
   });
 }
 
 // Get base price for package type
 function getBasePrice(packageType) {
   switch (packageType) {
-    case 'mobile':
+    case 'home_internet':
       return 29.99;
-    case 'broadband':
-      return 39.99;
-    case 'tablet':
+    case 'mobile_hotspot':
+      return 15.99;
+    case 'mobile_no_hotspot':
+      return 10.99;
+    case 'mobile_combo':
       return 19.99;
     default:
       return 0;
@@ -214,20 +312,32 @@ function updateOrderSummary() {
   let summaryHTML = `<p><strong>Base Package:</strong> $${currentOrder.basePrice.toFixed(2)}</p>`;
 
   // Add selected options to the summary
-  if (currentOrder.packageType === 'mobile') {
-    const phoneModelSelect = document.getElementById('phoneModel');
-    if (phoneModelSelect.value) {
-      const selectedModel = mockData.packageOptions.mobile.phoneModels.find(m => m.id === phoneModelSelect.value);
-      if (selectedModel) {
-        totalPrice += selectedModel.price;
-        summaryHTML += `<p><strong>Phone Model:</strong> ${selectedModel.name} (+$${selectedModel.price.toFixed(2)})</p>`;
-        currentOrder.options.phoneModel = selectedModel;
+  if (currentOrder.packageType === 'home_internet') {
+    // Internet Speed
+    const speedSelect = document.getElementById('internetSpeed');
+    if (speedSelect.value) {
+      const selectedSpeed = mockData.packageOptions.home_internet.speeds.find(s => s.id === speedSelect.value);
+      if (selectedSpeed) {
+        totalPrice += selectedSpeed.price;
+        summaryHTML += `<p><strong>Internet Speed:</strong> ${selectedSpeed.name} (+$${selectedSpeed.price.toFixed(2)})</p>`;
+        currentOrder.options.speed = selectedSpeed;
+      }
+    }
+
+    // Router Option
+    const routerSelect = document.getElementById('routerOption');
+    if (routerSelect.value) {
+      const selectedRouter = mockData.packageOptions.home_internet.routers.find(r => r.id === routerSelect.value);
+      if (selectedRouter) {
+        totalPrice += selectedRouter.price;
+        summaryHTML += `<p><strong>Router:</strong> ${selectedRouter.name} ${selectedRouter.price > 0 ? '(+$' + selectedRouter.price.toFixed(2) + ')' : '(Included)'}</p>`;
+        currentOrder.options.router = selectedRouter;
       }
     }
 
     // Check for selected add-ons
     const selectedAddOns = [];
-    mockData.packageOptions.mobile.addOns.forEach(addon => {
+    mockData.packageOptions.home_internet.addOns.forEach(addon => {
       const checkbox = document.getElementById(`addon-${addon.id}`);
       if (checkbox && checkbox.checked) {
         totalPrice += addon.price;
@@ -239,35 +349,83 @@ function updateOrderSummary() {
     if (selectedAddOns.length > 0) {
       currentOrder.options.addOns = selectedAddOns;
     }
-  } else if (currentOrder.packageType === 'broadband') {
-    const routerSelect = document.getElementById('routerOption');
-    if (routerSelect.value) {
-      const selectedRouter = mockData.packageOptions.broadband.routers.find(r => r.id === routerSelect.value);
-      if (selectedRouter) {
-        totalPrice += selectedRouter.price;
-        summaryHTML += `<p><strong>Router:</strong> ${selectedRouter.name} ${selectedRouter.price > 0 ? '(+$' + selectedRouter.price.toFixed(2) + ')' : '(Included)'}</p>`;
-        currentOrder.options.router = selectedRouter;
-      }
-    }
-  } else if (currentOrder.packageType === 'tablet') {
-    const tabletModelSelect = document.getElementById('tabletModel');
-    if (tabletModelSelect.value) {
-      const selectedModel = mockData.packageOptions.tablet.models.find(m => m.id === tabletModelSelect.value);
-      if (selectedModel) {
-        totalPrice += selectedModel.price;
-        summaryHTML += `<p><strong>Tablet Model:</strong> ${selectedModel.name} (+$${selectedModel.price.toFixed(2)})</p>`;
-        currentOrder.options.tabletModel = selectedModel;
-      }
-    }
-
-    const dataPlanSelect = document.getElementById('dataPlan');
+  } else if (currentOrder.packageType === 'mobile_hotspot') {
+    // Data Plan
+    const dataPlanSelect = document.getElementById('hotspotDataPlan');
     if (dataPlanSelect.value) {
-      const selectedPlan = mockData.packageOptions.tablet.dataPlans.find(p => p.id === dataPlanSelect.value);
+      const selectedPlan = mockData.packageOptions.mobile_hotspot.dataPlans.find(p => p.id === dataPlanSelect.value);
       if (selectedPlan) {
         totalPrice += selectedPlan.price;
         summaryHTML += `<p><strong>Data Plan:</strong> ${selectedPlan.name} (+$${selectedPlan.price.toFixed(2)})</p>`;
         currentOrder.options.dataPlan = selectedPlan;
       }
+    }
+
+    // Check for selected add-ons
+    const selectedAddOns = [];
+    mockData.packageOptions.mobile_hotspot.addOns.forEach(addon => {
+      const checkbox = document.getElementById(`addon-hotspot-${addon.id}`);
+      if (checkbox && checkbox.checked) {
+        totalPrice += addon.price;
+        selectedAddOns.push(addon);
+        summaryHTML += `<p><strong>Add-on:</strong> ${addon.name} (+$${addon.price.toFixed(2)})</p>`;
+      }
+    });
+
+    if (selectedAddOns.length > 0) {
+      currentOrder.options.addOns = selectedAddOns;
+    }
+  } else if (currentOrder.packageType === 'mobile_no_hotspot') {
+    // Data Plan
+    const dataPlanSelect = document.getElementById('noHotspotDataPlan');
+    if (dataPlanSelect.value) {
+      const selectedPlan = mockData.packageOptions.mobile_no_hotspot.dataPlans.find(p => p.id === dataPlanSelect.value);
+      if (selectedPlan) {
+        totalPrice += selectedPlan.price;
+        summaryHTML += `<p><strong>Data Plan:</strong> ${selectedPlan.name} (+$${selectedPlan.price.toFixed(2)})</p>`;
+        currentOrder.options.dataPlan = selectedPlan;
+      }
+    }
+
+    // Check for selected add-ons
+    const selectedAddOns = [];
+    mockData.packageOptions.mobile_no_hotspot.addOns.forEach(addon => {
+      const checkbox = document.getElementById(`addon-no-hotspot-${addon.id}`);
+      if (checkbox && checkbox.checked) {
+        totalPrice += addon.price;
+        selectedAddOns.push(addon);
+        summaryHTML += `<p><strong>Add-on:</strong> ${addon.name} (+$${addon.price.toFixed(2)})</p>`;
+      }
+    });
+
+    if (selectedAddOns.length > 0) {
+      currentOrder.options.addOns = selectedAddOns;
+    }
+  } else if (currentOrder.packageType === 'mobile_combo') {
+    // Plan
+    const planSelect = document.getElementById('comboPlan');
+    if (planSelect.value) {
+      const selectedPlan = mockData.packageOptions.mobile_combo.plans.find(p => p.id === planSelect.value);
+      if (selectedPlan) {
+        totalPrice += selectedPlan.price;
+        summaryHTML += `<p><strong>Plan:</strong> ${selectedPlan.name} (+$${selectedPlan.price.toFixed(2)})</p>`;
+        currentOrder.options.plan = selectedPlan;
+      }
+    }
+
+    // Check for selected add-ons
+    const selectedAddOns = [];
+    mockData.packageOptions.mobile_combo.addOns.forEach(addon => {
+      const checkbox = document.getElementById(`addon-combo-${addon.id}`);
+      if (checkbox && checkbox.checked) {
+        totalPrice += addon.price;
+        selectedAddOns.push(addon);
+        summaryHTML += `<p><strong>Add-on:</strong> ${addon.name} (+$${addon.price.toFixed(2)})</p>`;
+      }
+    });
+
+    if (selectedAddOns.length > 0) {
+      currentOrder.options.addOns = selectedAddOns;
     }
   }
 
@@ -330,144 +488,253 @@ function submitOrder() {
 
 // Usage page functions
 function initializeUsagePage() {
-  if (!document.getElementById('dataProgressBar')) return; // Not on usage page
+  if (!document.getElementById('packageSections')) return; // Not on usage page
 
   // Display billing cycle dates
   const currentCycle = mockData.usageData.currentBillingCycle;
   document.getElementById('billingCycleDates').textContent = 
     `${currentCycle.startDate} to ${currentCycle.endDate}`;
 
-  // Initialize usage data displays
-  displayDataUsage();
-  displayCallMinutes();
-  displaySmsUsage();
+  // Get the container for package sections
+  const packageSectionsContainer = document.getElementById('packageSections');
+  packageSectionsContainer.innerHTML = ''; // Clear any existing content
+
+  // Get user packages
+  const userPackages = mockData.userInfo.packages;
+
+  // Create a section for each package
+  userPackages.forEach(package => {
+    // Create package section
+    const packageSection = createPackageSection(package);
+    packageSectionsContainer.appendChild(packageSection);
+  });
 
   // Populate previous billing cycles table
   populatePreviousCycles();
 }
 
-function displayDataUsage() {
-  const currentCycle = mockData.usageData.currentBillingCycle;
-  const dataUsed = currentCycle.dataUsed;
-  const dataTotal = currentCycle.dataTotal;
+// Create a section for a package
+function createPackageSection(package) {
+  // Create the package section container
+  const packageSection = document.createElement('div');
+  packageSection.className = 'mb-5';
 
-  // Calculate percentage
-  const percentage = (dataUsed / dataTotal) * 100;
+  // Create the package header
+  const packageHeader = document.createElement('div');
+  packageHeader.className = 'mb-3';
 
-  // Update text
-  document.getElementById('dataUsageText').textContent = 
-    `${dataUsed.toFixed(1)} GB / ${dataTotal} GB`;
-
-  // Update progress bar
-  const progressBar = document.getElementById('dataProgressBar');
-  progressBar.style.width = `${percentage}%`;
-  progressBar.setAttribute('aria-valuenow', percentage);
-
-  // Update percentage text in the center
-  document.getElementById('dataProgressPercentage').textContent = `${Math.round(percentage)}%`;
-
-  // Set color based on usage
-  if (percentage < 50) {
-    progressBar.classList.add('bg-success');
-  } else if (percentage < 90) {
-    progressBar.classList.add('bg-warning');
-  } else {
-    progressBar.classList.add('bg-danger');
+  // Get a user-friendly package type name
+  let packageTypeName = package.type;
+  const packageTypeObj = mockData.packageTypes.find(pt => pt.id === package.type);
+  if (packageTypeObj) {
+    packageTypeName = packageTypeObj.name;
   }
+
+  packageHeader.innerHTML = `
+    <h3>${package.name}</h3>
+    <p class="text-muted">${packageTypeName} ${package.addOns && package.addOns.length > 0 ? '• ' + package.addOns.join(', ') : ''}</p>
+  `;
+  packageSection.appendChild(packageHeader);
+
+  // Get usage data for this package
+  const packageUsage = mockData.usageData.currentBillingCycle.packages[package.id];
+
+  // Create usage cards based on package type
+  if (package.type === 'mobile_combo') {
+    packageSection.appendChild(createMobileComboUsageCards(packageUsage));
+  } else if (package.type === 'mobile_hotspot') {
+    packageSection.appendChild(createMobileHotspotUsageCards(packageUsage));
+  } else if (package.type === 'mobile_no_hotspot') {
+    packageSection.appendChild(createMobileNoHotspotUsageCards(packageUsage));
+  } else if (package.type === 'home_internet') {
+    packageSection.appendChild(createHomeInternetUsageCards(packageUsage));
+  }
+
+  return packageSection;
 }
 
-function displayCallMinutes() {
-  const currentCycle = mockData.usageData.currentBillingCycle;
-  const minutesUsed = currentCycle.callMinutesUsed;
-  const minutesTotal = currentCycle.callMinutesTotal;
+// Create usage cards for Mobile Combo packages
+function createMobileComboUsageCards(packageUsage) {
+  const cardsContainer = document.createElement('div');
 
-  // Update text
-  document.getElementById('callMinutesText').textContent = 
-    `${minutesUsed} minutes / ${minutesTotal}`;
+  // Data Usage Card
+  const dataCard = createUsageCard(
+    'Data Usage',
+    `${packageUsage.dataUsed.toFixed(1)} GB / ${packageUsage.dataTotal} GB`,
+    calculatePercentage(packageUsage.dataUsed, packageUsage.dataTotal)
+  );
+  cardsContainer.appendChild(dataCard);
 
-  let percentage = 0;
-  const progressBar = document.getElementById('callMinutesProgressBar');
-  const percentageText = document.getElementById('callMinutesProgressPercentage');
+  // Call Minutes Card
+  const callMinutesCard = createUsageCard(
+    'Call Minutes',
+    `${packageUsage.callMinutesUsed} minutes / ${packageUsage.callMinutesTotal}`,
+    packageUsage.callMinutesTotal === 'Unlimited' ? 100 : calculatePercentage(packageUsage.callMinutesUsed, parseInt(packageUsage.callMinutesTotal)),
+    packageUsage.callMinutesTotal === 'Unlimited' ? 'unlimited' : null
+  );
+  cardsContainer.appendChild(callMinutesCard);
 
-  if (minutesTotal === "Unlimited") {
-    // For unlimited plans, show full green progress bar
-    percentage = 100;
-    progressBar.classList.add('bg-success');
-  } else {
-    // For limited plans, calculate percentage and set color accordingly
-    percentage = (minutesUsed / parseInt(minutesTotal)) * 100;
+  // SMS Card
+  const smsCard = createUsageCard(
+    'Text Messages',
+    `${packageUsage.smsUsed} messages / ${packageUsage.smsTotal}`,
+    packageUsage.smsTotal === 'Unlimited' ? 100 : calculatePercentage(packageUsage.smsUsed, parseInt(packageUsage.smsTotal)),
+    packageUsage.smsTotal === 'Unlimited' ? 'unlimited' : null
+  );
+  cardsContainer.appendChild(smsCard);
 
-    // Set color based on usage
-    if (percentage < 50) {
-      progressBar.classList.add('bg-success');
-    } else if (percentage < 90) {
-      progressBar.classList.add('bg-warning');
-    } else {
-      progressBar.classList.add('bg-danger');
-    }
-  }
-
-  // Update progress bar
-  progressBar.style.width = `${percentage}%`;
-  progressBar.setAttribute('aria-valuenow', percentage);
-
-  // Set text content based on whether the plan is unlimited or not
-  if (minutesTotal === "Unlimited") {
-    percentageText.textContent = "unlimited";
-  } else {
-    percentageText.textContent = `${Math.round(percentage)}%`;
-  }
+  return cardsContainer;
 }
 
-function displaySmsUsage() {
-  const currentCycle = mockData.usageData.currentBillingCycle;
-  const smsUsed = currentCycle.smsUsed;
-  const smsTotal = currentCycle.smsTotal;
+// Create usage cards for Mobile Hotspot packages
+function createMobileHotspotUsageCards(packageUsage) {
+  const cardsContainer = document.createElement('div');
 
-  // Update text
-  document.getElementById('smsText').textContent = 
-    `${smsUsed} messages / ${smsTotal}`;
+  // Data Usage Card
+  const dataCard = createUsageCard(
+    'Data Usage',
+    `${packageUsage.dataUsed.toFixed(1)} GB / ${packageUsage.dataTotal} GB`,
+    calculatePercentage(packageUsage.dataUsed, packageUsage.dataTotal)
+  );
+  cardsContainer.appendChild(dataCard);
 
-  let percentage = 0;
-  const progressBar = document.getElementById('smsProgressBar');
-  const percentageText = document.getElementById('smsProgressPercentage');
+  // Hotspot Info Card
+  const hotspotCard = document.createElement('div');
+  hotspotCard.className = 'card usage-card';
+  hotspotCard.innerHTML = `
+    <div class="card-body">
+      <h5 class="card-title">Hotspot Information</h5>
+      <p class="card-text">Hotspot sharing is enabled for this plan. You can share your data with other devices.</p>
+    </div>
+  `;
+  cardsContainer.appendChild(hotspotCard);
 
-  if (smsTotal === "Unlimited") {
-    // For unlimited plans, show full green progress bar
-    percentage = 100;
-    progressBar.classList.add('bg-success');
-  } else {
-    // For limited plans, calculate percentage and set color accordingly
-    percentage = (smsUsed / parseInt(smsTotal)) * 100;
+  return cardsContainer;
+}
 
-    // Set color based on usage
-    if (percentage < 50) {
-      progressBar.classList.add('bg-success');
-    } else if (percentage < 90) {
-      progressBar.classList.add('bg-warning');
-    } else {
-      progressBar.classList.add('bg-danger');
-    }
+// Create usage cards for Mobile No Hotspot packages
+function createMobileNoHotspotUsageCards(packageUsage) {
+  const cardsContainer = document.createElement('div');
+
+  // Data Usage Card
+  const dataCard = createUsageCard(
+    'Data Usage',
+    `${packageUsage.dataUsed.toFixed(1)} GB / ${packageUsage.dataTotal} GB`,
+    calculatePercentage(packageUsage.dataUsed, packageUsage.dataTotal)
+  );
+  cardsContainer.appendChild(dataCard);
+
+  // Hotspot Info Card
+  const hotspotCard = document.createElement('div');
+  hotspotCard.className = 'card usage-card';
+  hotspotCard.innerHTML = `
+    <div class="card-body">
+      <h5 class="card-title">Hotspot Information</h5>
+      <p class="card-text">Hotspot sharing is not available for this plan. You cannot share your data with other devices.</p>
+    </div>
+  `;
+  cardsContainer.appendChild(hotspotCard);
+
+  return cardsContainer;
+}
+
+// Create usage cards for Home Internet packages
+function createHomeInternetUsageCards(packageUsage) {
+  const cardsContainer = document.createElement('div');
+
+  // Data Usage Card
+  const dataCard = createUsageCard(
+    'Data Usage',
+    `${packageUsage.dataUsed.toFixed(1)} GB / ${packageUsage.dataTotal} GB`,
+    calculatePercentage(packageUsage.dataUsed, packageUsage.dataTotal)
+  );
+  cardsContainer.appendChild(dataCard);
+
+  // Connection Speed Card
+  const speedCard = document.createElement('div');
+  speedCard.className = 'card usage-card';
+  speedCard.innerHTML = `
+    <div class="card-body">
+      <h5 class="card-title">Connection Speed</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <p class="card-text"><strong>Download:</strong> ${packageUsage.downloadSpeed}</p>
+        </div>
+        <div class="col-md-6">
+          <p class="card-text"><strong>Upload:</strong> ${packageUsage.uploadSpeed}</p>
+        </div>
+      </div>
+    </div>
+  `;
+  cardsContainer.appendChild(speedCard);
+
+  // Connected Devices Card
+  const devicesCard = document.createElement('div');
+  devicesCard.className = 'card usage-card';
+  devicesCard.innerHTML = `
+    <div class="card-body">
+      <h5 class="card-title">Connected Devices</h5>
+      <p class="card-text">${packageUsage.devices} devices currently connected</p>
+    </div>
+  `;
+  cardsContainer.appendChild(devicesCard);
+
+  return cardsContainer;
+}
+
+// Helper function to create a usage card with progress bar
+function createUsageCard(title, text, percentage, customPercentageText = null) {
+  const card = document.createElement('div');
+  card.className = 'card usage-card';
+
+  // Determine progress bar color
+  let colorClass = 'bg-success';
+  if (percentage >= 90) {
+    colorClass = 'bg-danger';
+  } else if (percentage >= 50) {
+    colorClass = 'bg-warning';
   }
 
-  // Update progress bar
-  progressBar.style.width = `${percentage}%`;
-  progressBar.setAttribute('aria-valuenow', percentage);
+  // Set percentage text
+  const percentageText = customPercentageText || `${Math.round(percentage)}%`;
 
-  // Set text content based on whether the plan is unlimited or not
-  if (smsTotal === "Unlimited") {
-    percentageText.textContent = "unlimited";
-  } else {
-    percentageText.textContent = `${Math.round(percentage)}%`;
-  }
+  card.innerHTML = `
+    <div class="card-body">
+      <h5 class="card-title">${title}</h5>
+      <p class="card-text">${text}</p>
+      <div class="progress">
+        <div class="progress-bar ${colorClass}" role="progressbar" style="width: ${percentage}%;" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100"></div>
+        <span class="progress-percentage">${percentageText}</span>
+      </div>
+    </div>
+  `;
+
+  return card;
+}
+
+// Helper function to calculate percentage
+function calculatePercentage(used, total) {
+  return (used / total) * 100;
 }
 
 function populatePreviousCycles() {
   const previousCycles = mockData.usageData.previousBillingCycles;
   const tableBody = document.getElementById('previousCyclesTable');
+  const userPackages = mockData.userInfo.packages;
 
   // Clear existing rows
   tableBody.innerHTML = '';
+
+  // Update table headers based on user packages
+  const tableHead = document.querySelector('#previousCyclesTable').parentElement.querySelector('thead tr');
+  tableHead.innerHTML = '<th>Period</th>';
+
+  // Add headers for each package
+  userPackages.forEach(package => {
+    const packageHeader = document.createElement('th');
+    packageHeader.textContent = package.name;
+    tableHead.appendChild(packageHeader);
+  });
 
   // Add a row for each previous cycle
   previousCycles.forEach(cycle => {
@@ -478,20 +745,40 @@ function populatePreviousCycles() {
     periodCell.textContent = cycle.period;
     row.appendChild(periodCell);
 
-    // Data Used
-    const dataCell = document.createElement('td');
-    dataCell.textContent = `${cycle.dataUsed.toFixed(1)} GB / ${cycle.dataTotal} GB`;
-    row.appendChild(dataCell);
+    // Add data for each package
+    userPackages.forEach(package => {
+      const packageData = cycle.packages[package.id];
+      const packageCell = document.createElement('td');
 
-    // Call Minutes
-    const callCell = document.createElement('td');
-    callCell.textContent = `${cycle.callMinutesUsed} minutes`;
-    row.appendChild(callCell);
+      if (packageData) {
+        if (package.type === 'mobile_combo') {
+          packageCell.innerHTML = `
+            <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
+            <div><strong>Calls:</strong> ${packageData.callMinutesUsed} minutes${packageData.callMinutesTotal ? ' / ' + packageData.callMinutesTotal + ' minutes' : ''}</div>
+            <div><strong>SMS:</strong> ${packageData.smsUsed} messages${packageData.smsTotal ? ' / ' + packageData.smsTotal + ' messages' : ''}</div>
+          `;
+        } else if (package.type === 'mobile_hotspot' || package.type === 'mobile_no_hotspot') {
+          packageCell.innerHTML = `
+            <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
+            <div><strong>Hotspot:</strong> ${package.type === 'mobile_hotspot' ? 'Enabled' : 'Disabled'}</div>
+          `;
+        } else if (package.type === 'home_internet') {
+          packageCell.innerHTML = `
+            <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
+            ${packageData.downloadSpeed ? `<div><strong>Speed:</strong> ${packageData.downloadSpeed} down / ${packageData.uploadSpeed} up</div>` : ''}
+          `;
+        } else {
+          // Fallback for any other package type
+          packageCell.innerHTML = `
+            <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
+          `;
+        }
+      } else {
+        packageCell.textContent = 'No data available';
+      }
 
-    // SMS
-    const smsCell = document.createElement('td');
-    smsCell.textContent = `${cycle.smsUsed} messages`;
-    row.appendChild(smsCell);
+      row.appendChild(packageCell);
+    });
 
     tableBody.appendChild(row);
   });
@@ -960,7 +1247,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Initialize usage page if we're on it
-  if (document.getElementById('dataProgressBar')) {
+  if (document.getElementById('packageSections')) {
     initializeUsagePage();
   }
 

@@ -57,7 +57,7 @@
         <div class="col-lg-8 mx-auto">
             <h1 class="mb-4">Order a Package</h1>
             <p class="lead mb-4">Select your preferred package and customize it to your needs.</p>
-            
+
             <form id="orderForm">
                 <!-- Package Type Selection -->
                 <div class="mb-3">
@@ -67,29 +67,19 @@
                         <!-- Options will be populated from mock-data.js -->
                     </select>
                 </div>
-                
+
                 <!-- Dynamic Package Options -->
                 <div id="packageOptions" class="package-options">
-                    <!-- Mobile Options (initially hidden) -->
-                    <div id="mobileOptions" class="d-none">
+                    <!-- Home Internet Options (initially hidden) -->
+                    <div id="home_internet_options" class="d-none">
                         <div class="mb-3">
-                            <label for="phoneModel" class="form-label">Phone Model</label>
-                            <select class="form-select" id="phoneModel" onchange="updateOrderSummary()">
-                                <option value="" selected disabled>Select a phone model</option>
+                            <label for="internetSpeed" class="form-label">Internet Speed</label>
+                            <select class="form-select" id="internetSpeed" onchange="updateOrderSummary()">
+                                <option value="" selected disabled>Select an internet speed</option>
                                 <!-- Options will be populated from mock-data.js -->
                             </select>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Add-ons</label>
-                            <div class="form-check" id="mobileAddOns">
-                                <!-- Checkboxes will be populated from mock-data.js -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Broadband Options (initially hidden) -->
-                    <div id="broadbandOptions" class="d-none">
+
                         <div class="mb-3">
                             <label for="routerOption" class="form-label">Router Option</label>
                             <select class="form-select" id="routerOption" onchange="updateOrderSummary()">
@@ -97,28 +87,70 @@
                                 <!-- Options will be populated from mock-data.js -->
                             </select>
                         </div>
-                    </div>
-                    
-                    <!-- Tablet Options (initially hidden) -->
-                    <div id="tabletOptions" class="d-none">
+
                         <div class="mb-3">
-                            <label for="tabletModel" class="form-label">Tablet Model</label>
-                            <select class="form-select" id="tabletModel" onchange="updateOrderSummary()">
-                                <option value="" selected disabled>Select a tablet model</option>
-                                <!-- Options will be populated from mock-data.js -->
-                            </select>
+                            <label class="form-label">Add-ons</label>
+                            <div class="form-check" id="homeInternetAddOns">
+                                <!-- Checkboxes will be populated from mock-data.js -->
+                            </div>
                         </div>
-                        
+                    </div>
+
+                    <!-- Mobile Internet with Hotspot Options (initially hidden) -->
+                    <div id="mobile_hotspot_options" class="d-none">
                         <div class="mb-3">
-                            <label for="dataPlan" class="form-label">Data Plan</label>
-                            <select class="form-select" id="dataPlan" onchange="updateOrderSummary()">
+                            <label for="hotspotDataPlan" class="form-label">Data Plan</label>
+                            <select class="form-select" id="hotspotDataPlan" onchange="updateOrderSummary()">
                                 <option value="" selected disabled>Select a data plan</option>
                                 <!-- Options will be populated from mock-data.js -->
                             </select>
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Add-ons</label>
+                            <div class="form-check" id="mobileHotspotAddOns">
+                                <!-- Checkboxes will be populated from mock-data.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Internet without Hotspot Options (initially hidden) -->
+                    <div id="mobile_no_hotspot_options" class="d-none">
+                        <div class="mb-3">
+                            <label for="noHotspotDataPlan" class="form-label">Data Plan</label>
+                            <select class="form-select" id="noHotspotDataPlan" onchange="updateOrderSummary()">
+                                <option value="" selected disabled>Select a data plan</option>
+                                <!-- Options will be populated from mock-data.js -->
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Add-ons</label>
+                            <div class="form-check" id="mobileNoHotspotAddOns">
+                                <!-- Checkboxes will be populated from mock-data.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Combo Options (initially hidden) -->
+                    <div id="mobile_combo_options" class="d-none">
+                        <div class="mb-3">
+                            <label for="comboPlan" class="form-label">Plan</label>
+                            <select class="form-select" id="comboPlan" onchange="updateOrderSummary()">
+                                <option value="" selected disabled>Select a plan</option>
+                                <!-- Options will be populated from mock-data.js -->
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Add-ons</label>
+                            <div class="form-check" id="mobileComboAddOns">
+                                <!-- Checkboxes will be populated from mock-data.js -->
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
+
                 <!-- Promo Code -->
                 <div class="mb-3">
                     <label for="promoCode" class="form-label">Promo Code</label>
@@ -128,7 +160,7 @@
                     </div>
                     <div id="promoCodeFeedback" class="form-text"></div>
                 </div>
-                
+
                 <!-- Order Summary -->
                 <div class="summary-section">
                     <h3>Order Summary</h3>
@@ -140,7 +172,7 @@
                         <h4 id="orderTotal">$0.00</h4>
                     </div>
                 </div>
-                
+
                 <!-- Submit Button -->
                 <div class="d-grid gap-2 mt-4">
                     <button type="button" class="btn btn-primary btn-lg" onclick="submitOrder()">Place Order</button>

@@ -74,37 +74,9 @@
             <h1 class="mb-4">Usage Overview</h1>
             <p class="lead mb-4">Current billing cycle: <span id="billingCycleDates"></span></p>
 
-            <div class="card usage-card">
-                <div class="card-body">
-                    <h5 class="card-title">Data Usage</h5>
-                    <p class="card-text" id="dataUsageText">Loading...</p>
-                    <div class="progress">
-                        <div id="dataProgressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                        <span id="dataProgressPercentage" class="progress-percentage">0%</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card usage-card">
-                <div class="card-body">
-                    <h5 class="card-title">Call Minutes</h5>
-                    <p class="card-text" id="callMinutesText">Loading...</p>
-                    <div class="progress">
-                        <div id="callMinutesProgressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                        <span id="callMinutesProgressPercentage" class="progress-percentage">0%</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card usage-card">
-                <div class="card-body">
-                    <h5 class="card-title">Text Messages</h5>
-                    <p class="card-text" id="smsText">Loading...</p>
-                    <div class="progress">
-                        <div id="smsProgressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                        <span id="smsProgressPercentage" class="progress-percentage">0%</span>
-                    </div>
-                </div>
+            <!-- Package sections will be dynamically added here -->
+            <div id="packageSections">
+                <!-- This will be populated by JavaScript -->
             </div>
 
             <h3 class="mt-5 mb-3">Previous Billing Cycles</h3>
@@ -112,10 +84,8 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <!-- Headers will be dynamically populated by JavaScript -->
                             <th>Period</th>
-                            <th>Data Used</th>
-                            <th>Call Minutes</th>
-                            <th>Text Messages</th>
                         </tr>
                     </thead>
                     <tbody id="previousCyclesTable">

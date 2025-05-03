@@ -41,8 +41,23 @@ const mockData = {
     accountNumber: "ACC987654321",
     accountType: "Premium",
     registrationDate: "2023-05-15",
-    packageType: "MobileOnly",
-    addOns: ["Landline minutes", "International minutes"],
+    packages: [
+      {
+        id: "PKG002",
+        type: "mobile_combo",
+        name: "Standard Mobile Plan",
+        plan: "standard",
+        addOns: ["Landline minutes", "International minutes"]
+      },
+      {
+        id: "PKG005",
+        type: "home_internet",
+        name: "Home Internet",
+        speed: "standard",
+        router: "premium",
+        addOns: ["Static IP", "Premium Support"]
+      }
+    ],
     paymentMethod: "**** **** **** 1234",
     billingAddress: {
       street: "123 Main Street",
@@ -55,42 +70,67 @@ const mockData = {
 
   // Package types for order form
   packageTypes: [
-    { id: "mobile", name: "MobileOnly" },
-    { id: "broadband", name: "BroadbandOnly" },
-    { id: "tablet", name: "TabletOnly" }
+    { id: "home_internet", name: "Home Internet (limit only speed)" },
+    { id: "mobile_hotspot", name: "Mobile Internet (with hotspot)" },
+    { id: "mobile_no_hotspot", name: "Mobile Internet (no hotspot)" },
+    { id: "mobile_combo", name: "Mobile Internet + Minutes + SMS" }
   ],
 
   // Package options based on type
   packageOptions: {
-    mobile: {
-      phoneModels: [
-        { id: "iphone13", name: "iPhone 13", price: 799.99 },
-        { id: "galaxys21", name: "Samsung Galaxy S21", price: 699.99 },
-        { id: "pixel6", name: "Google Pixel 6", price: 599.99 }
+    home_internet: {
+      speeds: [
+        { id: "basic", name: "Basic (50 Mbps)", price: 29.99 },
+        { id: "standard", name: "Standard (100 Mbps)", price: 49.99 },
+        { id: "premium", name: "Premium (500 Mbps)", price: 79.99 },
+        { id: "ultra", name: "Ultra (1 Gbps)", price: 99.99 }
       ],
-      addOns: [
-        { id: "landline", name: "Landline minutes", price: 5.99 },
-        { id: "international", name: "International minutes", price: 10.99 },
-        { id: "08numbers", name: "08-number calls", price: 3.99 }
-      ]
-    },
-    broadband: {
       routers: [
         { id: "basic", name: "Basic Router", price: 0 },
         { id: "premium", name: "Premium Router", price: 49.99 },
         { id: "mesh", name: "Mesh WiFi System", price: 149.99 }
+      ],
+      addOns: [
+        { id: "static_ip", name: "Static IP", price: 5.99 },
+        { id: "premium_support", name: "Premium Support", price: 10.99 }
       ]
     },
-    tablet: {
-      models: [
-        { id: "ipad", name: "iPad 10.2", price: 329.99 },
-        { id: "galaxytab", name: "Samsung Galaxy Tab", price: 249.99 },
-        { id: "fireHD", name: "Amazon Fire HD", price: 149.99 }
-      ],
+    mobile_hotspot: {
       dataPlans: [
-        { id: "5gb", name: "5GB Data", price: 15.99 },
-        { id: "10gb", name: "10GB Data", price: 25.99 },
-        { id: "unlimited", name: "Unlimited Data", price: 35.99 }
+        { id: "10gb", name: "10GB Data", price: 15.99 },
+        { id: "20gb", name: "20GB Data", price: 25.99 },
+        { id: "50gb", name: "50GB Data", price: 45.99 },
+        { id: "unlimited", name: "Unlimited Data", price: 65.99 }
+      ],
+      addOns: [
+        { id: "international", name: "International Roaming", price: 10.99 },
+        { id: "priority", name: "Priority Data", price: 15.99 }
+      ]
+    },
+    mobile_no_hotspot: {
+      dataPlans: [
+        { id: "10gb", name: "10GB Data", price: 10.99 },
+        { id: "20gb", name: "20GB Data", price: 20.99 },
+        { id: "50gb", name: "50GB Data", price: 40.99 },
+        { id: "unlimited", name: "Unlimited Data", price: 55.99 }
+      ],
+      addOns: [
+        { id: "international", name: "International Roaming", price: 10.99 },
+        { id: "priority", name: "Priority Data", price: 15.99 }
+      ]
+    },
+    mobile_combo: {
+      plans: [
+        { id: "basic", name: "Basic (5GB + 100 mins + 100 SMS)", price: 19.99 },
+        { id: "standard", name: "Standard (20GB + 500 mins + 500 SMS)", price: 39.99 },
+        { id: "premium", name: "Premium (50GB + Unlimited mins + Unlimited SMS)", price: 59.99 },
+        { id: "unlimited", name: "Unlimited (Unlimited Data + Unlimited mins + Unlimited SMS)", price: 79.99 }
+      ],
+      addOns: [
+        { id: "landline", name: "Landline minutes", price: 5.99 },
+        { id: "international", name: "International minutes", price: 10.99 },
+        { id: "08numbers", name: "08-number calls", price: 3.99 },
+        { id: "international_sms", name: "International SMS", price: 5.99 }
       ]
     }
   },
@@ -165,27 +205,75 @@ const mockData = {
     currentBillingCycle: {
       startDate: "2025-03-01",
       endDate: "2025-03-31",
-      dataUsed: 12.5, // GB
-      dataTotal: 20, // GB
-      callMinutesUsed: 320,
-      callMinutesTotal: "Unlimited",
-      smsUsed: 45,
-      smsTotal: "Unlimited"
+      packages: {
+        "PKG002": {
+          type: "mobile_combo",
+          name: "Standard Mobile Plan",
+          dataUsed: 12.5, // GB
+          dataTotal: 20, // GB
+          callMinutesUsed: 320,
+          callMinutesTotal: 500,
+          smsUsed: 45,
+          smsTotal: 500,
+          hotspotAllowed: false
+        },
+        "PKG005": {
+          type: "home_internet",
+          name: "Home Internet",
+          dataUsed: 250.5, // GB
+          dataTotal: 500, // GB
+          downloadSpeed: "100 Mbps",
+          uploadSpeed: "20 Mbps",
+          devices: 8
+        }
+      }
     },
     previousBillingCycles: [
       {
         period: "February 2025",
-        dataUsed: 18.2,
-        dataTotal: 20,
-        callMinutesUsed: 450,
-        smsUsed: 78
+        packages: {
+          "PKG002": {
+            type: "mobile_combo",
+            name: "Standard Mobile Plan",
+            dataUsed: 18.2,
+            dataTotal: 20,
+            callMinutesUsed: 450,
+            callMinutesTotal: 500,
+            smsUsed: 78,
+            smsTotal: 500
+          },
+          "PKG005": {
+            type: "home_internet",
+            name: "Home Internet",
+            dataUsed: 320.7,
+            dataTotal: 500,
+            downloadSpeed: "100 Mbps",
+            uploadSpeed: "20 Mbps"
+          }
+        }
       },
       {
         period: "January 2025",
-        dataUsed: 15.7,
-        dataTotal: 20,
-        callMinutesUsed: 380,
-        smsUsed: 62
+        packages: {
+          "PKG002": {
+            type: "mobile_combo",
+            name: "Standard Mobile Plan",
+            dataUsed: 15.7,
+            dataTotal: 20,
+            callMinutesUsed: 380,
+            callMinutesTotal: 500,
+            smsUsed: 62,
+            smsTotal: 500
+          },
+          "PKG005": {
+            type: "home_internet",
+            name: "Home Internet",
+            dataUsed: 280.3,
+            dataTotal: 500,
+            downloadSpeed: "100 Mbps",
+            uploadSpeed: "20 Mbps"
+          }
+        }
       }
     ]
   },
