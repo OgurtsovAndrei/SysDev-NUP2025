@@ -1,5 +1,37 @@
 // Mock data for G4UltimateMobile CRM Prototype
 const mockData = {
+  // Feedback data
+  feedback: {
+    averageRating: 4.5,
+    totalReviews: 128,
+    recentFeedback: [
+      {
+        id: "FB001",
+        rating: 5,
+        topic: "support",
+        text: "The customer support team was extremely helpful and resolved my issue quickly.",
+        timestamp: "2025-03-15T14:30:00Z",
+        user: "John D."
+      },
+      {
+        id: "FB002",
+        rating: 4,
+        topic: "deals",
+        text: "Good deals, but I wish there were more options for international plans.",
+        timestamp: "2025-03-12T09:15:00Z",
+        user: "Sarah M."
+      },
+      {
+        id: "FB003",
+        rating: 5,
+        topic: "app",
+        text: "The mobile app is very intuitive and easy to use. Love the new features!",
+        timestamp: "2025-03-10T16:45:00Z",
+        user: "Michael T."
+      }
+    ]
+  },
+
   // User information
   userInfo: {
     id: "USR12345",

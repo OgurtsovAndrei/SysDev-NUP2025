@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Feedback - G4UltimateMobile CRM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { padding-top: 60px; }
+        .feedback-section { padding: 2rem 0; }
+        footer { margin-top: 3rem; padding: 1.5rem 0; background-color: #f8f9fa; }
+        
+        /* Feedback specific styles */
+        .feedback-container {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .star-rating {
+            font-size: 2rem;
+            display: inline-flex;
+            cursor: pointer;
+        }
+        
+        .star-rating .bi-star-fill {
+            color: #ffc107; /* Bootstrap warning color for filled stars */
+        }
+        
+        .star-rating .bi-star {
+            color: #6c757d; /* Bootstrap secondary color for empty stars */
+        }
+        
+        .average-rating {
+            background-color: #e9ecef;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .disclaimer {
+            font-style: italic;
+            color: #6c757d;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">Telecom Proto</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="order.html">Order</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="usage.html">Usage</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="chat.html">Chat</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="feedback.html">Feedback</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="goToProfilePage()">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="goToLoginPage()">Login</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Feedback Section -->
+<main class="container feedback-section">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="mb-4">Share Your Feedback</h1>
+            <p class="lead mb-4">We value your opinion and would love to hear about your experience.</p>
+            
+            <!-- Average Rating (Optional Enhancement) -->
+            <div class="average-rating" id="averageRatingContainer">
+                <h5>Average Customer Rating</h5>
+                <div class="star-rating" id="averageRatingStars">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-half"></i>
+                </div>
+                <p class="mb-0 mt-2"><strong>4.5</strong> out of 5 based on <strong>128</strong> reviews</p>
+            </div>
+            
+            <div class="feedback-container">
+                <form id="feedbackForm">
+                    <!-- Service Rating -->
+                    <div class="mb-4">
+                        <label class="form-label">Rate our customer support</label>
+                        <div class="star-rating" id="ratingStars">
+                            <i class="bi bi-star" data-rating="1" onclick="setRating(1)"></i>
+                            <i class="bi bi-star" data-rating="2" onclick="setRating(2)"></i>
+                            <i class="bi bi-star" data-rating="3" onclick="setRating(3)"></i>
+                            <i class="bi bi-star" data-rating="4" onclick="setRating(4)"></i>
+                            <i class="bi bi-star" data-rating="5" onclick="setRating(5)"></i>
+                        </div>
+                        <input type="hidden" id="ratingValue" value="0">
+                    </div>
+                    
+                    <!-- Feedback Topic -->
+                    <div class="mb-3">
+                        <label for="feedbackTopic" class="form-label">Select feedback topic</label>
+                        <select class="form-select" id="feedbackTopic" required>
+                            <option value="" selected disabled>Choose a topic</option>
+                            <option value="deals">Deals & Packages</option>
+                            <option value="support">Customer Support</option>
+                            <option value="app">Mobile App</option>
+                            <option value="suggestion">General Suggestion</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Text Feedback -->
+                    <div class="mb-3">
+                        <label for="feedbackText" class="form-label">Additional Comments</label>
+                        <textarea class="form-control" id="feedbackText" rows="5" placeholder="Write your feedback here..."></textarea>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" onclick="submitFeedback()">Submit Feedback</button>
+                    </div>
+                    
+                    <!-- Disclaimer (Optional Enhancement) -->
+                    <p class="disclaimer">Your feedback helps us improve!</p>
+                </form>
+                
+                <!-- Success Alert (Initially Hidden) -->
+                <div class="alert alert-success mt-3 d-none" id="feedbackSuccess">
+                    Thanks for your feedback! We appreciate your input.
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="text-center text-muted">
+    <div class="container">
+        <p class="mb-0">G4UltimateMobile CRM Prototype © 2025. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="/js/mock-data.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
