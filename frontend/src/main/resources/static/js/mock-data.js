@@ -17,7 +17,56 @@ const mockData = {
       country: "USA"
     }
   },
-  
+
+  // Package types for order form
+  packageTypes: [
+    { id: "mobile", name: "MobileOnly" },
+    { id: "broadband", name: "BroadbandOnly" },
+    { id: "tablet", name: "TabletOnly" }
+  ],
+
+  // Package options based on type
+  packageOptions: {
+    mobile: {
+      phoneModels: [
+        { id: "iphone13", name: "iPhone 13", price: 799.99 },
+        { id: "galaxys21", name: "Samsung Galaxy S21", price: 699.99 },
+        { id: "pixel6", name: "Google Pixel 6", price: 599.99 }
+      ],
+      addOns: [
+        { id: "landline", name: "Landline minutes", price: 5.99 },
+        { id: "international", name: "International minutes", price: 10.99 },
+        { id: "08numbers", name: "08-number calls", price: 3.99 }
+      ]
+    },
+    broadband: {
+      routers: [
+        { id: "basic", name: "Basic Router", price: 0 },
+        { id: "premium", name: "Premium Router", price: 49.99 },
+        { id: "mesh", name: "Mesh WiFi System", price: 149.99 }
+      ]
+    },
+    tablet: {
+      models: [
+        { id: "ipad", name: "iPad 10.2", price: 329.99 },
+        { id: "galaxytab", name: "Samsung Galaxy Tab", price: 249.99 },
+        { id: "fireHD", name: "Amazon Fire HD", price: 149.99 }
+      ],
+      dataPlans: [
+        { id: "5gb", name: "5GB Data", price: 15.99 },
+        { id: "10gb", name: "10GB Data", price: 25.99 },
+        { id: "unlimited", name: "Unlimited Data", price: 35.99 }
+      ]
+    }
+  },
+
+  // Promo codes
+  promoCodes: [
+    { code: "WELCOME10", discount: 0.1, description: "10% off for new customers" },
+    { code: "LOYALTY25", discount: 0.25, description: "25% off for loyal customers" },
+    { code: "SUMMER2025", discount: 0.15, description: "15% summer discount" }
+  ],
+
   // Available packages
   packages: [
     {
@@ -75,7 +124,7 @@ const mockData = {
       popular: false
     }
   ],
-  
+
   // Usage data
   usageData: {
     currentBillingCycle: {
@@ -105,7 +154,7 @@ const mockData = {
       }
     ]
   },
-  
+
   // Support tickets
   supportTickets: [
     {
@@ -126,7 +175,7 @@ const mockData = {
       resolution: "Resolved by network reset"
     }
   ],
-  
+
   // Notifications
   notifications: [
     {
