@@ -13,7 +13,7 @@ function goToUsagePage() {
 
 function goToChatPage() {
   console.log("Navigating to Chat Page");
-  alert("Chat Support would open here");
+  window.location.href = "chat.html";
 }
 
 function goToFeedbackPage() {
@@ -357,7 +357,9 @@ function displayDataUsage() {
   const progressBar = document.getElementById('dataProgressBar');
   progressBar.style.width = `${percentage}%`;
   progressBar.setAttribute('aria-valuenow', percentage);
-  progressBar.textContent = `${Math.round(percentage)}%`;
+
+  // Update percentage text in the center
+  document.getElementById('dataProgressPercentage').textContent = `${Math.round(percentage)}%`;
 
   // Set color based on usage
   if (percentage < 50) {
@@ -378,30 +380,37 @@ function displayCallMinutes() {
   document.getElementById('callMinutesText').textContent = 
     `${minutesUsed} minutes / ${minutesTotal}`;
 
-  // For unlimited plans, set a threshold for color coding (e.g., 500 minutes)
-  const threshold = 500;
   let percentage = 0;
+  const progressBar = document.getElementById('callMinutesProgressBar');
+  const percentageText = document.getElementById('callMinutesProgressPercentage');
 
   if (minutesTotal === "Unlimited") {
-    percentage = (minutesUsed / threshold) * 100;
-    if (percentage > 100) percentage = 100; // Cap at 100%
+    // For unlimited plans, show full green progress bar
+    percentage = 100;
+    progressBar.classList.add('bg-success');
   } else {
+    // For limited plans, calculate percentage and set color accordingly
     percentage = (minutesUsed / parseInt(minutesTotal)) * 100;
+
+    // Set color based on usage
+    if (percentage < 50) {
+      progressBar.classList.add('bg-success');
+    } else if (percentage < 90) {
+      progressBar.classList.add('bg-warning');
+    } else {
+      progressBar.classList.add('bg-danger');
+    }
   }
 
   // Update progress bar
-  const progressBar = document.getElementById('callMinutesProgressBar');
   progressBar.style.width = `${percentage}%`;
   progressBar.setAttribute('aria-valuenow', percentage);
-  progressBar.textContent = `${Math.round(percentage)}%`;
 
-  // Set color based on usage
-  if (percentage < 50) {
-    progressBar.classList.add('bg-success');
-  } else if (percentage < 90) {
-    progressBar.classList.add('bg-warning');
+  // Set text content based on whether the plan is unlimited or not
+  if (minutesTotal === "Unlimited") {
+    percentageText.textContent = "unlimited";
   } else {
-    progressBar.classList.add('bg-danger');
+    percentageText.textContent = `${Math.round(percentage)}%`;
   }
 }
 
@@ -414,30 +423,37 @@ function displaySmsUsage() {
   document.getElementById('smsText').textContent = 
     `${smsUsed} messages / ${smsTotal}`;
 
-  // For unlimited plans, set a threshold for color coding (e.g., 100 messages)
-  const threshold = 100;
   let percentage = 0;
+  const progressBar = document.getElementById('smsProgressBar');
+  const percentageText = document.getElementById('smsProgressPercentage');
 
   if (smsTotal === "Unlimited") {
-    percentage = (smsUsed / threshold) * 100;
-    if (percentage > 100) percentage = 100; // Cap at 100%
+    // For unlimited plans, show full green progress bar
+    percentage = 100;
+    progressBar.classList.add('bg-success');
   } else {
+    // For limited plans, calculate percentage and set color accordingly
     percentage = (smsUsed / parseInt(smsTotal)) * 100;
+
+    // Set color based on usage
+    if (percentage < 50) {
+      progressBar.classList.add('bg-success');
+    } else if (percentage < 90) {
+      progressBar.classList.add('bg-warning');
+    } else {
+      progressBar.classList.add('bg-danger');
+    }
   }
 
   // Update progress bar
-  const progressBar = document.getElementById('smsProgressBar');
   progressBar.style.width = `${percentage}%`;
   progressBar.setAttribute('aria-valuenow', percentage);
-  progressBar.textContent = `${Math.round(percentage)}%`;
 
-  // Set color based on usage
-  if (percentage < 50) {
-    progressBar.classList.add('bg-success');
-  } else if (percentage < 90) {
-    progressBar.classList.add('bg-warning');
+  // Set text content based on whether the plan is unlimited or not
+  if (smsTotal === "Unlimited") {
+    percentageText.textContent = "unlimited";
   } else {
-    progressBar.classList.add('bg-danger');
+    percentageText.textContent = `${Math.round(percentage)}%`;
   }
 }
 
@@ -476,6 +492,148 @@ function populatePreviousCycles() {
   });
 }
 
+// Chat page functions
+let chatMessages = [];
+
+// Initialize chat page
+function initializeChatPage() {
+  if (!document.getElementById('chatMessages')) return; // Not on chat page
+
+  // Display welcome message
+  addOperatorMessage("Hello! How can I assist you today?");
+}
+
+// Add a user message to the chat
+function sendMessage() {
+  const messageInput = document.getElementById('messageInput');
+  const message = messageInput.value.trim();
+
+  if (!message) return; // Don't send empty messages
+
+  // Add user message to chat
+  addUserMessage(message);
+
+  // Clear input field
+  messageInput.value = '';
+
+  // Simulate operator response after a delay
+  setTimeout(() => {
+    simulateOperatorResponse(message);
+  }, 1000);
+}
+
+// Handle Enter key press in the input field
+function handleKeyPress(event) {
+  if (event.key === 'Enter') {
+    sendMessage();
+    event.preventDefault();
+  }
+}
+
+// Insert a quick message into the input field
+function insertQuickMessage(message) {
+  const messageInput = document.getElementById('messageInput');
+  messageInput.value = message;
+  messageInput.focus();
+}
+
+// Add a user message to the chat display
+function addUserMessage(message) {
+  const chatMessagesElement = document.getElementById('chatMessages');
+  const messageElement = document.createElement('div');
+  messageElement.className = 'message user-message';
+
+  // Add message text
+  messageElement.textContent = message;
+
+  // Add timestamp
+  const timeElement = document.createElement('div');
+  timeElement.className = 'message-time';
+  timeElement.textContent = getCurrentTime();
+  messageElement.appendChild(timeElement);
+
+  // Add to chat display
+  chatMessagesElement.appendChild(messageElement);
+
+  // Store in messages array
+  chatMessages.push({
+    type: 'user',
+    text: message,
+    time: new Date()
+  });
+
+  // Scroll to bottom
+  chatMessagesElement.scrollTop = chatMessagesElement.scrollHeight;
+
+  // Log to console (simulating backend sending)
+  console.log('User message sent:', message);
+}
+
+// Add an operator message to the chat display
+function addOperatorMessage(message) {
+  const chatMessagesElement = document.getElementById('chatMessages');
+  const messageElement = document.createElement('div');
+  messageElement.className = 'message operator-message';
+
+  // Add message text
+  messageElement.textContent = message;
+
+  // Add timestamp
+  const timeElement = document.createElement('div');
+  timeElement.className = 'message-time';
+  timeElement.textContent = getCurrentTime();
+  messageElement.appendChild(timeElement);
+
+  // Add to chat display
+  chatMessagesElement.appendChild(messageElement);
+
+  // Store in messages array
+  chatMessages.push({
+    type: 'operator',
+    text: message,
+    time: new Date()
+  });
+
+  // Scroll to bottom
+  chatMessagesElement.scrollTop = chatMessagesElement.scrollHeight;
+}
+
+// Simulate operator response based on user message
+function simulateOperatorResponse(userMessage) {
+  const lowerMessage = userMessage.toLowerCase();
+  let response;
+
+  // Simple keyword-based responses
+  if (lowerMessage.includes('billing') || lowerMessage.includes('payment') || lowerMessage.includes('invoice')) {
+    response = "I can help you with billing issues. What specific question do you have about your bill?";
+  } else if (lowerMessage.includes('upgrade') || lowerMessage.includes('plan')) {
+    response = "We have several upgrade options available. Would you like to know about our Premium Mobile package?";
+  } else if (lowerMessage.includes('technical') || lowerMessage.includes('problem') || lowerMessage.includes('issue') || lowerMessage.includes('not working')) {
+    response = "I'm sorry to hear you're experiencing technical issues. Could you please provide more details about the problem?";
+  } else if (lowerMessage.includes('cancel')) {
+    response = "We're sorry to hear you want to cancel. Is there anything we can do to improve your experience with us?";
+  } else {
+    // Default responses
+    const defaultResponses = [
+      "Thank you for your message. How else can I assist you?",
+      "I understand. Is there anything specific you'd like to know?",
+      "Let me check that for you. Is there anything else you need help with?",
+      "I'd be happy to help with that. Could you provide more details?"
+    ];
+    response = defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+  }
+
+  addOperatorMessage(response);
+}
+
+// Get current time in HH:MM format
+function getCurrentTime() {
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
   console.log("Page fully loaded");
@@ -493,5 +651,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize usage page if we're on it
   if (document.getElementById('dataProgressBar')) {
     initializeUsagePage();
+  }
+
+  // Initialize chat page if we're on it
+  if (document.getElementById('chatMessages')) {
+    initializeChatPage();
   }
 });
