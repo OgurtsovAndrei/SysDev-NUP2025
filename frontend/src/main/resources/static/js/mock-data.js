@@ -41,6 +41,9 @@ const mockData = {
     accountNumber: "ACC987654321",
     accountType: "Premium",
     registrationDate: "2023-05-15",
+    packageType: "MobileOnly",
+    addOns: ["Landline minutes", "International minutes"],
+    paymentMethod: "**** **** **** 1234",
     billingAddress: {
       street: "123 Main Street",
       city: "Anytown",
