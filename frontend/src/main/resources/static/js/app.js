@@ -8,7 +8,7 @@ function goToOrderPage() {
 
 function goToUsagePage() {
   console.log("Navigating to Usage Page");
-  alert("Usage Page would load here");
+  window.location.href = "usage.html";
 }
 
 function goToChatPage() {
@@ -323,6 +323,159 @@ function submitOrder() {
   alert('Your order has been placed! Check the console for details.');
 }
 
+// Usage page functions
+function initializeUsagePage() {
+  if (!document.getElementById('dataProgressBar')) return; // Not on usage page
+
+  // Display billing cycle dates
+  const currentCycle = mockData.usageData.currentBillingCycle;
+  document.getElementById('billingCycleDates').textContent = 
+    `${currentCycle.startDate} to ${currentCycle.endDate}`;
+
+  // Initialize usage data displays
+  displayDataUsage();
+  displayCallMinutes();
+  displaySmsUsage();
+
+  // Populate previous billing cycles table
+  populatePreviousCycles();
+}
+
+function displayDataUsage() {
+  const currentCycle = mockData.usageData.currentBillingCycle;
+  const dataUsed = currentCycle.dataUsed;
+  const dataTotal = currentCycle.dataTotal;
+
+  // Calculate percentage
+  const percentage = (dataUsed / dataTotal) * 100;
+
+  // Update text
+  document.getElementById('dataUsageText').textContent = 
+    `${dataUsed.toFixed(1)} GB / ${dataTotal} GB`;
+
+  // Update progress bar
+  const progressBar = document.getElementById('dataProgressBar');
+  progressBar.style.width = `${percentage}%`;
+  progressBar.setAttribute('aria-valuenow', percentage);
+  progressBar.textContent = `${Math.round(percentage)}%`;
+
+  // Set color based on usage
+  if (percentage < 50) {
+    progressBar.classList.add('bg-success');
+  } else if (percentage < 90) {
+    progressBar.classList.add('bg-warning');
+  } else {
+    progressBar.classList.add('bg-danger');
+  }
+}
+
+function displayCallMinutes() {
+  const currentCycle = mockData.usageData.currentBillingCycle;
+  const minutesUsed = currentCycle.callMinutesUsed;
+  const minutesTotal = currentCycle.callMinutesTotal;
+
+  // Update text
+  document.getElementById('callMinutesText').textContent = 
+    `${minutesUsed} minutes / ${minutesTotal}`;
+
+  // For unlimited plans, set a threshold for color coding (e.g., 500 minutes)
+  const threshold = 500;
+  let percentage = 0;
+
+  if (minutesTotal === "Unlimited") {
+    percentage = (minutesUsed / threshold) * 100;
+    if (percentage > 100) percentage = 100; // Cap at 100%
+  } else {
+    percentage = (minutesUsed / parseInt(minutesTotal)) * 100;
+  }
+
+  // Update progress bar
+  const progressBar = document.getElementById('callMinutesProgressBar');
+  progressBar.style.width = `${percentage}%`;
+  progressBar.setAttribute('aria-valuenow', percentage);
+  progressBar.textContent = `${Math.round(percentage)}%`;
+
+  // Set color based on usage
+  if (percentage < 50) {
+    progressBar.classList.add('bg-success');
+  } else if (percentage < 90) {
+    progressBar.classList.add('bg-warning');
+  } else {
+    progressBar.classList.add('bg-danger');
+  }
+}
+
+function displaySmsUsage() {
+  const currentCycle = mockData.usageData.currentBillingCycle;
+  const smsUsed = currentCycle.smsUsed;
+  const smsTotal = currentCycle.smsTotal;
+
+  // Update text
+  document.getElementById('smsText').textContent = 
+    `${smsUsed} messages / ${smsTotal}`;
+
+  // For unlimited plans, set a threshold for color coding (e.g., 100 messages)
+  const threshold = 100;
+  let percentage = 0;
+
+  if (smsTotal === "Unlimited") {
+    percentage = (smsUsed / threshold) * 100;
+    if (percentage > 100) percentage = 100; // Cap at 100%
+  } else {
+    percentage = (smsUsed / parseInt(smsTotal)) * 100;
+  }
+
+  // Update progress bar
+  const progressBar = document.getElementById('smsProgressBar');
+  progressBar.style.width = `${percentage}%`;
+  progressBar.setAttribute('aria-valuenow', percentage);
+  progressBar.textContent = `${Math.round(percentage)}%`;
+
+  // Set color based on usage
+  if (percentage < 50) {
+    progressBar.classList.add('bg-success');
+  } else if (percentage < 90) {
+    progressBar.classList.add('bg-warning');
+  } else {
+    progressBar.classList.add('bg-danger');
+  }
+}
+
+function populatePreviousCycles() {
+  const previousCycles = mockData.usageData.previousBillingCycles;
+  const tableBody = document.getElementById('previousCyclesTable');
+
+  // Clear existing rows
+  tableBody.innerHTML = '';
+
+  // Add a row for each previous cycle
+  previousCycles.forEach(cycle => {
+    const row = document.createElement('tr');
+
+    // Period
+    const periodCell = document.createElement('td');
+    periodCell.textContent = cycle.period;
+    row.appendChild(periodCell);
+
+    // Data Used
+    const dataCell = document.createElement('td');
+    dataCell.textContent = `${cycle.dataUsed.toFixed(1)} GB / ${cycle.dataTotal} GB`;
+    row.appendChild(dataCell);
+
+    // Call Minutes
+    const callCell = document.createElement('td');
+    callCell.textContent = `${cycle.callMinutesUsed} minutes`;
+    row.appendChild(callCell);
+
+    // SMS
+    const smsCell = document.createElement('td');
+    smsCell.textContent = `${cycle.smsUsed} messages`;
+    row.appendChild(smsCell);
+
+    tableBody.appendChild(row);
+  });
+}
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
   console.log("Page fully loaded");
@@ -335,5 +488,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize order page if we're on it
   if (document.getElementById('orderForm')) {
     initializePackageTypeDropdown();
+  }
+
+  // Initialize usage page if we're on it
+  if (document.getElementById('dataProgressBar')) {
+    initializeUsagePage();
   }
 });
