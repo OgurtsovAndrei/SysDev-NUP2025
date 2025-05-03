@@ -753,8 +753,6 @@ function renderUserProfile() {
 
   // Set profile fields
   document.getElementById('profileEmail').textContent = userInfo.email;
-  document.getElementById('profilePackageType').textContent = userInfo.packageType;
-  document.getElementById('profileAddOns').textContent = userInfo.addOns.join(', ');
   document.getElementById('profilePaymentMethod').textContent = userInfo.paymentMethod;
 
   // Format billing address
@@ -780,23 +778,6 @@ function toggleEditMode() {
     // Replace static fields with inputs
     document.getElementById('profileEmail').innerHTML = 
       `<input type="email" class="form-control" id="emailInput" value="${userInfo.email}">`;
-
-    document.getElementById('profilePackageType').innerHTML = 
-      `<select class="form-select" id="packageTypeInput">
-        ${mockData.packageTypes.map(type => 
-          `<option value="${type.name}" ${type.name === userInfo.packageType ? 'selected' : ''}>${type.name}</option>`
-        ).join('')}
-      </select>`;
-
-    // Add-ons as checkboxes
-    const addOnsHtml = mockData.packageOptions.mobile.addOns.map(addon => 
-      `<div class="form-check">
-        <input class="form-check-input" type="checkbox" id="addon-${addon.id}" 
-          ${userInfo.addOns.includes(addon.name) ? 'checked' : ''}>
-        <label class="form-check-label" for="addon-${addon.id}">${addon.name}</label>
-      </div>`
-    ).join('');
-    document.getElementById('profileAddOns').innerHTML = addOnsHtml;
 
     // Payment method (masked)
     document.getElementById('profilePaymentMethod').innerHTML = 
@@ -837,8 +818,6 @@ function saveProfileChanges() {
   const updatedProfile = {
     name: mockData.userInfo.name, // Name is not editable in this implementation
     email: document.getElementById('emailInput').value,
-    packageType: document.getElementById('packageTypeInput').value,
-    addOns: [],
     paymentMethod: document.getElementById('paymentMethodInput').value,
     billingAddress: {
       street: document.getElementById('streetInput').value,
@@ -848,14 +827,6 @@ function saveProfileChanges() {
       country: document.getElementById('countryInput').value
     }
   };
-
-  // Get selected add-ons
-  mockData.packageOptions.mobile.addOns.forEach(addon => {
-    const checkbox = document.getElementById(`addon-${addon.id}`);
-    if (checkbox && checkbox.checked) {
-      updatedProfile.addOns.push(addon.name);
-    }
-  });
 
   // Log the updated profile
   console.log('Profile updated:', updatedProfile);
@@ -925,16 +896,7 @@ function loginUser() {
 
 // Initialize register page
 function initializeRegisterPage() {
-  const packageSelect = document.getElementById('initialPackage');
-  if (!packageSelect) return; // Not on register page
-
-  // Populate package types from mock data
-  mockData.packageTypes.forEach(type => {
-    const option = document.createElement('option');
-    option.value = type.id;
-    option.textContent = type.name;
-    packageSelect.appendChild(option);
-  });
+  // No initialization needed after removing package selection
 }
 
 // Register user
@@ -943,11 +905,10 @@ function registerUser() {
   const email = document.getElementById('registerEmail').value;
   const password = document.getElementById('registerPassword').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
-  const initialPackage = document.getElementById('initialPackage').value;
   const agreeTerms = document.getElementById('agreeTerms').checked;
 
   // Validate form
-  if (!fullName || !email || !password || !confirmPassword || !initialPackage) {
+  if (!fullName || !email || !password || !confirmPassword) {
     alert('Please fill in all required fields.');
     return;
   }
@@ -962,15 +923,10 @@ function registerUser() {
     return;
   }
 
-  // Get package name from id
-  const packageType = mockData.packageTypes.find(type => type.id === initialPackage);
-  const packageName = packageType ? packageType.name : initialPackage;
-
   // Create user object (in a real app, this would be sent to an API)
   const newUser = {
     name: fullName,
     email: email,
-    packageType: packageName,
     registrationDate: new Date().toISOString().split('T')[0]
   };
 
@@ -1024,7 +980,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Initialize register page if we're on it
-  if (document.getElementById('initialPackage')) {
+  if (document.getElementById('registerForm')) {
     initializeRegisterPage();
   }
 });
