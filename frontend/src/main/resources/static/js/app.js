@@ -28,7 +28,12 @@ function goToProfilePage() {
 
 function goToLoginPage() {
   console.log("Navigating to Login Page");
-  alert("Login Form would load here");
+  window.location.href = "login.html";
+}
+
+function goToRegisterPage() {
+  console.log("Navigating to Register Page");
+  window.location.href = "register.html";
 }
 
 // Example of using mock data
@@ -875,6 +880,115 @@ function resetEditMode() {
   renderUserProfile();
 }
 
+// Login and Register page functions
+
+// Login user
+function loginUser() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const rememberMe = document.getElementById('rememberMe').checked;
+
+  // Validate form
+  if (!email || !password) {
+    document.getElementById('loginError').textContent = 'Please enter both email and password.';
+    document.getElementById('loginError').classList.remove('d-none');
+    document.getElementById('loginSuccess').classList.add('d-none');
+    return;
+  }
+
+  // Simulate login check (in a real app, this would be an API call)
+  console.log('Login attempt:', { email, password, rememberMe });
+
+  // For demo purposes, accept any valid email format
+  if (email.includes('@') && password.length >= 6) {
+    // Show success message
+    document.getElementById('loginSuccess').classList.remove('d-none');
+    document.getElementById('loginError').classList.add('d-none');
+
+    // Log success
+    console.log('Login successful');
+
+    // Simulate redirect after login
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 2000);
+  } else {
+    // Show error message
+    document.getElementById('loginError').textContent = 'Invalid email or password. Password must be at least 6 characters.';
+    document.getElementById('loginError').classList.remove('d-none');
+    document.getElementById('loginSuccess').classList.add('d-none');
+
+    // Log error
+    console.log('Login failed: Invalid credentials');
+  }
+}
+
+// Initialize register page
+function initializeRegisterPage() {
+  const packageSelect = document.getElementById('initialPackage');
+  if (!packageSelect) return; // Not on register page
+
+  // Populate package types from mock data
+  mockData.packageTypes.forEach(type => {
+    const option = document.createElement('option');
+    option.value = type.id;
+    option.textContent = type.name;
+    packageSelect.appendChild(option);
+  });
+}
+
+// Register user
+function registerUser() {
+  const fullName = document.getElementById('fullName').value;
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const initialPackage = document.getElementById('initialPackage').value;
+  const agreeTerms = document.getElementById('agreeTerms').checked;
+
+  // Validate form
+  if (!fullName || !email || !password || !confirmPassword || !initialPackage) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert('Passwords do not match.');
+    return;
+  }
+
+  if (!agreeTerms) {
+    alert('You must agree to the Terms and Conditions.');
+    return;
+  }
+
+  // Get package name from id
+  const packageType = mockData.packageTypes.find(type => type.id === initialPackage);
+  const packageName = packageType ? packageType.name : initialPackage;
+
+  // Create user object (in a real app, this would be sent to an API)
+  const newUser = {
+    name: fullName,
+    email: email,
+    packageType: packageName,
+    registrationDate: new Date().toISOString().split('T')[0]
+  };
+
+  // Log registration
+  console.log('User registered:', newUser);
+
+  // Show success message
+  document.getElementById('registerSuccess').classList.remove('d-none');
+
+  // Reset form
+  document.getElementById('registerForm').reset();
+
+  // Simulate redirect after registration
+  setTimeout(() => {
+    window.location.href = 'login.html';
+  }, 3000);
+}
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
   console.log("Page fully loaded");
@@ -907,5 +1021,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize profile page if we're on it
   if (document.getElementById('profileBody')) {
     initializeProfilePage();
+  }
+
+  // Initialize register page if we're on it
+  if (document.getElementById('initialPackage')) {
+    initializeRegisterPage();
   }
 });
