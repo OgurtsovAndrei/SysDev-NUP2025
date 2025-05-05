@@ -1,27 +1,40 @@
 // Profile page functions
+import { getUserProfile, updateUserProfile } from './model.js';
+
 let isEditMode = false;
+let userProfile = null;
 
 // Initialize profile page
-function initializeProfilePage() {
+async function initializeProfilePage() {
   if (!document.getElementById('profileBody')) return; // Not on profile page
 
-  // Render user profile data
-  renderUserProfile();
+  try {
+    // Fetch user profile data from API
+    userProfile = await getUserProfile();
+
+    // Render user profile data
+    renderUserProfile();
+  } catch (error) {
+    console.error('Failed to load profile data:', error);
+    // Display error message to user
+    document.getElementById('profileName').textContent = 'Error loading profile';
+    document.getElementById('profileBody').innerHTML = '<div class="alert alert-danger">Failed to load profile data. Please try again later.</div>';
+  }
 }
 
 // Render user profile data
 function renderUserProfile() {
-  const userInfo = mockData.userInfo;
+  if (!userProfile) return;
 
   // Set profile name in header
-  document.getElementById('profileName').textContent = userInfo.name;
+  document.getElementById('profileName').textContent = userProfile.name;
 
   // Set profile fields
-  document.getElementById('profileEmail').textContent = userInfo.email;
-  document.getElementById('profilePaymentMethod').textContent = userInfo.paymentMethod;
+  document.getElementById('profileEmail').textContent = userProfile.email;
+  document.getElementById('profilePaymentMethod').textContent = userProfile.paymentMethod;
 
   // Format billing address
-  const address = userInfo.billingAddress;
+  const address = userProfile.billingAddress;
   const formattedAddress = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}`;
   document.getElementById('profileBillingAddress').textContent = formattedAddress;
 }
@@ -30,7 +43,11 @@ function renderUserProfile() {
 function toggleEditMode() {
   const editButton = document.getElementById('editButton');
   const profileBody = document.getElementById('profileBody');
-  const userInfo = mockData.userInfo;
+
+  if (!userProfile) {
+    console.error('Cannot edit profile: user profile data not loaded');
+    return;
+  }
 
   if (!isEditMode) {
     // Switch to edit mode
@@ -42,14 +59,14 @@ function toggleEditMode() {
 
     // Replace static fields with inputs
     document.getElementById('profileEmail').innerHTML = 
-      `<input type="email" class="form-control" id="emailInput" value="${userInfo.email}">`;
+      `<input type="email" class="form-control" id="emailInput" value="${userProfile.email}">`;
 
     // Payment method (masked)
     document.getElementById('profilePaymentMethod').innerHTML = 
-      `<input type="text" class="form-control" id="paymentMethodInput" value="${userInfo.paymentMethod}" placeholder="**** **** **** 1234">`;
+      `<input type="text" class="form-control" id="paymentMethodInput" value="${userProfile.paymentMethod}" placeholder="**** **** **** 1234">`;
 
     // Billing address
-    const address = userInfo.billingAddress;
+    const address = userProfile.billingAddress;
     document.getElementById('profileBillingAddress').innerHTML = 
       `<div class="mb-2">
         <input type="text" class="form-control" id="streetInput" value="${address.street}" placeholder="Street">
@@ -78,29 +95,53 @@ function toggleEditMode() {
 }
 
 // Save profile changes
-function saveProfileChanges() {
-  // Get updated values
-  const updatedProfile = {
-    name: mockData.userInfo.name, // Name is not editable in this implementation
-    email: document.getElementById('emailInput').value,
-    paymentMethod: document.getElementById('paymentMethodInput').value,
-    billingAddress: {
-      street: document.getElementById('streetInput').value,
-      city: document.getElementById('cityInput').value,
-      state: document.getElementById('stateInput').value,
-      zipCode: document.getElementById('zipCodeInput').value,
-      country: document.getElementById('countryInput').value
-    }
-  };
+async function saveProfileChanges() {
+  try {
+    // Get updated values
+    const updatedProfile = {
+      email: document.getElementById('emailInput').value,
+      paymentMethod: document.getElementById('paymentMethodInput').value,
+      billingAddress: {
+        street: document.getElementById('streetInput').value,
+        city: document.getElementById('cityInput').value,
+        state: document.getElementById('stateInput').value,
+        zipCode: document.getElementById('zipCodeInput').value,
+        country: document.getElementById('countryInput').value
+      }
+    };
 
-  // Log the updated profile
-  console.log('Profile updated:', updatedProfile);
+    // Show loading state
+    const editButton = document.getElementById('editButton');
+    const originalButtonText = editButton.textContent;
+    editButton.textContent = 'Saving...';
+    editButton.disabled = true;
 
-  // Show confirmation
-  alert('Profile updated successfully!');
+    // Send update to API
+    const response = await updateUserProfile(updatedProfile);
 
-  // Reset edit mode
-  resetEditMode();
+    // Update local userProfile with the changes
+    userProfile = {
+      ...userProfile,
+      ...updatedProfile
+    };
+
+    // Log the updated profile
+    console.log('Profile updated:', response);
+
+    // Show confirmation
+    alert('Profile updated successfully!');
+
+    // Reset edit mode
+    resetEditMode();
+  } catch (error) {
+    console.error('Failed to update profile:', error);
+    alert('Failed to update profile. Please try again later.');
+
+    // Re-enable the button
+    const editButton = document.getElementById('editButton');
+    editButton.textContent = 'Save Changes';
+    editButton.disabled = false;
+  }
 }
 
 // Reset edit mode
@@ -110,8 +151,14 @@ function resetEditMode() {
   editButton.textContent = 'Edit';
   editButton.classList.remove('btn-primary');
   editButton.classList.add('btn-outline-primary');
+  editButton.disabled = false;
   editButton.onclick = toggleEditMode;
 
   // Re-render the profile
   renderUserProfile();
 }
+
+// Expose functions to the global scope
+window.initializeProfilePage = initializeProfilePage;
+window.toggleEditMode = toggleEditMode;
+window.saveProfileChanges = saveProfileChanges;
