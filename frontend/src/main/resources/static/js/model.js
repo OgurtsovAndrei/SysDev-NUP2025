@@ -8,7 +8,8 @@ import {
     PACKAGES_ENDPOINTS,
     ORDER_ENDPOINTS,
     USAGE_ENDPOINTS,
-    FEEDBACK_ENDPOINTS
+    FEEDBACK_ENDPOINTS,
+    CHAT_ENDPOINTS
 } from './api-routes.js'; // Ensure the correct path to api-routes.js
 
 // --- Type Definitions for API Responses ---
@@ -572,6 +573,48 @@ async function submitFeedback(feedbackData) {
 }
 
 
+// --- Chat API Calls ---
+
+/**
+ * Fetches the chat history for the authenticated user from the API.
+ * @returns {Promise<ChatMessage[]>} A promise that resolves with an array of chat messages.
+ * @throws {Error} If the API request fails or returns an error.
+ */
+async function getChatHistory() {
+    try {
+        const response = await fetch(CHAT_ENDPOINTS.CHAT_HISTORY, {
+            method: 'GET',
+            headers: getAuthHeaders() // Chat history requires auth
+        });
+        return handleApiResponse(response);
+    } catch (error) {
+        console.error('Failed to fetch chat history:', error);
+        throw error;
+    }
+}
+
+/**
+ * Sends a chat message to the API.
+ * @param {string} messageText - The text of the message to send.
+ * @returns {Promise<ApiResponse>} A promise that resolves with the API response.
+ * @throws {Error} If the API request fails or returns an error.
+ */
+async function sendChatMessage(messageText) {
+    try {
+        const response = await fetch(CHAT_ENDPOINTS.SEND_MESSAGE, {
+            method: 'POST',
+            headers: getAuthHeaders(), // Sending a message requires auth
+            body: JSON.stringify({
+                messageText
+            })
+        });
+        return handleApiResponse(response);
+    } catch (error) {
+        console.error('Failed to send chat message:', error);
+        throw error;
+    }
+}
+
 // Export the API interaction functions
 export {
     loginUser,
@@ -588,5 +631,7 @@ export {
     getUserUsage,
     getFeedbackSummary,
     submitFeedback,
+    getChatHistory,
+    sendChatMessage,
     // Add other exported functions as you create them
 };

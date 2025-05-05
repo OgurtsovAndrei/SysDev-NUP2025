@@ -42,6 +42,12 @@ const FEEDBACK_ENDPOINTS = {
     SUBMIT_FEEDBACK: `${API_BASE_URL}/feedback`
 };
 
+// Chat Endpoints
+const CHAT_ENDPOINTS = {
+    CHAT_HISTORY: `${API_BASE_URL}/user/chat/history`,
+    SEND_MESSAGE: `${API_BASE_URL}/chat/messages`
+};
+
 // Export the endpoints for use in other modules
 export {
     AUTH_ENDPOINTS,
@@ -49,5 +55,6 @@ export {
     PACKAGES_ENDPOINTS,
     ORDER_ENDPOINTS,
     USAGE_ENDPOINTS,
-    FEEDBACK_ENDPOINTS
+    FEEDBACK_ENDPOINTS,
+    CHAT_ENDPOINTS
 };
