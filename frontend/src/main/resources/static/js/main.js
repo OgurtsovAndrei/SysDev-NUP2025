@@ -5,8 +5,14 @@ import { getUserProfile, getPackageTypes } from './model.js';
 
 // Example of using mock data
 function displayAvailablePackages() {
-  console.log("Displaying available packages:", mockData.packages);
-  // In a real implementation, this would populate a UI element with the packages
+  getPackageTypes()
+    .then(packageTypes => {
+      console.log("Displaying available packages:", packageTypes);
+      // In a real implementation, this would populate a UI element with the packages
+    })
+    .catch(error => {
+      console.error("Failed to load package types:", error);
+    });
 }
 
 function displayUserInfo() {

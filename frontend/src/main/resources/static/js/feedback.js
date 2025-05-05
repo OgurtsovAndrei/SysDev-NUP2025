@@ -1,4 +1,6 @@
 // Feedback page functions
+import { getFeedbackSummary, submitFeedback as submitFeedbackAPI } from './model.js';
+
 let currentRating = 0;
 
 // Set the rating when a star is clicked
@@ -18,39 +20,47 @@ function setRating(rating) {
 }
 
 // Initialize feedback page
-function initializeFeedbackPage() {
+async function initializeFeedbackPage() {
   if (!document.getElementById('feedbackForm')) return; // Not on feedback page
 
-  // If we have feedback data in mock data, initialize the average rating
-  if (mockData && mockData.feedback) {
-    const averageRating = mockData.feedback.averageRating;
-    const totalReviews = mockData.feedback.totalReviews;
+  try {
+    // Fetch feedback summary from API
+    const feedbackSummary = await getFeedbackSummary();
 
-    // Update the average rating text
-    document.querySelector('#averageRatingContainer p').innerHTML = 
-      `<strong>${averageRating.toFixed(1)}</strong> out of 5 based on <strong>${totalReviews}</strong> reviews`;
+    if (feedbackSummary) {
+      const averageRating = feedbackSummary.averageRating;
+      const totalReviews = feedbackSummary.totalReviews;
 
-    // Update the average rating stars
-    const stars = document.querySelectorAll('#averageRatingStars i');
-    stars.forEach((star, index) => {
-      // For full stars
-      if (index < Math.floor(averageRating)) {
-        star.className = 'bi bi-star-fill';
-      } 
-      // For half stars
-      else if (index === Math.floor(averageRating) && averageRating % 1 >= 0.5) {
-        star.className = 'bi bi-star-half';
-      } 
-      // For empty stars
-      else {
-        star.className = 'bi bi-star';
-      }
-    });
+      // Update the average rating text
+      document.querySelector('#averageRatingContainer p').innerHTML = 
+        `<strong>${averageRating.toFixed(1)}</strong> out of 5 based on <strong>${totalReviews}</strong> reviews`;
+
+      // Update the average rating stars
+      const stars = document.querySelectorAll('#averageRatingStars i');
+      stars.forEach((star, index) => {
+        // For full stars
+        if (index < Math.floor(averageRating)) {
+          star.className = 'bi bi-star-fill';
+        } 
+        // For half stars
+        else if (index === Math.floor(averageRating) && averageRating % 1 >= 0.5) {
+          star.className = 'bi bi-star-half';
+        } 
+        // For empty stars
+        else {
+          star.className = 'bi bi-star';
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Failed to load feedback summary:', error);
+    // Display error message (optional)
+    // document.getElementById('averageRatingContainer').innerHTML = '<div class="alert alert-danger">Failed to load feedback summary. Please try again later.</div>';
   }
 }
 
 // Submit feedback
-function submitFeedback() {
+async function submitFeedback() {
   // Get form values
   const rating = currentRating;
   const topic = document.getElementById('feedbackTopic').value;
@@ -68,26 +78,41 @@ function submitFeedback() {
   }
 
   // Create feedback object
-  const feedback = {
+  const feedbackData = {
     rating: rating,
     topic: topic,
-    text: text,
-    timestamp: new Date().toISOString()
+    text: text
   };
 
-  // Log feedback to console
-  console.log('Feedback submitted:', feedback);
+  try {
+    // Submit feedback to API
+    const response = await submitFeedbackAPI(feedbackData);
 
-  // Show success message
-  document.getElementById('feedbackSuccess').classList.remove('d-none');
+    // Log response to console
+    console.log('Feedback submitted:', response);
 
-  // Reset form
-  setRating(0);
-  document.getElementById('feedbackTopic').value = '';
-  document.getElementById('feedbackText').value = '';
+    // Show success message
+    document.getElementById('feedbackSuccess').classList.remove('d-none');
 
-  // Hide success message after 5 seconds
-  setTimeout(() => {
-    document.getElementById('feedbackSuccess').classList.add('d-none');
-  }, 5000);
+    // Reset form
+    setRating(0);
+    document.getElementById('feedbackTopic').value = '';
+    document.getElementById('feedbackText').value = '';
+
+    // Hide success message after 5 seconds
+    setTimeout(() => {
+      document.getElementById('feedbackSuccess').classList.add('d-none');
+    }, 5000);
+
+    // Refresh the feedback summary after submission (optional)
+    initializeFeedbackPage();
+  } catch (error) {
+    console.error('Failed to submit feedback:', error);
+    alert('Failed to submit feedback. Please try again later.');
+  }
 }
+
+// Expose functions to the global scope
+window.initializeFeedbackPage = initializeFeedbackPage;
+window.setRating = setRating;
+window.submitFeedback = submitFeedback;
