@@ -10,6 +10,9 @@ import io.ktor.server.routing.*
 import io.ktor.server.http.content.* // Для staticResources, если вы планируете их использовать
 import com.yourcompany.backend.plugins.* // Импортируем пакет с конфигурацией плагинов
 import kotlinx.serialization.Serializable // Для простого ответа API (если нужен тестовый эндпоинт)
+import com.yourcompany.backend.database.DatabaseFactory
+import com.yourcompany.backend.database.Schema
+import com.yourcompany.backend.database.repositories.UserRepository
 
 // Простой data class для API ответа (для примера)
 // @Serializable
@@ -24,6 +27,22 @@ fun main(args: Array<String>): Unit = EngineMain.main(args)
 @Suppress("unused")
 fun Application.module() {
     log.info("Starting G4UltimateMobile CRM Backend Module...") // Используем стандартный логгер Ktor
+
+    // Initialize database connection and schema
+    log.info("Initializing database connection...")
+    DatabaseFactory.init(this)
+
+    log.info("Initializing database schema...")
+    Schema.init(this)
+
+    log.info("Database schema initialized successfully. Initializing mock data...")
+    try {
+        UserRepository().initializeMockData()
+        log.info("Mock data initialized successfully.")
+    } catch (e: Exception) {
+        log.error("Error initializing mock data: ${e.message}", e)
+        throw e
+    }
 
     // Установка и настройка плагинов
     configureSerialization() // Настройка сериализации JSON (из plugins/Serialization.kt)

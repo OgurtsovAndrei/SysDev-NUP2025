@@ -34,14 +34,15 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation-jvm") // Content negotiation for JSON
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm") // Kotlinx Serialization (JSON)
 
-    // Exposed ORM dependencies (based on user's file - add if you plan to use Exposed)
-    // implementation("org.jetbrains.exposed:exposed-core:0.49.0")
-    // implementation("org.jetbrains.exposed:exposed-dao:0.49.0")
-    // implementation("org.jetbrains.exposed:exposed-jdbc:0.49.0")
-    // implementation("org.jetbrains.exposed:exposed-java-time:0.49.0") // For dates
+    // Ktorm ORM dependencies
+    implementation("org.ktorm:ktorm-core:3.6.0")
+    implementation("org.ktorm:ktorm-support-postgresql:3.6.0")
 
-    // PostgreSQL Driver (based on user's file - add if you plan to use PostgreSQL)
-    // implementation("org.postgresql:postgresql:42.7.3")
+    // HikariCP for connection pooling
+    implementation("com.zaxxer:HikariCP:5.1.0")
+
+    // PostgreSQL Driver
+    implementation("org.postgresql:postgresql:42.7.3")
 
     // Logging
     implementation("ch.qos.logback:logback-classic:1.4.14") // Updated to user's version

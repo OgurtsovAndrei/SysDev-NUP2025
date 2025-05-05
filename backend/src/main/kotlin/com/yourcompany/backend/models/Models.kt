@@ -2,6 +2,21 @@ package com.yourcompany.backend.models
 
 import kotlinx.serialization.Serializable
 
+@Serializable
+data class User(
+    val id: String,
+    val name: String,
+    val email: String,
+    val password: String, // In a real app, this would be hashed!
+    val phone: String,
+    val accountNumber: String,
+    val accountType: String,
+    val registrationDate: String,
+    val packages: List<UserPackage>,
+    val paymentMethod: String,
+    val billingAddress: Address
+)
+
 // Data class for the Login Request body
 @Serializable
 data class LoginRequest(
