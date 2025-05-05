@@ -2,14 +2,14 @@
 // Handles data fetching and manipulation by interacting with the backend API.
 // Uses the API endpoint definitions from api-routes.js.
 
-import {
-    AUTH_ENDPOINTS,
-    USER_ENDPOINTS,
-    PACKAGES_ENDPOINTS,
-    ORDER_ENDPOINTS,
-    USAGE_ENDPOINTS,
-    FEEDBACK_ENDPOINTS
-} from './api-routes.js'; // Ensure the correct path to api-routes.js
+// import {
+//     AUTH_ENDPOINTS,
+//     USER_ENDPOINTS,
+//     PACKAGES_ENDPOINTS,
+//     ORDER_ENDPOINTS,
+//     USAGE_ENDPOINTS,
+//     FEEDBACK_ENDPOINTS
+// } from './api-routes.js'; // Ensure the correct path to api-routes.js
 
 // --- Type Definitions for API Responses ---
 
@@ -272,7 +272,7 @@ function getAuthHeaders() {
  * @returns {Promise<LoginResponse>} A promise that resolves with the login response.
  * @throws {Error} If the API request fails or returns an error.
  */
-async function loginUser(email, password, rememberMe) {
+async function loginUserCall(email, password, rememberMe) {
     try {
         const response = await fetch(AUTH_ENDPOINTS.LOGIN, {
             method: 'POST',
@@ -287,9 +287,9 @@ async function loginUser(email, password, rememberMe) {
         });
         const data = await handleApiResponse(response);
         // In a real app, you would store the token here:
-        // if (data.success && data.token) {
-        //     localStorage.setItem('authToken', data.token);
-        // }
+        if (data.success && data.token) {
+            localStorage.setItem('authToken', data.token);
+        }
         return data;
     } catch (error) {
         console.error('Login failed:', error);
@@ -557,7 +557,7 @@ async function getFeedbackSummary() {
  * @returns {Promise<SubmitFeedbackResponse>} A promise that resolves with the feedback submission response.
  * @throws {Error} If the API request fails or returns an error.
  */
-async function submitFeedback(feedbackData) {
+async function submitFeedbackToAPI(feedbackData) {
     try {
         const response = await fetch(FEEDBACK_ENDPOINTS.SUBMIT_FEEDBACK, {
             method: 'POST',
@@ -572,9 +572,43 @@ async function submitFeedback(feedbackData) {
 }
 
 
-// Export the API interaction functions
+// Create a bundler object that contains all the API interaction functions
+const ModelAPI = {
+    // Authentication
+    loginUserCall,
+    registerUser,
+
+    // User Profile
+    getUserProfile,
+    updateUserProfile,
+    getUserSupportTickets,
+    getUserNotifications,
+    markNotificationAsRead,
+
+    // Packages and Ordering
+    getPackageTypes,
+    getPackageOptions,
+    validatePromoCode,
+    submitOrder,
+
+    // Usage Data
+    getUserUsage,
+
+    // Feedback
+    getFeedbackSummary,
+    submitFeedbackToAPI,
+
+    // Helper functions
+    getAuthToken,
+    getAuthHeaders
+};
+
+// Export the bundler object as default export
+export default ModelAPI;
+
+// Also export individual functions for backward compatibility and selective imports
 export {
-    loginUser,
+    loginUserCall,
     registerUser,
     getUserProfile,
     updateUserProfile,
@@ -587,6 +621,7 @@ export {
     submitOrder,
     getUserUsage,
     getFeedbackSummary,
-    submitFeedback,
-    // Add other exported functions as you create them
+    submitFeedbackToAPI,
+    getAuthToken,
+    getAuthHeaders
 };

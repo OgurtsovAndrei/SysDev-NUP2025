@@ -1,64 +1,87 @@
 // Usage page functions
-function initializeUsagePage() {
+// Import specific functions from model.js (selective import)
+import {
+  getUserUsage,
+  getUserProfile,
+  getPackageTypes
+} from './model.js';
+
+// Alternative: Import the entire API bundle
+// import ModelAPI from './model.js';
+// Then use: ModelAPI.getUserUsage(), ModelAPI.getUserProfile(), ModelAPI.getPackageTypes()
+
+async function initializeUsagePage() {
   if (!document.getElementById('packageSections')) return; // Not on usage page
 
-  // Display billing cycle dates
-  const currentCycle = mockData.usageData.currentBillingCycle;
-  document.getElementById('billingCycleDates').textContent = 
-    `${currentCycle.startDate} to ${currentCycle.endDate}`;
+  try {
+    // Get user profile and usage data from API
+    const userProfile = await getUserProfile();
+    const usageData = await getUserUsage();
+    const packageTypesData = await getPackageTypes();
 
-  // Get the container for package sections
-  const packageSectionsContainer = document.getElementById('packageSections');
-  packageSectionsContainer.innerHTML = ''; // Clear any existing content
+    // Display billing cycle dates
+    const currentCycle = usageData.currentBillingCycle;
+    document.getElementById('billingCycleDates').textContent = 
+      `${currentCycle.startDate} to ${currentCycle.endDate}`;
 
-  // Get user packages
-  const userPackages = mockData.userInfo.packages;
+    // Get the container for package sections
+    const packageSectionsContainer = document.getElementById('packageSections');
+    packageSectionsContainer.innerHTML = ''; // Clear any existing content
 
-  // Create a section for each package
-  userPackages.forEach(package => {
-    // Create package section
-    const packageSection = createPackageSection(package);
-    packageSectionsContainer.appendChild(packageSection);
-  });
+    // Get user packages
+    const userPackages = userProfile.packages;
 
-  // Populate previous billing cycles table
-  populatePreviousCycles();
+    // Create a section for each userPackage
+    userPackages.forEach(userPackage => {
+      // Create userPackage section
+      const packageSection = createPackageSection(userPackage, packageTypesData, currentCycle.packages);
+      packageSectionsContainer.appendChild(packageSection);
+    });
+
+    // Populate previous billing cycles table
+    populatePreviousCycles(usageData.previousBillingCycles, userProfile.packages, packageTypesData);
+  } catch (error) {
+    console.error('Error initializing usage page:', error);
+    // Optionally display an error message to the user
+    const packageSectionsContainer = document.getElementById('packageSections');
+    packageSectionsContainer.innerHTML = '<div class="alert alert-danger">Failed to load usage data. Please try again later.</div>';
+  }
 }
 
-// Create a section for a package
-function createPackageSection(package) {
-  // Create the package section container
+// Create a section for a userPackage
+function createPackageSection(userPackage, packageTypes, packagesUsage) {
+  // Create the userPackage section container
   const packageSection = document.createElement('div');
   packageSection.className = 'mb-5';
 
-  // Create the package header
+  // Create the userPackage header
   const packageHeader = document.createElement('div');
   packageHeader.className = 'mb-3';
 
-  // Get a user-friendly package type name
-  let packageTypeName = package.type;
-  const packageTypeObj = mockData.packageTypes.find(pt => pt.id === package.type);
+  // Get a user-friendly userPackage type name
+  let packageTypeName = userPackage.type;
+  const packageTypeObj = packageTypes.find(pt => pt.id === userPackage.type);
   if (packageTypeObj) {
     packageTypeName = packageTypeObj.name;
   }
 
   packageHeader.innerHTML = `
-    <h3>${package.name}</h3>
-    <p class="text-muted">${packageTypeName} ${package.addOns && package.addOns.length > 0 ? '• ' + package.addOns.join(', ') : ''}</p>
+    <h3>${userPackage.name}</h3>
+    <p class="text-muted">${packageTypeName} ${userPackage.addOns && userPackage.addOns.length > 0 ? '• ' + userPackage.addOns.join(', ') : ''}</p>
   `;
   packageSection.appendChild(packageHeader);
 
-  // Get usage data for this package
-  const packageUsage = mockData.usageData.currentBillingCycle.packages[package.id];
+  // Get usage data for this userPackage
+  const packageUsage = packagesUsage[userPackage.id];
 
-  // Create usage cards based on package type
-  if (package.type === 'mobile_combo') {
+  // Create usage cards based on userPackage type
+  if (userPackage.type === 'mobile_combo') {
     packageSection.appendChild(createMobileComboUsageCards(packageUsage));
-  } else if (package.type === 'mobile_hotspot') {
+  } else if (userPackage.type === 'mobile_hotspot') {
     packageSection.appendChild(createMobileHotspotUsageCards(packageUsage));
-  } else if (package.type === 'mobile_no_hotspot') {
+  } else if (userPackage.type === 'mobile_no_hotspot') {
     packageSection.appendChild(createMobileNoHotspotUsageCards(packageUsage));
-  } else if (package.type === 'home_internet') {
+  } else if (userPackage.type === 'home_internet') {
     packageSection.appendChild(createHomeInternetUsageCards(packageUsage));
   }
 
@@ -229,10 +252,8 @@ function calculatePercentage(used, total) {
   return (used / total) * 100;
 }
 
-function populatePreviousCycles() {
-  const previousCycles = mockData.usageData.previousBillingCycles;
+function populatePreviousCycles(previousCycles, userPackages, packageTypes) {
   const tableBody = document.getElementById('previousCyclesTable');
-  const userPackages = mockData.userInfo.packages;
 
   // Clear existing rows
   tableBody.innerHTML = '';
@@ -241,10 +262,10 @@ function populatePreviousCycles() {
   const tableHead = document.querySelector('#previousCyclesTable').parentElement.querySelector('thead tr');
   tableHead.innerHTML = '<th>Period</th>';
 
-  // Add headers for each package
-  userPackages.forEach(package => {
+  // Add headers for each userPackage
+  userPackages.forEach(userPackage => {
     const packageHeader = document.createElement('th');
-    packageHeader.textContent = package.name;
+    packageHeader.textContent = userPackage.name;
     tableHead.appendChild(packageHeader);
   });
 
@@ -257,30 +278,30 @@ function populatePreviousCycles() {
     periodCell.textContent = cycle.period;
     row.appendChild(periodCell);
 
-    // Add data for each package
-    userPackages.forEach(package => {
-      const packageData = cycle.packages[package.id];
+    // Add data for each userPackage
+    userPackages.forEach(userPackage => {
+      const packageData = cycle.packages[userPackage.id];
       const packageCell = document.createElement('td');
 
       if (packageData) {
-        if (package.type === 'mobile_combo') {
+        if (userPackage.type === 'mobile_combo') {
           packageCell.innerHTML = `
             <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
             <div><strong>Calls:</strong> ${packageData.callMinutesUsed} minutes${packageData.callMinutesTotal ? ' / ' + packageData.callMinutesTotal + ' minutes' : ''}</div>
             <div><strong>SMS:</strong> ${packageData.smsUsed} messages${packageData.smsTotal ? ' / ' + packageData.smsTotal + ' messages' : ''}</div>
           `;
-        } else if (package.type === 'mobile_hotspot' || package.type === 'mobile_no_hotspot') {
+        } else if (userPackage.type === 'mobile_hotspot' || userPackage.type === 'mobile_no_hotspot') {
           packageCell.innerHTML = `
             <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
-            <div><strong>Hotspot:</strong> ${package.type === 'mobile_hotspot' ? 'Enabled' : 'Disabled'}</div>
+            <div><strong>Hotspot:</strong> ${userPackage.type === 'mobile_hotspot' ? 'Enabled' : 'Disabled'}</div>
           `;
-        } else if (package.type === 'home_internet') {
+        } else if (userPackage.type === 'home_internet') {
           packageCell.innerHTML = `
             <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
             ${packageData.downloadSpeed ? `<div><strong>Speed:</strong> ${packageData.downloadSpeed} down / ${packageData.uploadSpeed} up</div>` : ''}
           `;
         } else {
-          // Fallback for any other package type
+          // Fallback for any other userPackage type
           packageCell.innerHTML = `
             <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
           `;
@@ -294,4 +315,9 @@ function populatePreviousCycles() {
 
     tableBody.appendChild(row);
   });
+}
+
+// Export functions for use in other modules
+export {
+  initializeUsagePage
 }

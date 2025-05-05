@@ -1,7 +1,10 @@
 // Login and Register page functions
 
 // Login user
-function loginUser() {
+
+import {loginUserCall} from "./model";
+
+async function loginUser() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const rememberMe = document.getElementById('rememberMe').checked;
@@ -16,9 +19,9 @@ function loginUser() {
 
   // Simulate login check (in a real app, this would be an API call)
   console.log('Login attempt:', { email, password, rememberMe });
-
+  const result = await loginUserCall(email, password, rememberMe)
   // For demo purposes, accept any valid email format
-  if (email.includes('@') && password.length >= 6) {
+  if (result.success) {
     // Show success message
     document.getElementById('loginSuccess').classList.remove('d-none');
     document.getElementById('loginError').classList.add('d-none');
@@ -90,4 +93,10 @@ function registerUser() {
   setTimeout(() => {
     window.location.href = 'login.html';
   }, 3000);
+}
+
+export {
+  registerUser,
+  loginUser,
+  initializeRegisterPage
 }

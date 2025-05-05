@@ -2,7 +2,7 @@
 // Defines the base URL and specific endpoints for the G4UltimateMobile CRM API.
 
 // Replace with the actual base URL of your backend server
-const API_BASE_URL = 'http://localhost:8080/api'; // Example: assuming your server runs on localhost:8080
+const API_BASE_URL = 'http://localhost:8082/api'; // Example: assuming your server runs on localhost:8082
 
 // Authentication Endpoints
 const AUTH_ENDPOINTS = {

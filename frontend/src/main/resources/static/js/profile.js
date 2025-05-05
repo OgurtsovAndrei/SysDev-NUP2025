@@ -1,36 +1,54 @@
 // Profile page functions
 let isEditMode = false;
+let currentUserProfile = null; // Store the current user profile
 
 // Initialize profile page
-function initializeProfilePage() {
+async function initializeProfilePage() {
   if (!document.getElementById('profileBody')) return; // Not on profile page
 
-  // Render user profile data
-  renderUserProfile();
+  try {
+    // Get user profile from API
+    currentUserProfile = await getUserProfile();
+
+    // Render user profile data
+    renderUserProfile();
+  } catch (error) {
+    console.error('Error initializing profile page:', error);
+    // Optionally display an error message to the user
+    const profileBody = document.getElementById('profileBody');
+    profileBody.innerHTML = '<div class="alert alert-danger">Failed to load profile data. Please try again later.</div>';
+  }
 }
 
 // Render user profile data
 function renderUserProfile() {
-  const userInfo = mockData.userInfo;
+  if (!currentUserProfile) {
+    console.error('No user profile data available');
+    return;
+  }
 
   // Set profile name in header
-  document.getElementById('profileName').textContent = userInfo.name;
+  document.getElementById('profileName').textContent = currentUserProfile.name;
 
   // Set profile fields
-  document.getElementById('profileEmail').textContent = userInfo.email;
-  document.getElementById('profilePaymentMethod').textContent = userInfo.paymentMethod;
+  document.getElementById('profileEmail').textContent = currentUserProfile.email;
+  document.getElementById('profilePaymentMethod').textContent = currentUserProfile.paymentMethod;
 
   // Format billing address
-  const address = userInfo.billingAddress;
+  const address = currentUserProfile.billingAddress;
   const formattedAddress = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}`;
   document.getElementById('profileBillingAddress').textContent = formattedAddress;
 }
 
 // Toggle edit mode
 function toggleEditMode() {
+  if (!currentUserProfile) {
+    console.error('No user profile data available');
+    return;
+  }
+
   const editButton = document.getElementById('editButton');
   const profileBody = document.getElementById('profileBody');
-  const userInfo = mockData.userInfo;
 
   if (!isEditMode) {
     // Switch to edit mode
@@ -42,14 +60,14 @@ function toggleEditMode() {
 
     // Replace static fields with inputs
     document.getElementById('profileEmail').innerHTML = 
-      `<input type="email" class="form-control" id="emailInput" value="${userInfo.email}">`;
+      `<input type="email" class="form-control" id="emailInput" value="${currentUserProfile.email}">`;
 
     // Payment method (masked)
     document.getElementById('profilePaymentMethod').innerHTML = 
-      `<input type="text" class="form-control" id="paymentMethodInput" value="${userInfo.paymentMethod}" placeholder="**** **** **** 1234">`;
+      `<input type="text" class="form-control" id="paymentMethodInput" value="${currentUserProfile.paymentMethod}" placeholder="**** **** **** 1234">`;
 
     // Billing address
-    const address = userInfo.billingAddress;
+    const address = currentUserProfile.billingAddress;
     document.getElementById('profileBillingAddress').innerHTML = 
       `<div class="mb-2">
         <input type="text" class="form-control" id="streetInput" value="${address.street}" placeholder="Street">
@@ -78,10 +96,15 @@ function toggleEditMode() {
 }
 
 // Save profile changes
-function saveProfileChanges() {
+async function saveProfileChanges() {
+  if (!currentUserProfile) {
+    console.error('No user profile data available');
+    return;
+  }
+
   // Get updated values
   const updatedProfile = {
-    name: mockData.userInfo.name, // Name is not editable in this implementation
+    name: currentUserProfile.name, // Name is not editable in this implementation
     email: document.getElementById('emailInput').value,
     paymentMethod: document.getElementById('paymentMethodInput').value,
     billingAddress: {
@@ -93,14 +116,26 @@ function saveProfileChanges() {
     }
   };
 
-  // Log the updated profile
-  console.log('Profile updated:', updatedProfile);
+  try {
+    // Submit updated profile to API
+    const response = await updateUserProfile(updatedProfile);
 
-  // Show confirmation
-  alert('Profile updated successfully!');
+    if (response.success) {
+      // Update the current user profile with the new values
+      currentUserProfile = await getUserProfile();
 
-  // Reset edit mode
-  resetEditMode();
+      // Show confirmation
+      alert('Profile updated successfully!');
+
+      // Reset edit mode
+      resetEditMode();
+    } else {
+      alert(`Failed to update profile: ${response.message}`);
+    }
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    alert('An error occurred while updating your profile. Please try again later.');
+  }
 }
 
 // Reset edit mode
