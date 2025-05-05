@@ -16,9 +16,8 @@ async function initializeProfilePage() {
     renderUserProfile();
   } catch (error) {
     console.error('Failed to load profile data:', error);
-    // Display error message to user
-    document.getElementById('profileName').textContent = 'Error loading profile';
-    document.getElementById('profileBody').innerHTML = '<div class="alert alert-danger">Failed to load profile data. Please try again later.</div>';
+    // Navigate to home page instead of showing error
+    window.location.href = 'index.html';
   }
 }
 
@@ -135,12 +134,8 @@ async function saveProfileChanges() {
     resetEditMode();
   } catch (error) {
     console.error('Failed to update profile:', error);
-    alert('Failed to update profile. Please try again later.');
-
-    // Re-enable the button
-    const editButton = document.getElementById('editButton');
-    editButton.textContent = 'Save Changes';
-    editButton.disabled = false;
+    // Navigate to home page instead of showing error
+    window.location.href = 'index.html';
   }
 }
 

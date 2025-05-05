@@ -108,7 +108,8 @@ async function submitFeedback() {
     initializeFeedbackPage();
   } catch (error) {
     console.error('Failed to submit feedback:', error);
-    alert('Failed to submit feedback. Please try again later.');
+    // Navigate to home page instead of showing error
+    window.location.href = 'index.html';
   }
 }
 

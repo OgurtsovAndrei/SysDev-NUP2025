@@ -31,12 +31,8 @@ async function initializeChatPage() {
     }
   } catch (error) {
     console.error('Failed to load chat history:', error);
-    // Display error message
-    const chatMessagesElement = document.getElementById('chatMessages');
-    chatMessagesElement.innerHTML = '<div class="alert alert-danger">Failed to load chat history. Please try again later.</div>';
-
-    // Still display welcome message
-    addOperatorMessage("Hello! How can I assist you today?");
+    // Navigate to home page instead of showing error
+    window.location.href = 'index.html';
   }
 }
 
@@ -80,12 +76,8 @@ async function sendMessage() {
     }, 1000);
   } catch (error) {
     console.error('Failed to send message:', error);
-    // Display error message
-    const chatMessagesElement = document.getElementById('chatMessages');
-    const errorElement = document.createElement('div');
-    errorElement.className = 'alert alert-danger';
-    errorElement.textContent = 'Failed to send message. Please try again.';
-    chatMessagesElement.appendChild(errorElement);
+    // Navigate to home page instead of showing error
+    window.location.href = 'index.html';
   }
 }
 

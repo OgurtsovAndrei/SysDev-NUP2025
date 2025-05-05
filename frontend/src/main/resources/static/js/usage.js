@@ -21,8 +21,16 @@ async function initializeUsagePage() {
     const packageSectionsContainer = document.getElementById('packageSections');
     packageSectionsContainer.innerHTML = ''; // Clear any existing content
 
-    // Get user packages
-    const userPackages = mockData.userInfo.packages;
+    // Get user packages from the API response
+    const userPackages = Object.keys(usageData.currentBillingCycle.packages).map(packageId => {
+      const packageData = usageData.currentBillingCycle.packages[packageId];
+      return {
+        id: packageId,
+        type: packageData.type,
+        name: packageData.name,
+        addOns: [] // API doesn't provide addOns in this context, so use empty array
+      };
+    });
 
     // Create a section for each package
     userPackages.forEach(pkg => {
@@ -35,9 +43,8 @@ async function initializeUsagePage() {
     populatePreviousCycles();
   } catch (error) {
     console.error('Failed to load usage data:', error);
-    // Display error message to user
-    const packageSectionsContainer = document.getElementById('packageSections');
-    packageSectionsContainer.innerHTML = '<div class="alert alert-danger">Failed to load usage data. Please try again later.</div>';
+    // Navigate to home page instead of showing error
+    window.location.href = 'index.html';
   }
 }
 
@@ -51,11 +58,18 @@ function createPackageSection(pkg) {
   const packageHeader = document.createElement('div');
   packageHeader.className = 'mb-3';
 
-  // Get a user-friendly package type name
+  // Use the package type as the type name (API doesn't provide friendly names)
   let packageTypeName = pkg.type;
-  const packageTypeObj = mockData.packageTypes.find(pt => pt.id === pkg.type);
-  if (packageTypeObj) {
-    packageTypeName = packageTypeObj.name;
+
+  // Convert package type to a more user-friendly format
+  if (pkg.type === 'mobile_combo') {
+    packageTypeName = "Mobile Internet + Minutes + SMS";
+  } else if (pkg.type === 'mobile_hotspot') {
+    packageTypeName = "Mobile Internet (with hotspot)";
+  } else if (pkg.type === 'mobile_no_hotspot') {
+    packageTypeName = "Mobile Internet (no hotspot)";
+  } else if (pkg.type === 'home_internet') {
+    packageTypeName = "Home Internet";
   }
 
   packageHeader.innerHTML = `
@@ -248,7 +262,17 @@ function calculatePercentage(used, total) {
 function populatePreviousCycles() {
   const previousCycles = usageData.previousBillingCycles;
   const tableBody = document.getElementById('previousCyclesTable');
-  const userPackages = mockData.userInfo.packages;
+
+  // Get user packages from the API response (same as in initializeUsagePage)
+  const userPackages = Object.keys(usageData.currentBillingCycle.packages).map(packageId => {
+    const packageData = usageData.currentBillingCycle.packages[packageId];
+    return {
+      id: packageId,
+      type: packageData.type,
+      name: packageData.name,
+      addOns: [] // API doesn't provide addOns in this context, so use empty array
+    };
+  });
 
   // Clear existing rows
   tableBody.innerHTML = '';

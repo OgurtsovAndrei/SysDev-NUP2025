@@ -36,8 +36,8 @@ async function initializePackageTypeDropdown() {
     });
   } catch (error) {
     console.error('Failed to load package types:', error);
-    // Display error message to user
-    alert('Failed to load package types. Please try again later.');
+    // Navigate to home page instead of showing error
+    window.location.href = 'index.html';
   }
 }
 
@@ -81,8 +81,8 @@ async function updatePackageOptions() {
     updateOrderSummary();
   } catch (error) {
     console.error(`Failed to fetch options for package type ${packageType}:`, error);
-    // Display error message to user
-    alert('Failed to load package options. Please try again later.');
+    // Navigate to home page instead of showing error
+    window.location.href = 'index.html';
   }
 }
 
@@ -546,12 +546,14 @@ async function submitOrder() {
       // Reset form (optional)
       // resetOrderForm();
     } else {
-      // Show error message
-      alert(`Failed to place order: ${response.message}`);
+      // Navigate to home page instead of showing error
+      console.error(`Failed to place order: ${response.message}`);
+      window.location.href = 'index.html';
     }
   } catch (error) {
     console.error('Failed to submit order:', error);
-    alert('Failed to submit order. Please try again later.');
+    // Navigate to home page instead of showing error
+    window.location.href = 'index.html';
   }
 }
 
