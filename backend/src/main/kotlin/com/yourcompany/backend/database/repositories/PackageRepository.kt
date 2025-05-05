@@ -2,12 +2,13 @@ package com.yourcompany.backend.database.repositories
 
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
-import com.yourcompany.backend.models.Option
-import com.yourcompany.backend.models.PackageOptionsResponse
+import com.yourcompany.backend.models.*
+import com.yourcompany.backend.models.UserPackage
 import com.yourcompany.backend.models.PackageType as PackageTypeModel
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import java.math.BigDecimal
+import java.time.Instant
 
 /**
  * Repository for package-related database operations
@@ -28,9 +29,6 @@ class PackageRepository {
      * Get package options for a specific package type
      */
     fun getPackageOptions(packageTypeId: String): PackageOptionsResponse? {
-        val packageType = database.sequenceOf(PackageTypes)
-            .firstOrNull { it.id eq packageTypeId } ?: return null
-
         val options = database.sequenceOf(PackageOptions)
             .filter { it.packageTypeId eq packageTypeId }
             .map { toOptionModel(it) }
@@ -194,5 +192,54 @@ class PackageRepository {
                 }
             }
         }
+    }
+
+    /**
+     * Create a new package
+     */
+    fun createPackage(userId: String, orderRequest: OrderRequest, packageTypeName: String): String {
+        val request = CreatePackageRequest(
+            name = packageTypeName,
+            plan = orderRequest.options.plan,
+            type = orderRequest.packageType,
+            speed = orderRequest.options.speed,
+            addOns = orderRequest.options.addOns,
+            router = orderRequest.options.router,
+            userId = userId
+        )
+        // Generate a unique ID for the package
+        val packageId = "pkg_${System.currentTimeMillis()}"
+
+        // Use a transaction to ensure all operations are committed
+        database.useTransaction { 
+            // Insert the package
+            database.insert(Packages) {
+                set(it.id, packageId)
+                set(it.type, request.type)
+                set(it.name, request.name)
+                set(it.plan, request.plan)
+                set(it.speed, request.speed)
+                set(it.router, request.router)
+                set(it.createdAt, Instant.now())
+            }
+
+            // Insert add-ons if any
+            for (addOn in request.addOns) {
+                database.insert(PackageAddOns) {
+                    set(it.packageId, packageId)
+                    set(it.addOn, addOn)
+                }
+            }
+
+            // Associate with user if userId is provided
+            if (request.userId != null) {
+                database.insert(UserPackages) {
+                    set(it.userId, request.userId)
+                    set(it.packageId, packageId)
+                }
+            }
+        }
+
+        return packageId
     }
 }

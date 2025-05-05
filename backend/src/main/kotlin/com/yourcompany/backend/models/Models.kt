@@ -278,3 +278,15 @@ data class Notification(
     val date: String,
     val read: Boolean
 )
+
+// Data class for Package Creation Request
+@Serializable
+data class CreatePackageRequest(
+    val type: String, // e.g., "mobile_combo", "home_internet"
+    val name: String,
+    val plan: String? = null, // Specific plan ID if applicable
+    val speed: String? = null, // Specific speed ID if applicable
+    val router: String? = null, // Specific router ID if applicable
+    val addOns: List<String> = emptyList(), // Array of add-on IDs
+    val userId: String? = null // Optional user ID to associate the package with
+)

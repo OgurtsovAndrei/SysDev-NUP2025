@@ -9,7 +9,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-
+const val SAFE_DELIMITER = "simulated_jwt_token_for_"
 // Defines routes related to the user profile
 fun Route.userProfileRoutes() {
     val userRepository = UserRepository()
@@ -19,8 +19,9 @@ fun Route.userProfileRoutes() {
         get("/profile") {
             // In a real application, get the authenticated user ID from the JWT token or session
             // For this mock, we'll use a hardcoded user ID
-            val userId = "USR12345" // Simulate authenticated user ID
+            val userId = call.request.headers["Authorization"]?.split(SAFE_DELIMITER)?.last() ?: "NaN"
             val user = userRepository.findUserById(userId)
+
 
             if (user != null) {
                 // Convert the database entity to a model
@@ -49,7 +50,7 @@ fun Route.userProfileRoutes() {
         // PUT /api/user/profile (or PATCH)
         put("/profile") {
             // In a real application, get the authenticated user ID from the JWT token or session
-            val userId = "USR12345" // Simulate authenticated user ID
+            val userId = call.request.headers["Authorization"]?.split(SAFE_DELIMITER)?.last() ?: "NaN"
 
             // Check if user exists
             val user = userRepository.findUserById(userId)

@@ -18,7 +18,7 @@ fun Route.usageRoutes() {
         get("/usage") {
             // In a real application, get the authenticated user ID from the JWT token or session
             // For this mock, we'll use a hardcoded user ID
-            val userId = "USR12345" // Simulate authenticated user ID
+            val userId = call.request.headers["Authorization"]?.split(SAFE_DELIMITER)?.last() ?: "NaN"
 
             // Get the usage data for the user from the database
             val usageData = usageRepository.getUserUsageData(userId)

@@ -31,12 +31,16 @@ async function initializeUsagePage() {
         addOns: [] // API doesn't provide addOns in this context, so use empty array
       };
     });
-
+    var counter = 0
     // Create a section for each package
-    userPackages.forEach(pkg => {
+    userPackages.reverse().forEach(pkg => {
       // Create package section
+      if (counter !== 0 && pkg.type !== 'home_internet') {
+        return
+      }
       const packageSection = createPackageSection(pkg);
       packageSectionsContainer.appendChild(packageSection);
+      if (pkg.type !== 'home_internet') {counter++}
     });
 
     // Populate previous billing cycles table
@@ -44,7 +48,7 @@ async function initializeUsagePage() {
   } catch (error) {
     console.error('Failed to load usage data:', error);
     // Navigate to home page instead of showing error
-    window.location.href = 'index.html';
+    // window.location.href = 'index.html';
   }
 }
 

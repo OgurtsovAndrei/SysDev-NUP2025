@@ -2,6 +2,7 @@ package com.yourcompany.backend.routes
 
 import com.yourcompany.backend.database.repositories.PackageRepository
 import com.yourcompany.backend.database.repositories.PromoCodeRepository
+import com.yourcompany.backend.database.repositories.UsageRepository
 import com.yourcompany.backend.models.* // Import all models
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -14,6 +15,7 @@ import java.util.UUID // For generating mock order IDs
 fun Route.packagesRoutes() {
     val packageRepository = PackageRepository()
     val promoCodeRepository = PromoCodeRepository()
+    val usageRepository = UsageRepository()
 
     route("/api/packages") {
         // GET /api/packages/types
@@ -80,6 +82,7 @@ fun Route.packagesRoutes() {
     route("/api/orders") {
         // POST /api/orders
         post {
+
             // In a real application, you would authenticate the user here
             // and associate the order with the authenticated user ID.
             // For this mock, we'll just log the order details.
@@ -91,7 +94,12 @@ fun Route.packagesRoutes() {
                 call.respond(HttpStatusCode.BadRequest, ApiResponse(success = false, message = "Invalid request body"))
                 return@post
             }
+            val userId = call.request.headers["Authorization"]?.split(SAFE_DELIMITER)?.last() ?: "NaN"
+            val packageTypeName = packageRepository.getAllPackageTypes().find { it.id == orderRequest.packageType }?.name ?: "Unknown"
 
+            val packageId = packageRepository.createPackage(userId, orderRequest, packageTypeName)
+
+            usageRepository.createAndInsertNewOrderData(userId, packageId, orderRequest)
             // Simulate order processing (replace with actual order creation logic and database insertion)
             val newOrderId = UUID.randomUUID().toString() // Generate a mock order ID
 

@@ -260,6 +260,8 @@ function getAuthHeaders() {
     if (token) {
         headers['Authorization'] = `Bearer ${token}`; // Assuming JWT Bearer token
     }
+    console.log(token)
+    console.log(headers)
     return headers;
 }
 

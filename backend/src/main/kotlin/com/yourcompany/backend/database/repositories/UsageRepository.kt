@@ -2,16 +2,15 @@ package com.yourcompany.backend.database.repositories
 
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
-import com.yourcompany.backend.models.BillingCycle
-import com.yourcompany.backend.models.PackageUsage
-import com.yourcompany.backend.models.PreviousBillingCycle
-import com.yourcompany.backend.models.PreviousPackageUsage
-import com.yourcompany.backend.models.UsageDataResponse
+import com.yourcompany.backend.database.entities.User
+import com.yourcompany.backend.models.*
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.reflect.KClass
 
 /**
  * Repository for usage data-related database operations
@@ -25,7 +24,6 @@ class UsageRepository {
      */
     fun getUserUsageData(userId: String): UsageDataResponse? {
         // Check if user exists
-        val user = database.sequenceOf(Users).firstOrNull { it.id eq userId } ?: return null
 
         // Get all usage data for the user
         val usageDataList = database.sequenceOf(UsageDataTable)
@@ -149,7 +147,7 @@ class UsageRepository {
         }
 
         // Get the user and packages
-        val user = database.sequenceOf(Users).firstOrNull { it.id eq "USR12345" } ?: return
+        val userId = database.sequenceOf(Users).firstOrNull { it.id eq "USR12345" }?.id ?: return
         val package1 = database.sequenceOf(Packages).firstOrNull { it.id eq "PKG002" } ?: return
         val package2 = database.sequenceOf(Packages).firstOrNull { it.id eq "PKG005" } ?: return
 
@@ -157,7 +155,7 @@ class UsageRepository {
         database.useTransaction { transaction ->
             // Current billing cycle (March 2025)
             insertUsageData(
-                user = user,
+                userId = userId,
                 package_ = package1,
                 billingCycleStart = LocalDate.of(2025, 3, 1),
                 billingCycleEnd = LocalDate.of(2025, 3, 31),
@@ -170,7 +168,7 @@ class UsageRepository {
             )
 
             insertUsageData(
-                user = user,
+                userId = userId,
                 package_ = package2,
                 billingCycleStart = LocalDate.of(2025, 3, 1),
                 billingCycleEnd = LocalDate.of(2025, 3, 31),
@@ -183,7 +181,7 @@ class UsageRepository {
 
             // Previous billing cycle (February 2025)
             insertUsageData(
-                user = user,
+                userId = userId,
                 package_ = package1,
                 billingCycleStart = LocalDate.of(2025, 2, 1),
                 billingCycleEnd = LocalDate.of(2025, 2, 28),
@@ -196,7 +194,7 @@ class UsageRepository {
             )
 
             insertUsageData(
-                user = user,
+                userId = userId,
                 package_ = package2,
                 billingCycleStart = LocalDate.of(2025, 2, 1),
                 billingCycleEnd = LocalDate.of(2025, 2, 28),
@@ -206,7 +204,7 @@ class UsageRepository {
 
             // Previous billing cycle (January 2025)
             insertUsageData(
-                user = user,
+                userId = userId,
                 package_ = package1,
                 billingCycleStart = LocalDate.of(2025, 1, 1),
                 billingCycleEnd = LocalDate.of(2025, 1, 31),
@@ -219,7 +217,7 @@ class UsageRepository {
             )
 
             insertUsageData(
-                user = user,
+                userId = userId,
                 package_ = package2,
                 billingCycleStart = LocalDate.of(2025, 1, 1),
                 billingCycleEnd = LocalDate.of(2025, 1, 31),
@@ -229,11 +227,102 @@ class UsageRepository {
         }
     }
 
+    fun createAndInsertNewOrderData(userId: String, packageId: String, orderRequest: OrderRequest) {
+        val package_ = database.sequenceOf(Packages).firstOrNull { it.id eq packageId } ?: return
+        val date = LocalDate.now()
+
+        // Extract data based on package type
+        val dataTotal: BigDecimal
+        val callMinutesTotal: String?
+        val smsTotal: String?
+        val uploadSpeed: String?
+
+        when (orderRequest.packageType) {
+            "home_internet" -> {
+                // Home internet packages have unlimited data
+                dataTotal = BigDecimal("Unlimited".hashCode().toString())
+                callMinutesTotal = null
+                smsTotal = null
+                // Upload speed is typically 1/5 of download speed for home internet
+                uploadSpeed = package_.speed?.let { speed ->
+                    val downloadSpeedValue = speed.split(" ")[0].toDoubleOrNull()
+                    val unit = speed.split(" ").getOrNull(1) ?: "Mbps"
+                    val uploadSpeedValue = downloadSpeedValue?.div(5)
+                    "$uploadSpeedValue $unit"
+                }
+            }
+            "mobile_hotspot", "mobile_no_hotspot" -> {
+                // Extract data plan information
+                dataTotal = orderRequest.options.dataPlan?.let { dataPlanId ->
+                    when (dataPlanId) {
+                        "10gb" -> BigDecimal("10")
+                        "20gb" -> BigDecimal("20")
+                        "50gb" -> BigDecimal("50")
+                        "unlimited" -> BigDecimal("Unlimited".hashCode().toString())
+                        else -> BigDecimal("0")
+                    }
+                } ?: BigDecimal("0")
+                callMinutesTotal = null
+                smsTotal = null
+                uploadSpeed = null
+            }
+            "mobile_combo" -> {
+                // Extract plan information
+                val planInfo = orderRequest.options.plan
+                println(orderRequest.options.plan)
+                dataTotal = when {
+                    planInfo?.contains("basic") == true -> BigDecimal("5")
+                    planInfo?.contains("standard") == true -> BigDecimal("20")
+                    planInfo?.contains("premium") == true -> BigDecimal("50")
+                    planInfo?.contains("unlimited") == true -> BigDecimal(Int.MAX_VALUE)
+                    else -> BigDecimal("0")
+                }
+                callMinutesTotal = when {
+                    planInfo?.contains("basic") == true -> "100"
+                    planInfo?.contains("standard") == true -> "500"
+                    planInfo?.contains("premium") == true || planInfo?.contains("unlimited") == true -> "Unlimited"
+                    else -> "0"
+                }
+                smsTotal = when {
+                    planInfo?.contains("basic") == true -> "100"
+                    planInfo?.contains("standard") == true -> "500"
+                    planInfo?.contains("premium") == true || planInfo?.contains("unlimited") == true -> "Unlimited"
+                    else -> "0"
+                }
+                uploadSpeed = null
+            }
+            else -> {
+                dataTotal = BigDecimal("0")
+                callMinutesTotal = "0"
+                smsTotal = "0"
+                uploadSpeed = null
+            }
+        }
+
+        database.useTransaction { transaction ->
+            insertUsageData(
+                userId = userId,
+                package_ = package_,
+                billingCycleStart = date,
+                billingCycleEnd = LocalDate.of(date.year, date.month, date.lengthOfMonth()),
+                dataUsed = BigDecimal("0"),
+                dataTotal = dataTotal,
+                callMinutesUsed = 0,
+                callMinutesTotal = callMinutesTotal,
+                smsUsed = 0,
+                smsTotal = smsTotal,
+                downloadSpeed = package_.speed,
+                uploadSpeed = uploadSpeed,
+                devices = 1 // Default to 1 device for new orders
+            )
+        }
+    }
+
     /**
      * Helper method to insert usage data
      */
     private fun insertUsageData(
-        user: User,
+        userId: String,
         package_: Package,
         billingCycleStart: LocalDate,
         billingCycleEnd: LocalDate,
@@ -248,7 +337,7 @@ class UsageRepository {
         devices: Int? = null
     ) {
         database.insert(UsageDataTable) {
-            set(it.userId, user.id)
+            set(it.userId, userId)
             set(it.packageId, package_.id)
             set(it.billingCycleStart, billingCycleStart)
             set(it.billingCycleEnd, billingCycleEnd)

@@ -12,6 +12,7 @@ fun Application.configureCORS() {
         // You can add multiple origins.
         // The scheme (http/https) is now specified in the 'schemes' parameter.
         allowHost("localhost:8081", schemes = listOf("http"))
+        allowHost("127.0.0.1:8081", schemes = listOf("http"))
         allowHost("0.0.0.0:8081", schemes = listOf("http"))
         // Or for development, allow any host (less secure in production)
         // anyHost()
