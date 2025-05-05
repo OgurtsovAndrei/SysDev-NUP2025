@@ -1,11 +1,5 @@
 // Usage page functions
 // Import specific functions from model.js (selective import)
-import {
-  getUserUsage,
-  getUserProfile,
-  getPackageTypes
-} from './model.js';
-
 // Alternative: Import the entire API bundle
 // import ModelAPI from './model.js';
 // Then use: ModelAPI.getUserUsage(), ModelAPI.getUserProfile(), ModelAPI.getPackageTypes()
@@ -315,9 +309,4 @@ function populatePreviousCycles(previousCycles, userPackages, packageTypes) {
 
     tableBody.appendChild(row);
   });
-}
-
-// Export functions for use in other modules
-export {
-  initializeUsagePage
 }

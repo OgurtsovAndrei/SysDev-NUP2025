@@ -287,7 +287,7 @@ val mockNotifications = mapOf(
 )
 
 val mockFeedback = FeedbackSummary(
-    averageRating = 4.5, // Simulate average rating
+    averageRating = 4.55, // Simulate average rating
     totalReviews = 128, // Simulate total number of reviews
     recentFeedback = listOf( // List of recent feedback entries
         FeedbackEntry(

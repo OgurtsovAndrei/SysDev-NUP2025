@@ -1,11 +1,5 @@
 
 let currentRating = 0;
-const API_BASE_URL = 'http://localhost:8082/api';
-// Feedback Endpoints
-const FEEDBACK_ENDPOINTS = {
-    FEEDBACK_SUMMARY: `${API_BASE_URL}/feedback/summary`,
-    SUBMIT_FEEDBACK: `${API_BASE_URL}/feedback`
-};
 // Set the rating when a star is clicked
 function setRating(rating) {
     currentRating = rating;
@@ -22,44 +16,6 @@ function setRating(rating) {
     });
 }
 
-function getAuthToken() {
-    // This is a placeholder. In a real application, you would get the token
-    // from localStorage, sessionStorage, or a state management system.
-    return localStorage.getItem('authToken'); // Example: getting from localStorage
-}
-
-function getAuthHeaders() {
-    const token = getAuthToken();
-    const headers = {
-        'Content-Type': 'application/json'
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`; // Assuming JWT Bearer token
-    }
-    return headers;
-}
-
-async function handleApiResponse(response) {
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || `API request failed with status ${response.status}`);
-    }
-    return response.json();
-}
-
-async function getFeedbackSummary() {
-    try {
-        const response = await fetch(FEEDBACK_ENDPOINTS.FEEDBACK_SUMMARY, {
-            method: 'GET',
-            headers: getAuthHeaders() // May or may not require auth depending on API
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to fetch feedback summary:', error);
-        throw error;
-    }
-}
-
 // Initialize feedback page
 async function initializeFeedbackPage() {
     if (!document.getElementById('feedbackForm')) return; // Not on feedback page
@@ -71,7 +27,7 @@ async function initializeFeedbackPage() {
         if (feedbackData) {
             const averageRating = feedbackData.averageRating;
             const totalReviews = feedbackData.totalReviews;
-
+            console.log(`${averageRating} and ${totalReviews}`)
             // Update the average rating text
             document.querySelector('#averageRatingContainer p').innerHTML =
                 `<strong>${averageRating.toFixed(1)}</strong> out of 5 based on <strong>${totalReviews}</strong> reviews`;
@@ -96,20 +52,6 @@ async function initializeFeedbackPage() {
     } catch (error) {
         console.error('Error fetching feedback summary:', error);
         // Optionally display an error message to the user
-    }
-}
-
-async function submitFeedbackToAPI(feedbackData) {
-    try {
-        const response = await fetch(FEEDBACK_ENDPOINTS.SUBMIT_FEEDBACK, {
-            method: 'POST',
-            headers: getAuthHeaders(), // Submitting feedback may require auth
-            body: JSON.stringify(feedbackData)
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to submit feedback:', error);
-        throw error;
     }
 }
 

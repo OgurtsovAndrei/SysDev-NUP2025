@@ -41,13 +41,3 @@ const FEEDBACK_ENDPOINTS = {
     FEEDBACK_SUMMARY: `${API_BASE_URL}/feedback/summary`,
     SUBMIT_FEEDBACK: `${API_BASE_URL}/feedback`
 };
-
-// Export the endpoints for use in other modules
-export {
-    AUTH_ENDPOINTS,
-    USER_ENDPOINTS,
-    PACKAGES_ENDPOINTS,
-    ORDER_ENDPOINTS,
-    USAGE_ENDPOINTS,
-    FEEDBACK_ENDPOINTS
-};

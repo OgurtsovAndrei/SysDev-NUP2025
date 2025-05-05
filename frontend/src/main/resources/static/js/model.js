@@ -1,16 +1,3 @@
-// model.js
-// Handles data fetching and manipulation by interacting with the backend API.
-// Uses the API endpoint definitions from api-routes.js.
-
-// import {
-//     AUTH_ENDPOINTS,
-//     USER_ENDPOINTS,
-//     PACKAGES_ENDPOINTS,
-//     ORDER_ENDPOINTS,
-//     USAGE_ENDPOINTS,
-//     FEEDBACK_ENDPOINTS
-// } from './api-routes.js'; // Ensure the correct path to api-routes.js
-
 // --- Type Definitions for API Responses ---
 
 /**
@@ -307,7 +294,7 @@ async function loginUserCall(email, password, rememberMe) {
  * @returns {Promise<RegisterResponse>} A promise that resolves with the registration response.
  * @throws {Error} If the API request fails or returns an error.
  */
-async function registerUser(fullName, email, password, confirmPassword, agreeTerms) {
+async function registerUserToAPI(fullName, email, password, confirmPassword, agreeTerms) {
     try {
         const response = await fetch(AUTH_ENDPOINTS.REGISTER, {
             method: 'POST',
@@ -497,7 +484,7 @@ async function validatePromoCode(promoCode) {
  * @returns {Promise<SubmitOrderResponse>} A promise that resolves with the order submission response.
  * @throws {Error} If the API request fails or returns an error.
  */
-async function submitOrder(orderDetails) {
+async function submitOrderToAPI(orderDetails) {
     try {
         const response = await fetch(ORDER_ENDPOINTS.SUBMIT_ORDER, {
             method: 'POST',
@@ -570,58 +557,3 @@ async function submitFeedbackToAPI(feedbackData) {
         throw error;
     }
 }
-
-
-// Create a bundler object that contains all the API interaction functions
-const ModelAPI = {
-    // Authentication
-    loginUserCall,
-    registerUser,
-
-    // User Profile
-    getUserProfile,
-    updateUserProfile,
-    getUserSupportTickets,
-    getUserNotifications,
-    markNotificationAsRead,
-
-    // Packages and Ordering
-    getPackageTypes,
-    getPackageOptions,
-    validatePromoCode,
-    submitOrder,
-
-    // Usage Data
-    getUserUsage,
-
-    // Feedback
-    getFeedbackSummary,
-    submitFeedbackToAPI,
-
-    // Helper functions
-    getAuthToken,
-    getAuthHeaders
-};
-
-// Export the bundler object as default export
-export default ModelAPI;
-
-// Also export individual functions for backward compatibility and selective imports
-export {
-    loginUserCall,
-    registerUser,
-    getUserProfile,
-    updateUserProfile,
-    getUserSupportTickets,
-    getUserNotifications,
-    markNotificationAsRead,
-    getPackageTypes,
-    getPackageOptions,
-    validatePromoCode,
-    submitOrder,
-    getUserUsage,
-    getFeedbackSummary,
-    submitFeedbackToAPI,
-    getAuthToken,
-    getAuthHeaders
-};

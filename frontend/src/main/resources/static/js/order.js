@@ -1,10 +1,4 @@
 // Order page functions
-import {
-  getPackageTypes,
-  getPackageOptions,
-  validatePromoCode,
-  submitOrder as submitOrderToAPI
-} from './model.js';
 
 // Store package options for use in updateOrderSummary
 let packageOptionsCache = {
@@ -560,12 +554,4 @@ async function submitOrder() {
     console.error('Error submitting order:', error);
     alert('An error occurred while placing your order. Please try again later.');
   }
-}
-
-// Export functions for use in other modules
-export {
-  initializePackageTypeDropdown,
-  updatePackageOptions,
-  applyPromoCode,
-  submitOrder
 }

@@ -36,8 +36,7 @@ function renderUserProfile() {
 
   // Format billing address
   const address = currentUserProfile.billingAddress;
-  const formattedAddress = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}`;
-  document.getElementById('profileBillingAddress').textContent = formattedAddress;
+  document.getElementById('profileBillingAddress').textContent = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}`;
 }
 
 // Toggle edit mode
@@ -48,7 +47,7 @@ function toggleEditMode() {
   }
 
   const editButton = document.getElementById('editButton');
-  const profileBody = document.getElementById('profileBody');
+  // const profileBody = document.getElementById('profileBody');
 
   if (!isEditMode) {
     // Switch to edit mode

@@ -1,9 +1,5 @@
-// Login and Register page functions
 
 // Login user
-
-import {loginUserCall} from "./model";
-
 async function loginUser() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
@@ -50,7 +46,7 @@ function initializeRegisterPage() {
 }
 
 // Register user
-function registerUser() {
+async function registerUser() {
   const fullName = document.getElementById('fullName').value;
   const email = document.getElementById('registerEmail').value;
   const password = document.getElementById('registerPassword').value;
@@ -73,30 +69,31 @@ function registerUser() {
     return;
   }
 
-  // Create user object (in a real app, this would be sent to an API)
-  const newUser = {
-    name: fullName,
-    email: email,
-    registrationDate: new Date().toISOString().split('T')[0]
-  };
+  const response = await registerUserToAPI(fullName, email, password, confirmPassword, agreeTerms)
 
-  // Log registration
-  console.log('User registered:', newUser);
+  if (response.success) {
+    const newUser = {
+      name: fullName,
+      email: email,
+      registrationDate: new Date().toISOString().split('T')[0]
+    };
+    // Log registration
+    console.log('User registered:', newUser);
 
-  // Show success message
-  document.getElementById('registerSuccess').classList.remove('d-none');
+    // Show success message
+    document.getElementById('registerSuccess').classList.remove('d-none');
+
+    // Simulate redirect after registration
+    setTimeout(() => {
+      window.location.href = 'login.html';
+    }, 3000);
+  } else {
+    alert("Something went wrong! Please try again!")
+  }
+
 
   // Reset form
   document.getElementById('registerForm').reset();
 
-  // Simulate redirect after registration
-  setTimeout(() => {
-    window.location.href = 'login.html';
-  }, 3000);
-}
 
-export {
-  registerUser,
-  loginUser,
-  initializeRegisterPage
 }
