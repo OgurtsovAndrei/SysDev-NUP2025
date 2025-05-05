@@ -134,5 +134,18 @@
 <script src="/js/navigation.js"></script>
 <script src="/js/auth.js" type="module"></script>
 <script src="/js/main.js" type="module"></script>
+<script>
+  // Update login/logout link text based on login status
+  document.addEventListener('DOMContentLoaded', function() {
+    const loginLink = document.querySelector('a[onclick="goToLoginPage()"]');
+    if (loginLink && typeof isLoggedIn === 'function') {
+      if (isLoggedIn()) {
+        loginLink.textContent = 'Logout';
+      } else {
+        loginLink.textContent = 'Login';
+      }
+    }
+  });
+</script>
 </body>
 </html>

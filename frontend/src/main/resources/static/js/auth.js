@@ -1,5 +1,5 @@
 // Login and Register page functions
-import { loginUser as loginUserAPI, registerUser as registerUserAPI } from './model.js';
+import {loginUser as loginUserAPI, registerUser as registerUserAPI} from './model.js';
 
 // Login user
 async function loginUser() {

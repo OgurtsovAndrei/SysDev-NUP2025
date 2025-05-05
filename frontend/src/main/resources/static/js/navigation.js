@@ -50,8 +50,14 @@ function goToProfilePage() {
 }
 
 function goToLoginPage() {
-  console.log("Navigating to Login Page");
-  window.location.href = "login.html";
+  console.log("Navigating to Login/Logout Page");
+  if (typeof isLoggedIn === 'function' && isLoggedIn()) {
+    console.log("User is logged in, redirecting to logout page");
+    window.location.href = "logout.html";
+  } else {
+    console.log("User is not logged in, redirecting to login page");
+    window.location.href = "login.html";
+  }
 }
 
 function goToRegisterPage() {

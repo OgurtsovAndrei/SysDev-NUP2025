@@ -51,7 +51,7 @@
                     <a class="nav-link" href="#" onclick="goToProfilePage()">Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="login.html">Login</a>
+                    <a class="nav-link active" href="#" onclick="goToLoginPage()">Login</a>
                 </li>
             </ul>
         </div>
@@ -66,7 +66,7 @@
             <p class="lead mb-4 text-center">Please sign in to access your account</p>
 
             <!-- Login Form Card -->
-            <div class="card login-card">
+            <div class="card login-card" id="loginCard">
                 <div class="card-body">
                     <!-- Alert for success/error messages (initially hidden) -->
                     <div class="alert alert-success d-none" id="loginSuccess">
@@ -107,6 +107,17 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Logout Card (initially hidden) -->
+            <div class="card login-card d-none" id="logoutCard">
+                <div class="card-body text-center">
+                    <h4 class="mb-4">You are already logged in</h4>
+                    <p class="mb-4">If you want to log out from your account, please click the button below.</p>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-danger" onclick="logoutUser()">Log Out</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
@@ -123,5 +134,30 @@
 <script src="/js/navigation.js"></script>
 <script src="/js/auth.js" type="module"></script>
 <script src="/js/main.js" type="module"></script>
+<script>
+  // Update login/logout link text based on login status and show appropriate card
+  document.addEventListener('DOMContentLoaded', function() {
+    const loginLink = document.querySelector('a[onclick="goToLoginPage()"]');
+    if (loginLink && typeof isLoggedIn === 'function') {
+      if (isLoggedIn()) {
+        loginLink.textContent = 'Logout';
+
+        // Show logout card and hide login card
+        document.getElementById('loginCard').classList.add('d-none');
+        document.getElementById('logoutCard').classList.remove('d-none');
+
+        // Update page title and description
+        document.querySelector('h1.mb-4.text-center').textContent = 'Account';
+        document.querySelector('p.lead.mb-4.text-center').textContent = 'You are currently logged in';
+      } else {
+        loginLink.textContent = 'Login';
+
+        // Show login card and hide logout card
+        document.getElementById('loginCard').classList.remove('d-none');
+        document.getElementById('logoutCard').classList.add('d-none');
+      }
+    }
+  });
+</script>
 </body>
 </html>
