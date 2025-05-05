@@ -1,7 +1,8 @@
 // Login and Register page functions
+import { loginUser as loginUserAPI, registerUser as registerUserAPI } from './model.js';
 
 // Login user
-function loginUser() {
+async function loginUser() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const rememberMe = document.getElementById('rememberMe').checked;
@@ -14,30 +15,44 @@ function loginUser() {
     return;
   }
 
-  // Simulate login check (in a real app, this would be an API call)
-  console.log('Login attempt:', { email, password, rememberMe });
+  try {
+    // Call the API to login
+    const response = await loginUserAPI(email, password, rememberMe);
 
-  // For demo purposes, accept any valid email format
-  if (email.includes('@') && password.length >= 6) {
-    // Show success message
-    document.getElementById('loginSuccess').classList.remove('d-none');
-    document.getElementById('loginError').classList.add('d-none');
+    if (response.success) {
+      // Show success message
+      document.getElementById('loginSuccess').classList.remove('d-none');
+      document.getElementById('loginError').classList.add('d-none');
 
-    // Log success
-    console.log('Login successful');
+      // Log success
+      console.log('Login successful');
 
-    // Simulate redirect after login
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 2000);
-  } else {
+      // Store the token in localStorage
+      if (response.token) {
+        localStorage.setItem('authToken', response.token);
+      }
+
+      // Redirect after login
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
+    } else {
+      // Show error message
+      document.getElementById('loginError').textContent = response.message || 'Login failed. Please try again.';
+      document.getElementById('loginError').classList.remove('d-none');
+      document.getElementById('loginSuccess').classList.add('d-none');
+
+      // Log error
+      console.log('Login failed:', response.message);
+    }
+  } catch (error) {
     // Show error message
-    document.getElementById('loginError').textContent = 'Invalid email or password. Password must be at least 6 characters.';
+    document.getElementById('loginError').textContent = 'An error occurred during login. Please try again.';
     document.getElementById('loginError').classList.remove('d-none');
     document.getElementById('loginSuccess').classList.add('d-none');
 
     // Log error
-    console.log('Login failed: Invalid credentials');
+    console.error('Login error:', error);
   }
 }
 
@@ -47,7 +62,7 @@ function initializeRegisterPage() {
 }
 
 // Register user
-function registerUser() {
+async function registerUser() {
   const fullName = document.getElementById('fullName').value;
   const email = document.getElementById('registerEmail').value;
   const password = document.getElementById('registerPassword').value;
@@ -70,24 +85,54 @@ function registerUser() {
     return;
   }
 
-  // Create user object (in a real app, this would be sent to an API)
-  const newUser = {
-    name: fullName,
-    email: email,
-    registrationDate: new Date().toISOString().split('T')[0]
-  };
+  try {
+    // Call the API to register
+    const response = await registerUserAPI(fullName, email, password, confirmPassword, agreeTerms);
 
-  // Log registration
-  console.log('User registered:', newUser);
+    if (response.success) {
+      // Log registration
+      console.log('User registered successfully');
 
-  // Show success message
-  document.getElementById('registerSuccess').classList.remove('d-none');
+      // Show success message
+      document.getElementById('registerSuccess').classList.remove('d-none');
 
-  // Reset form
-  document.getElementById('registerForm').reset();
+      // Reset form
+      document.getElementById('registerForm').reset();
 
-  // Simulate redirect after registration
-  setTimeout(() => {
-    window.location.href = 'login.html';
-  }, 3000);
+      // Redirect after registration
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 3000);
+    } else {
+      // Show error message
+      alert(response.message || 'Registration failed. Please try again.');
+
+      // Log error
+      console.log('Registration failed:', response.message);
+    }
+  } catch (error) {
+    // Show error message
+    alert('An error occurred during registration. Please try again.');
+
+    // Log error
+    console.error('Registration error:', error);
+  }
 }
+
+// Check if user is logged in
+function isLoggedIn() {
+  return localStorage.getItem('authToken') !== null;
+}
+
+// Logout user
+function logoutUser() {
+  localStorage.removeItem('authToken');
+  window.location.href = 'login.html';
+}
+
+// Expose functions to the global scope
+window.loginUser = loginUser;
+window.registerUser = registerUser;
+window.initializeRegisterPage = initializeRegisterPage;
+window.isLoggedIn = isLoggedIn;
+window.logoutUser = logoutUser;

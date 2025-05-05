@@ -117,7 +117,17 @@
 <script src="/js/api-routes.js" type="module"></script>
 <script src="/js/model.js" type="module"></script>
 <script src="/js/navigation.js"></script>
+<script src="/js/auth.js" type="module"></script>
 <script src="/js/profile.js" type="module"></script>
 <script src="/js/main.js" type="module"></script>
+<script>
+  // Check if user is logged in when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
+      console.log("User not logged in, redirecting to login page");
+      window.location.href = "login.html";
+    }
+  });
+</script>
 </body>
 </html>
