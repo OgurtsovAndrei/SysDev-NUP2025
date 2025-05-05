@@ -1,33 +1,32 @@
 package com.yourcompany.backend.routes
 
-import com.yourcompany.backend.data.mockFeedback // Import mock feedback data
+import com.yourcompany.backend.database.repositories.FeedbackRepository
 import com.yourcompany.backend.models.ApiResponse // Import API response model
-import com.yourcompany.backend.models.FeedbackEntry
-import com.yourcompany.backend.models.FeedbackSummary // Import FeedbackSummary model
 import com.yourcompany.backend.models.SubmitFeedbackRequest // Import SubmitFeedbackRequest model
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.time.Instant // For timestamps
-import java.util.UUID // For generating mock feedback IDs
 
 // Defines routes related to user feedback
 fun Route.feedbackRoutes() {
+    val feedbackRepository = FeedbackRepository()
+
     route("/api/feedback") {
         // GET /api/feedback/summary
         get("/summary") {
-            // Return the mock feedback summary data
-            call.respond(HttpStatusCode.OK, mockFeedback)
+            // Get the feedback summary from the database
+            val feedbackSummary = feedbackRepository.getFeedbackSummary()
+
+            // Return the feedback summary
+            call.respond(HttpStatusCode.OK, feedbackSummary)
         }
 
         // POST /api/feedback
         post {
             // In a real application, you would authenticate the user here
             // and associate the feedback with the authenticated user ID.
-            // For this mock, we'll just log the feedback and simulate adding it
-            // to a list (though the mock data is static for summary).
 
             val feedbackRequest = try {
                 call.receive<SubmitFeedbackRequest>() // Receive and deserialize the feedback submission request
@@ -47,30 +46,10 @@ fun Route.feedbackRoutes() {
                 return@post
             }
 
+            // Submit the feedback to the database
+            val feedbackId = feedbackRepository.submitFeedback(feedbackRequest, "Anonymous User")
 
-            // Simulate feedback submission (replace with actual database insertion)
-            val newFeedbackId = UUID.randomUUID().toString() // Generate a mock feedback ID
-            val currentTimestamp = Instant.now().toString()
-
-            // Simulate creating a feedback entry (this won't affect the static mockFeedback summary)
-            val newFeedbackEntry = FeedbackEntry(
-                id = newFeedbackId,
-                rating = feedbackRequest.rating,
-                topic = feedbackRequest.topic,
-                text = feedbackRequest.text,
-                timestamp = currentTimestamp,
-                user = "Mock User" // In a real app, use the authenticated user's name/ID
-            )
-
-            println("Received new feedback:")
-            println("  ID: ${newFeedbackEntry.id}")
-            println("  Rating: ${newFeedbackEntry.rating}")
-            println("  Topic: ${newFeedbackEntry.topic}")
-            println("  Text: ${newFeedbackEntry.text}")
-            println("  Timestamp: ${newFeedbackEntry.timestamp}")
-            println("  User: ${newFeedbackEntry.user}")
-
-            // Simulate successful feedback submission
+            // Return success response
             call.respond(HttpStatusCode.Created, ApiResponse(success = true, message = "Feedback submitted successfully"))
         }
     }

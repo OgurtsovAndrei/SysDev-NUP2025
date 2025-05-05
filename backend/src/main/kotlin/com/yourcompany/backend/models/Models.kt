@@ -261,6 +261,14 @@ data class SupportTicket(
     val resolution: String? = null // Present if status is "Closed"
 )
 
+// Data class for Promo Code
+@Serializable
+data class PromoCode(
+    val code: String,
+    val discount: Double,
+    val description: String
+)
+
 // Data class for Notification
 @Serializable
 data class Notification(

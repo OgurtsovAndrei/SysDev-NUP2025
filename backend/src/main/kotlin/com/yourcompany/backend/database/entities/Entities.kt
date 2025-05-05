@@ -134,6 +134,24 @@ interface PackageAddOn : Entity<PackageAddOn> {
     var addOn: String
 }
 
+interface PackageType : Entity<PackageType> {
+    companion object : Entity.Factory<PackageType>()
+
+    val id: String
+    var name: String
+}
+
+interface PackageOption : Entity<PackageOption> {
+    companion object : Entity.Factory<PackageOption>()
+
+    val id: Int
+    var packageType: PackageType
+    var optionType: String
+    var optionId: String
+    var name: String
+    var price: BigDecimal
+}
+
 // Table schemas
 
 object Addresses : Table<Address>("addresses") {
@@ -228,6 +246,20 @@ object Feedbacks : Table<Feedback>("feedback") {
     val text = text("text").bindTo { it.text }
     val timestamp = timestamp("timestamp").bindTo { it.timestamp }
     val userName = varchar("user_name").bindTo { it.userName }
+}
+
+object PackageTypes : Table<PackageType>("package_types") {
+    val id = varchar("id").primaryKey().bindTo { it.id }
+    val name = varchar("name").bindTo { it.name }
+}
+
+object PackageOptions : Table<PackageOption>("package_options") {
+    val id = int("id").primaryKey().bindTo { it.id }
+    val packageTypeId = varchar("package_type_id").references(PackageTypes) { it.packageType }
+    val optionType = varchar("option_type").bindTo { it.optionType }
+    val optionId = varchar("option_id").bindTo { it.optionId }
+    val name = varchar("name").bindTo { it.name }
+    val price = decimal("price").bindTo { it.price }
 }
 
 object ChatMessages : Table<ChatMessage>("chat_messages") {

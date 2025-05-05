@@ -1,6 +1,6 @@
 package com.yourcompany.backend.routes
 
-import com.yourcompany.backend.data.mockUsageData
+import com.yourcompany.backend.database.repositories.UsageRepository
 import com.yourcompany.backend.models.ApiResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -9,10 +9,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 
-class UsageRoutes
-
 // Defines routes related to user usage data
 fun Route.usageRoutes() {
+    val usageRepository = UsageRepository()
+
     route("/api/user") {
         // GET /api/user/usage
         get("/usage") {
@@ -20,14 +20,14 @@ fun Route.usageRoutes() {
             // For this mock, we'll use a hardcoded user ID
             val userId = "USR12345" // Simulate authenticated user ID
 
-            // Find the usage data for the user in mock data
-            val usageData = mockUsageData[userId]
+            // Get the usage data for the user from the database
+            val usageData = usageRepository.getUserUsageData(userId)
 
             if (usageData != null) {
                 // Return the user's usage data
                 call.respond(HttpStatusCode.OK, usageData)
             } else {
-                // Return 404 Not Found if usage data for the user is not in mock data
+                // Return 404 Not Found if usage data for the user is not found
                 // In a real app, this might mean the user has no active packages or no usage data yet.
                 call.respond(
                     HttpStatusCode.NotFound,

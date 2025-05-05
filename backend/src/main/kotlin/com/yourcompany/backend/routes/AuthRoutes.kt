@@ -1,12 +1,12 @@
 package com.yourcompany.backend.routes
 
-import com.yourcompany.backend.data.User
-import com.yourcompany.backend.data.mockUsers
+import com.yourcompany.backend.database.repositories.UserRepository
 import com.yourcompany.backend.models.Address
 import com.yourcompany.backend.models.ApiResponse
 import com.yourcompany.backend.models.LoginRequest
 import com.yourcompany.backend.models.LoginResponse
 import com.yourcompany.backend.models.RegisterRequest
+import com.yourcompany.backend.models.User
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -16,6 +16,8 @@ import java.time.LocalDate
 
 // Defines routes related to user authentication (login and registration)
 fun Route.authRoutes() {
+    val userRepository = UserRepository()
+
     route("/api/auth") {
         // POST /api/auth/login
         post("/login") {
@@ -27,18 +29,18 @@ fun Route.authRoutes() {
                 return@post
             }
 
-            // Simulate user authentication (replace with actual authentication logic)
-            val user = mockUsers.find { it.email == loginRequest.email && it.password == loginRequest.password }
+            // Find user by email
+            val user = userRepository.findUserByEmail(loginRequest.email)
 
-            if (user != null) {
-                // Simulate successful login
+            if (user != null && user.password == loginRequest.password) {
+                // Successful login
                 // In a real application, generate and return a JWT token here
                 val token = "simulated_jwt_token_for_${user.id}"
                 call.respond(HttpStatusCode.OK,
                     LoginResponse(success = true, message = "Login successful", token = token)
                 )
             } else {
-                // Simulate failed login
+                // Failed login
                 call.respond(HttpStatusCode.Unauthorized,
                     ApiResponse(success = false, message = "Invalid email or password")
                 )
@@ -68,15 +70,19 @@ fun Route.authRoutes() {
                 )
                 return@post
             }
-            if (mockUsers.any { it.email == registerRequest.email }) {
+
+            // Check if email already exists
+            if (userRepository.findUserByEmail(registerRequest.email) != null) {
                 call.respond(HttpStatusCode.Conflict, ApiResponse(success = false, message = "Email already exists"))
                 return@post
             }
 
+            // Generate a unique user ID
+            val userId = "USR${System.currentTimeMillis()}"
 
-            // Simulate user registration (replace with actual registration logic and database insertion)
-            val newUser = User( // Use the User data class
-                id = "USR${mockUsers.size + 1}", // Simple ID generation
+            // Create the user in the database
+            val newUser = userRepository.createUser(
+                id = userId,
                 name = registerRequest.fullName,
                 email = registerRequest.email,
                 password = registerRequest.password, // In a real app, hash the password!
@@ -84,14 +90,17 @@ fun Route.authRoutes() {
                 accountNumber = "ACC${System.currentTimeMillis()}", // Simple account number
                 accountType = "Basic", // Default type
                 registrationDate = LocalDate.now().toString(),
-                packages = emptyList(), // No packages initially
                 paymentMethod = "", // Default empty
                 billingAddress = Address("", "", "", "", "") // Default empty address
             )
-            mockUsers.add(newUser) // Add to mock data
 
-            // Simulate successful registration
-            call.respond(HttpStatusCode.Created, ApiResponse(success = true, message = "Registration successful"))
+            if (newUser != null) {
+                // Successful registration
+                call.respond(HttpStatusCode.Created, ApiResponse(success = true, message = "Registration successful"))
+            } else {
+                // Failed registration
+                call.respond(HttpStatusCode.InternalServerError, ApiResponse(success = false, message = "Failed to create user"))
+            }
         }
     }
 }

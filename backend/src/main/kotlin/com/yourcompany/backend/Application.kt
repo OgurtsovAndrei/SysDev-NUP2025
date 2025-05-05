@@ -12,6 +12,12 @@ import com.yourcompany.backend.plugins.* // Импортируем пакет с
 import kotlinx.serialization.Serializable // Для простого ответа API (если нужен тестовый эндпоинт)
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.Schema
+import com.yourcompany.backend.database.repositories.FeedbackRepository
+import com.yourcompany.backend.database.repositories.PackageRepository
+import com.yourcompany.backend.database.repositories.PromoCodeRepository
+import com.yourcompany.backend.database.repositories.SupportTicketRepository
+import com.yourcompany.backend.database.repositories.NotificationRepository
+import com.yourcompany.backend.database.repositories.UsageRepository
 import com.yourcompany.backend.database.repositories.UserRepository
 
 // Простой data class для API ответа (для примера)
@@ -38,6 +44,12 @@ fun Application.module() {
     log.info("Database schema initialized successfully. Initializing mock data...")
     try {
         UserRepository().initializeMockData()
+        PackageRepository().initializeMockData()
+        PromoCodeRepository().initializeMockData()
+        UsageRepository().initializeMockData()
+        SupportTicketRepository().initializeMockData()
+        NotificationRepository().initializeMockData()
+        FeedbackRepository().initializeMockData()
         log.info("Mock data initialized successfully.")
     } catch (e: Exception) {
         log.error("Error initializing mock data: ${e.message}", e)

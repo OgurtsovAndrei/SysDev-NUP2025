@@ -1,9 +1,7 @@
 package com.yourcompany.backend.routes
 
-
-import com.yourcompany.backend.data.mockPackageOptions // Import mock package options data
-import com.yourcompany.backend.data.mockPackageTypes // Import mock package types data
-import com.yourcompany.backend.data.mockPromoCodes // Import mock promo codes data
+import com.yourcompany.backend.database.repositories.PackageRepository
+import com.yourcompany.backend.database.repositories.PromoCodeRepository
 import com.yourcompany.backend.models.* // Import all models
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -14,11 +12,15 @@ import java.util.UUID // For generating mock order IDs
 
 // Defines routes related to packages and ordering
 fun Route.packagesRoutes() {
+    val packageRepository = PackageRepository()
+    val promoCodeRepository = PromoCodeRepository()
+
     route("/api/packages") {
         // GET /api/packages/types
         get("/types") {
-            // Return the list of mock package types
-            call.respond(HttpStatusCode.OK, mockPackageTypes)
+            // Get all package types from the database
+            val packageTypes = packageRepository.getAllPackageTypes()
+            call.respond(HttpStatusCode.OK, packageTypes)
         }
 
         // GET /api/packages/{packageTypeId}/options
@@ -26,14 +28,19 @@ fun Route.packagesRoutes() {
             // Extract the package type ID from the path parameters
             val packageTypeId = call.parameters["packageTypeId"]
 
-            // Find the options for the given package type ID in mock data
-            val options = mockPackageOptions[packageTypeId]
+            if (packageTypeId == null) {
+                call.respond(HttpStatusCode.BadRequest, ApiResponse(success = false, message = "Package type ID is required"))
+                return@get
+            }
+
+            // Get package options from the database
+            val options = packageRepository.getPackageOptions(packageTypeId)
 
             if (options != null) {
                 // Return the package options if found
                 call.respond(HttpStatusCode.OK, options)
             } else {
-                // Return 404 Not Found if package type options are not in mock data
+                // Return 404 Not Found if package type options are not found
                 call.respond(HttpStatusCode.NotFound, ApiResponse(success = false, message = "Package type options not found"))
             }
         }
@@ -50,8 +57,8 @@ fun Route.packagesRoutes() {
                 return@post
             }
 
-            // Find the promo code in mock data
-            val promoCode = mockPromoCodes.find { it.code == validateRequest.promoCode }
+            // Find the promo code in the database
+            val promoCode = promoCodeRepository.findPromoCodeByCode(validateRequest.promoCode)
 
             if (promoCode != null) {
                 // Return validation success with discount details

@@ -78,6 +78,25 @@ object Schema {
                 """).execute()
 
                 connection.prepareStatement("""
+                    CREATE TABLE IF NOT EXISTS package_types (
+                        id VARCHAR(50) PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL
+                    )
+                """).execute()
+
+                connection.prepareStatement("""
+                    CREATE TABLE IF NOT EXISTS package_options (
+                        id SERIAL PRIMARY KEY,
+                        package_type_id VARCHAR(50) REFERENCES package_types(id),
+                        option_type VARCHAR(50) NOT NULL,
+                        option_id VARCHAR(50) NOT NULL,
+                        name VARCHAR(255) NOT NULL,
+                        price DECIMAL(10,2) NOT NULL,
+                        UNIQUE(package_type_id, option_type, option_id)
+                    )
+                """).execute()
+
+                connection.prepareStatement("""
                     CREATE TABLE IF NOT EXISTS promo_codes (
                         code VARCHAR(20) PRIMARY KEY,
                         discount DECIMAL(5,2) NOT NULL,
