@@ -11,7 +11,8 @@ fun Application.configureCORS() {
         // Replace "localhost:8000" with the actual host and port of your frontend
         // You can add multiple origins.
         // The scheme (http/https) is now specified in the 'schemes' parameter.
-        allowHost("localhost:8001", schemes = listOf("http"), subDomains = listOf("www")) // Corrected allowHost call
+        allowHost("localhost:8081", schemes = listOf("http"))
+        allowHost("0.0.0.0:8081", schemes = listOf("http"))
         // Or for development, allow any host (less secure in production)
         // anyHost()
 

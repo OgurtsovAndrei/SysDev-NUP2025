@@ -1,32 +1,48 @@
 // Usage page functions
-function initializeUsagePage() {
+import { getUserUsage } from './model.js';
+
+// Global variable to store usage data
+let usageData = null;
+
+// Define the initializeUsagePage function
+async function initializeUsagePage() {
   if (!document.getElementById('packageSections')) return; // Not on usage page
 
-  // Display billing cycle dates
-  const currentCycle = mockData.usageData.currentBillingCycle;
-  document.getElementById('billingCycleDates').textContent = 
-    `${currentCycle.startDate} to ${currentCycle.endDate}`;
+  try {
+    // Fetch usage data from API
+    usageData = await getUserUsage();
 
-  // Get the container for package sections
-  const packageSectionsContainer = document.getElementById('packageSections');
-  packageSectionsContainer.innerHTML = ''; // Clear any existing content
+    // Display billing cycle dates
+    const currentCycle = usageData.currentBillingCycle;
+    document.getElementById('billingCycleDates').textContent = 
+      `${currentCycle.startDate} to ${currentCycle.endDate}`;
 
-  // Get user packages
-  const userPackages = mockData.userInfo.packages;
+    // Get the container for package sections
+    const packageSectionsContainer = document.getElementById('packageSections');
+    packageSectionsContainer.innerHTML = ''; // Clear any existing content
 
-  // Create a section for each package
-  userPackages.forEach(package => {
-    // Create package section
-    const packageSection = createPackageSection(package);
-    packageSectionsContainer.appendChild(packageSection);
-  });
+    // Get user packages
+    const userPackages = mockData.userInfo.packages;
 
-  // Populate previous billing cycles table
-  populatePreviousCycles();
+    // Create a section for each package
+    userPackages.forEach(pkg => {
+      // Create package section
+      const packageSection = createPackageSection(pkg);
+      packageSectionsContainer.appendChild(packageSection);
+    });
+
+    // Populate previous billing cycles table
+    populatePreviousCycles();
+  } catch (error) {
+    console.error('Failed to load usage data:', error);
+    // Display error message to user
+    const packageSectionsContainer = document.getElementById('packageSections');
+    packageSectionsContainer.innerHTML = '<div class="alert alert-danger">Failed to load usage data. Please try again later.</div>';
+  }
 }
 
 // Create a section for a package
-function createPackageSection(package) {
+function createPackageSection(pkg) {
   // Create the package section container
   const packageSection = document.createElement('div');
   packageSection.className = 'mb-5';
@@ -36,29 +52,29 @@ function createPackageSection(package) {
   packageHeader.className = 'mb-3';
 
   // Get a user-friendly package type name
-  let packageTypeName = package.type;
-  const packageTypeObj = mockData.packageTypes.find(pt => pt.id === package.type);
+  let packageTypeName = pkg.type;
+  const packageTypeObj = mockData.packageTypes.find(pt => pt.id === pkg.type);
   if (packageTypeObj) {
     packageTypeName = packageTypeObj.name;
   }
 
   packageHeader.innerHTML = `
-    <h3>${package.name}</h3>
-    <p class="text-muted">${packageTypeName} ${package.addOns && package.addOns.length > 0 ? '• ' + package.addOns.join(', ') : ''}</p>
+    <h3>${pkg.name}</h3>
+    <p class="text-muted">${packageTypeName} ${pkg.addOns && pkg.addOns.length > 0 ? '• ' + pkg.addOns.join(', ') : ''}</p>
   `;
   packageSection.appendChild(packageHeader);
 
   // Get usage data for this package
-  const packageUsage = mockData.usageData.currentBillingCycle.packages[package.id];
+  const packageUsage = usageData.currentBillingCycle.packages[pkg.id];
 
   // Create usage cards based on package type
-  if (package.type === 'mobile_combo') {
+  if (pkg.type === 'mobile_combo') {
     packageSection.appendChild(createMobileComboUsageCards(packageUsage));
-  } else if (package.type === 'mobile_hotspot') {
+  } else if (pkg.type === 'mobile_hotspot') {
     packageSection.appendChild(createMobileHotspotUsageCards(packageUsage));
-  } else if (package.type === 'mobile_no_hotspot') {
+  } else if (pkg.type === 'mobile_no_hotspot') {
     packageSection.appendChild(createMobileNoHotspotUsageCards(packageUsage));
-  } else if (package.type === 'home_internet') {
+  } else if (pkg.type === 'home_internet') {
     packageSection.appendChild(createHomeInternetUsageCards(packageUsage));
   }
 
@@ -230,7 +246,7 @@ function calculatePercentage(used, total) {
 }
 
 function populatePreviousCycles() {
-  const previousCycles = mockData.usageData.previousBillingCycles;
+  const previousCycles = usageData.previousBillingCycles;
   const tableBody = document.getElementById('previousCyclesTable');
   const userPackages = mockData.userInfo.packages;
 
@@ -242,9 +258,9 @@ function populatePreviousCycles() {
   tableHead.innerHTML = '<th>Period</th>';
 
   // Add headers for each package
-  userPackages.forEach(package => {
+  userPackages.forEach(pkg => {
     const packageHeader = document.createElement('th');
-    packageHeader.textContent = package.name;
+    packageHeader.textContent = pkg.name;
     tableHead.appendChild(packageHeader);
   });
 
@@ -258,23 +274,23 @@ function populatePreviousCycles() {
     row.appendChild(periodCell);
 
     // Add data for each package
-    userPackages.forEach(package => {
-      const packageData = cycle.packages[package.id];
+    userPackages.forEach(pkg => {
+      const packageData = cycle.packages[pkg.id];
       const packageCell = document.createElement('td');
 
       if (packageData) {
-        if (package.type === 'mobile_combo') {
+        if (pkg.type === 'mobile_combo') {
           packageCell.innerHTML = `
             <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
             <div><strong>Calls:</strong> ${packageData.callMinutesUsed} minutes${packageData.callMinutesTotal ? ' / ' + packageData.callMinutesTotal + ' minutes' : ''}</div>
             <div><strong>SMS:</strong> ${packageData.smsUsed} messages${packageData.smsTotal ? ' / ' + packageData.smsTotal + ' messages' : ''}</div>
           `;
-        } else if (package.type === 'mobile_hotspot' || package.type === 'mobile_no_hotspot') {
+        } else if (pkg.type === 'mobile_hotspot' || pkg.type === 'mobile_no_hotspot') {
           packageCell.innerHTML = `
             <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
-            <div><strong>Hotspot:</strong> ${package.type === 'mobile_hotspot' ? 'Enabled' : 'Disabled'}</div>
+            <div><strong>Hotspot:</strong> ${pkg.type === 'mobile_hotspot' ? 'Enabled' : 'Disabled'}</div>
           `;
-        } else if (package.type === 'home_internet') {
+        } else if (pkg.type === 'home_internet') {
           packageCell.innerHTML = `
             <div><strong>Data:</strong> ${packageData.dataUsed.toFixed(1)} GB / ${packageData.dataTotal} GB</div>
             ${packageData.downloadSpeed ? `<div><strong>Speed:</strong> ${packageData.downloadSpeed} down / ${packageData.uploadSpeed} up</div>` : ''}
@@ -295,3 +311,6 @@ function populatePreviousCycles() {
     tableBody.appendChild(row);
   });
 }
+
+// Expose the initializeUsagePage function to the global scope
+window.initializeUsagePage = initializeUsagePage;
