@@ -15,6 +15,7 @@ import kotlin.reflect.KClass
 /**
  * Repository for usage data-related database operations
  */
+
 class UsageRepository {
     private val database = DatabaseFactory.getInstance()
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -240,7 +241,7 @@ class UsageRepository {
         when (orderRequest.packageType) {
             "home_internet" -> {
                 // Home internet packages have unlimited data
-                dataTotal = BigDecimal("Unlimited".hashCode().toString())
+                dataTotal = BigDecimal(99999)
                 callMinutesTotal = null
                 smsTotal = null
                 // Upload speed is typically 1/5 of download speed for home internet
@@ -258,7 +259,7 @@ class UsageRepository {
                         "10gb" -> BigDecimal("10")
                         "20gb" -> BigDecimal("20")
                         "50gb" -> BigDecimal("50")
-                        "unlimited" -> BigDecimal("Unlimited".hashCode().toString())
+                        "unlimited" -> BigDecimal(99999)
                         else -> BigDecimal("0")
                     }
                 } ?: BigDecimal("0")
@@ -274,7 +275,7 @@ class UsageRepository {
                     planInfo?.contains("basic") == true -> BigDecimal("5")
                     planInfo?.contains("standard") == true -> BigDecimal("20")
                     planInfo?.contains("premium") == true -> BigDecimal("50")
-                    planInfo?.contains("unlimited") == true -> BigDecimal(Int.MAX_VALUE)
+                    planInfo?.contains("unlimited") == true -> BigDecimal(99999)
                     else -> BigDecimal("0")
                 }
                 callMinutesTotal = when {
@@ -304,7 +305,7 @@ class UsageRepository {
                 userId = userId,
                 package_ = package_,
                 billingCycleStart = date,
-                billingCycleEnd = LocalDate.of(date.year, date.month, date.lengthOfMonth()),
+                billingCycleEnd = LocalDate.ofYearDay(date.year, date.dayOfYear + 30),
                 dataUsed = BigDecimal("0"),
                 dataTotal = dataTotal,
                 callMinutesUsed = 0,
@@ -351,5 +352,17 @@ class UsageRepository {
             set(it.uploadSpeed, uploadSpeed)
             set(it.devices, devices)
         }
+    }
+
+    /**
+     * Delete a package from usage data
+     */
+    fun deletePackage(userId: String, packageId: String): Boolean {
+        // Delete the usage data for the package
+        val deletedRows = database.delete(UsageDataTable) {
+            (it.userId eq userId) and (it.packageId eq packageId)
+        }
+
+        return deletedRows > 0
     }
 }

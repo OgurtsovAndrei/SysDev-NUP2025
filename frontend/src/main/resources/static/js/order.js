@@ -509,7 +509,13 @@ async function submitOrder() {
     // Prepare order details for API
     const orderDetails = {
       packageType: currentOrder.packageType,
-      options: {},
+      options: {
+        speed: '',
+        router: '',
+        dataPlan: '',
+        plan: '',
+        addOns: []
+      },
       promoCode: currentOrder.promoCode || ''
     };
 
@@ -537,6 +543,7 @@ async function submitOrder() {
     }
 
     // Submit order to API
+    console.log(`Before call: ${orderDetails}`);
     const response = await submitOrderAPI(orderDetails);
 
     if (response.success) {
@@ -552,8 +559,8 @@ async function submitOrder() {
     }
   } catch (error) {
     console.error('Failed to submit order:', error);
-    // Navigate to home page instead of showing error
-    window.location.href = 'index.html';
+    // // Navigate to home page instead of showing error
+    // window.location.href = 'index.html';
   }
 }
 

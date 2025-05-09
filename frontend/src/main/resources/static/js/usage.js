@@ -1,5 +1,5 @@
 // Usage page functions
-import { getUserUsage } from './model.js';
+import { getUserUsage, deletePackage } from './model.js';
 
 // Global variable to store usage data
 let usageData = null;
@@ -31,16 +31,25 @@ async function initializeUsagePage() {
         addOns: [] // API doesn't provide addOns in this context, so use empty array
       };
     });
-    var counter = 0
-    // Create a section for each package
-    userPackages.reverse().forEach(pkg => {
-      // Create package section
-      if (counter !== 0 && pkg.type !== 'home_internet') {
-        return
-      }
+
+    // Filter packages to show only the latest mobile internet package and only the latest home internet package
+    const latestMobilePackage = userPackages.filter(pkg => 
+      pkg.type === 'mobile_combo' || pkg.type === 'mobile_hotspot' || pkg.type === 'mobile_no_hotspot'
+    ).sort((a, b) => b.id.localeCompare(a.id))[0];
+
+    const latestHomePackage = userPackages.filter(pkg => 
+      pkg.type === 'home_internet'
+    ).sort((a, b) => b.id.localeCompare(a.id))[0];
+
+    // Create filtered package list
+    const filteredPackages = [];
+    if (latestMobilePackage) filteredPackages.push(latestMobilePackage);
+    if (latestHomePackage) filteredPackages.push(latestHomePackage);
+
+    // Create a section for each filtered package
+    filteredPackages.forEach(pkg => {
       const packageSection = createPackageSection(pkg);
       packageSectionsContainer.appendChild(packageSection);
-      if (pkg.type !== 'home_internet') {counter++}
     });
 
     // Populate previous billing cycles table
@@ -60,7 +69,7 @@ function createPackageSection(pkg) {
 
   // Create the package header
   const packageHeader = document.createElement('div');
-  packageHeader.className = 'mb-3';
+  packageHeader.className = 'mb-3 d-flex justify-content-between align-items-center';
 
   // Use the package type as the type name (API doesn't provide friendly names)
   let packageTypeName = pkg.type;
@@ -76,10 +85,37 @@ function createPackageSection(pkg) {
     packageTypeName = "Home Internet";
   }
 
-  packageHeader.innerHTML = `
+  // Create the package title and info
+  const packageInfo = document.createElement('div');
+  packageInfo.innerHTML = `
     <h3>${pkg.name}</h3>
     <p class="text-muted">${packageTypeName} ${pkg.addOns && pkg.addOns.length > 0 ? '• ' + pkg.addOns.join(', ') : ''}</p>
   `;
+
+  // Create the delete button
+  const deleteButton = document.createElement('button');
+  deleteButton.className = 'btn btn-danger';
+  deleteButton.innerHTML = '<i class="fas fa-trash"></i> Delete';
+  deleteButton.onclick = async () => {
+    if (confirm(`Are you sure you want to delete the ${pkg.name} package?`)) {
+      try {
+        const response = await deletePackage(pkg.id);
+        if (response.success) {
+          alert('Package deleted successfully. The page will now reload.');
+          window.location.reload();
+        } else {
+          alert(`Failed to delete package: ${response.message}`);
+        }
+      } catch (error) {
+        console.error('Error deleting package:', error);
+        alert('An error occurred while deleting the package. Please try again later.');
+      }
+    }
+  };
+
+  // Add the package info and delete button to the header
+  packageHeader.appendChild(packageInfo);
+  packageHeader.appendChild(deleteButton);
   packageSection.appendChild(packageHeader);
 
   // Get usage data for this package
@@ -267,7 +303,7 @@ function populatePreviousCycles() {
   const previousCycles = usageData.previousBillingCycles;
   const tableBody = document.getElementById('previousCyclesTable');
 
-  // Get user packages from the API response (same as in initializeUsagePage)
+  // Get user packages from the API response
   const userPackages = Object.keys(usageData.currentBillingCycle.packages).map(packageId => {
     const packageData = usageData.currentBillingCycle.packages[packageId];
     return {
@@ -278,15 +314,29 @@ function populatePreviousCycles() {
     };
   });
 
+  // Filter packages to show only the latest mobile internet package and only the latest home internet package
+  const latestMobilePackage = userPackages.filter(pkg => 
+    pkg.type === 'mobile_combo' || pkg.type === 'mobile_hotspot' || pkg.type === 'mobile_no_hotspot'
+  ).sort((a, b) => b.id.localeCompare(a.id))[0];
+
+  const latestHomePackage = userPackages.filter(pkg => 
+    pkg.type === 'home_internet'
+  ).sort((a, b) => b.id.localeCompare(a.id))[0];
+
+  // Create filtered package list
+  const filteredPackages = [];
+  if (latestMobilePackage) filteredPackages.push(latestMobilePackage);
+  if (latestHomePackage) filteredPackages.push(latestHomePackage);
+
   // Clear existing rows
   tableBody.innerHTML = '';
 
-  // Update table headers based on user packages
+  // Update table headers based on filtered packages
   const tableHead = document.querySelector('#previousCyclesTable').parentElement.querySelector('thead tr');
   tableHead.innerHTML = '<th>Period</th>';
 
-  // Add headers for each package
-  userPackages.forEach(pkg => {
+  // Add headers for each filtered package
+  filteredPackages.forEach(pkg => {
     const packageHeader = document.createElement('th');
     packageHeader.textContent = pkg.name;
     tableHead.appendChild(packageHeader);
@@ -301,8 +351,8 @@ function populatePreviousCycles() {
     periodCell.textContent = cycle.period;
     row.appendChild(periodCell);
 
-    // Add data for each package
-    userPackages.forEach(pkg => {
+    // Add data for each filtered package
+    filteredPackages.forEach(pkg => {
       const packageData = cycle.packages[pkg.id];
       const packageCell = document.createElement('td');
 

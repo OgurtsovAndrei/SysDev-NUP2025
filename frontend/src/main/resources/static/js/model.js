@@ -507,6 +507,7 @@ async function submitOrder(orderDetails) {
             headers: getAuthHeaders(), // Placing an order likely requires auth
             body: JSON.stringify(orderDetails)
         });
+        console.log(`After call: ${response}`)
         return handleApiResponse(response);
     } catch (error) {
         console.error('Failed to submit order:', error);
@@ -617,6 +618,25 @@ async function sendChatMessage(messageText) {
     }
 }
 
+/**
+ * Deletes a package from the user's usage data.
+ * @param {string} packageId - The ID of the package to delete.
+ * @returns {Promise<ApiResponse>} A promise that resolves with the API response.
+ * @throws {Error} If the API request fails or returns an error.
+ */
+async function deletePackage(packageId) {
+    try {
+        const response = await fetch(USAGE_ENDPOINTS.DELETE_PACKAGE(packageId), {
+            method: 'DELETE',
+            headers: getAuthHeaders() // Usage data requires auth
+        });
+        return handleApiResponse(response);
+    } catch (error) {
+        console.error(`Failed to delete package ${packageId}:`, error);
+        throw error;
+    }
+}
+
 // Export the API interaction functions
 export {
     loginUser,
@@ -631,6 +651,7 @@ export {
     validatePromoCode,
     submitOrder,
     getUserUsage,
+    deletePackage,
     getFeedbackSummary,
     submitFeedback,
     getChatHistory,

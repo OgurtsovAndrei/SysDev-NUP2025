@@ -33,7 +33,8 @@ const ORDER_ENDPOINTS = {
 
 // Usage Data Endpoints
 const USAGE_ENDPOINTS = {
-    USER_USAGE: `${API_BASE_URL}/user/usage`
+    USER_USAGE: `${API_BASE_URL}/user/usage`,
+    DELETE_PACKAGE: (packageId) => `${API_BASE_URL}/user/usage/${packageId}`
 };
 
 // Feedback Endpoints

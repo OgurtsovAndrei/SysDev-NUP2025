@@ -103,12 +103,6 @@ fun Route.packagesRoutes() {
             // Simulate order processing (replace with actual order creation logic and database insertion)
             val newOrderId = UUID.randomUUID().toString() // Generate a mock order ID
 
-            println("Received new order:")
-            println("  Package Type: ${orderRequest.packageType}")
-            println("  Options: ${orderRequest.options}")
-            println("  Promo Code: ${orderRequest.promoCode ?: "None"}")
-            println("  Mock Order ID: $newOrderId")
-
             // Simulate successful order placement
             call.respond(HttpStatusCode.Created, ApiResponse(success = true, message = "Order placed successfully"))
         }
