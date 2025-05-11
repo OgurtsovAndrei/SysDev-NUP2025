@@ -7,7 +7,7 @@ data class User(
     val id: String,
     val name: String,
     val email: String,
-    val password: String, // In a real app, this would be hashed!
+    val password: String,
     val phone: String,
     val accountNumber: String,
     val accountType: String,
@@ -17,7 +17,6 @@ data class User(
     val billingAddress: Address
 )
 
-// Data class for the Login Request body
 @Serializable
 data class LoginRequest(
     val email: String,
@@ -25,15 +24,13 @@ data class LoginRequest(
     val rememberMe: Boolean
 )
 
-// Data class for the Login Response body
 @Serializable
 data class LoginResponse(
     val success: Boolean,
     val message: String,
-    val token: String? = null // Token is optional (only present on success)
+    val token: String? = null
 )
 
-// Data class for the Register Request body
 @Serializable
 data class RegisterRequest(
     val fullName: String,
@@ -43,14 +40,12 @@ data class RegisterRequest(
     val agreeTerms: Boolean
 )
 
-// Generic API Response data class
 @Serializable
 data class ApiResponse(
     val success: Boolean,
     val message: String
 )
 
-// Data class for the User Profile response
 @Serializable
 data class UserProfile(
     val id: String,
@@ -60,24 +55,22 @@ data class UserProfile(
     val accountNumber: String,
     val accountType: String,
     val registrationDate: String,
-    val packages: List<UserPackage>, // List of packages the user has
+    val packages: List<UserPackage>,
     val paymentMethod: String,
     val billingAddress: Address
 )
 
-// Data class for a User's Package within the profile
 @Serializable
 data class UserPackage(
     val id: String,
-    val type: String, // e.g., "mobile_combo", "home_internet"
+    val type: String,
     val name: String,
-    val plan: String? = null, // Specific plan ID if applicable
-    val speed: String? = null, // Specific speed ID if applicable
-    val router: String? = null, // Specific router ID if applicable
-    val addOns: List<String> = emptyList() // Array of add-on IDs
+    val plan: String? = null,
+    val speed: String? = null,
+    val router: String? = null,
+    val addOns: List<String> = emptyList()
 )
 
-// Data class for an Address
 @Serializable
 data class Address(
     val street: String,
@@ -87,7 +80,6 @@ data class Address(
     val country: String
 )
 
-// Data class for updating User Profile
 @Serializable
 data class UpdateProfileRequest(
     val email: String? = null,
@@ -95,15 +87,12 @@ data class UpdateProfileRequest(
     val billingAddress: Address? = null
 )
 
-
-// Data class for Package Type
 @Serializable
 data class PackageType(
     val id: String,
     val name: String
 )
 
-// Data classes for Package Options (example structures, might need refinement based on mock data)
 @Serializable
 data class PackageOptionsResponse(
     val speeds: List<Option>? = null,
@@ -120,13 +109,11 @@ data class Option(
     val price: Double
 )
 
-// Data class for Promo Code Validation Request
 @Serializable
 data class ValidatePromoCodeRequest(
     val promoCode: String
 )
 
-// Data class for Promo Code Validation Response
 @Serializable
 data class ValidatePromoCodeResponse(
     val valid: Boolean,
@@ -134,7 +121,6 @@ data class ValidatePromoCodeResponse(
     val description: String? = null
 )
 
-// Data class for Order Request
 @Serializable
 data class OrderRequest(
     val packageType: String,
@@ -142,7 +128,6 @@ data class OrderRequest(
     val promoCode: String? = null
 )
 
-// Data class for Order Options within Order Request
 @Serializable
 data class OrderOptions(
     val speed: String? = null,
@@ -152,77 +137,66 @@ data class OrderOptions(
     val addOns: List<String> = emptyList()
 )
 
-// Data class for Usage Data Response
 @Serializable
 data class UsageDataResponse(
     val currentBillingCycle: BillingCycle,
     val previousBillingCycles: List<PreviousBillingCycle>
 )
 
-// Data class for a Billing Cycle
 @Serializable
 data class BillingCycle(
     val startDate: String,
     val endDate: String,
-    val packages: Map<String, PackageUsage> // Map of package ID to usage data
+    val packages: Map<String, PackageUsage>
 )
 
-// Data class for Package Usage within a Billing Cycle
 @Serializable
 data class PackageUsage(
     val type: String,
     val name: String,
     val dataUsed: Double, // GB
     val dataTotal: Double, // GB
-    // Mobile Combo specific
     val callMinutesUsed: Int? = null,
-    val callMinutesTotal: String? = null, // Number or "Unlimited"
+    val callMinutesTotal: String? = null,
     val smsUsed: Int? = null,
-    val smsTotal: String? = null, // Number or "Unlimited"
+    val smsTotal: String? = null,
     // Home Internet specific
     val downloadSpeed: String? = null,
     val uploadSpeed: String? = null,
     val devices: Int? = null
 )
 
-// Data class for a Previous Billing Cycle
 @Serializable
 data class PreviousBillingCycle(
-    val period: String, // e.g., "February 2025"
-    val packages: Map<String, PreviousPackageUsage> // Map of package ID to usage data
+    val period: String,
+    val packages: Map<String, PreviousPackageUsage>
 )
 
-// Data class for Package Usage within a Previous Billing Cycle
 @Serializable
 data class PreviousPackageUsage(
-    val type: String, // Included for context
-    val name: String, // Included for context
+    val type: String,
+    val name: String,
     val dataUsed: Double, // GB
     val dataTotal: Double, // GB
     // Mobile Combo specific
     val callMinutesUsed: Int? = null,
-    val callMinutesTotal: String? = null, // Number or "Unlimited"
+    val callMinutesTotal: String? = null,
     val smsUsed: Int? = null,
-    val smsTotal: String? = null // Number or "Unlimited"
-    // Note: Speed/Devices not in mock for previous cycles
+    val smsTotal: String? = null
 )
 
-// Data class for Chat Message
 @Serializable
 data class ChatMessage(
-    val type: String, // "user" or "operator"
+    val type: String,
     val text: String,
-    val time: String // ISO 8601 timestamp
+    val time: String
 )
 
-// Data class for sending a Chat Message
 @Serializable
 data class SendChatMessageRequest(
     val messageText: String
 )
 
-
-// Data class for Feedback Summary Response
 @Serializable
 data class FeedbackSummary(
     val averageRating: Double,
@@ -230,7 +204,6 @@ data class FeedbackSummary(
     val recentFeedback: List<FeedbackEntry>? = null
 )
 
-// Data class for a Feedback Entry
 @Serializable
 data class FeedbackEntry(
     val id: String,
@@ -238,10 +211,9 @@ data class FeedbackEntry(
     val topic: String,
     val text: String,
     val timestamp: String,
-    val user: String // User identifier
+    val user: String
 )
 
-// Data class for Feedback Submission Request
 @Serializable
 data class SubmitFeedbackRequest(
     val rating: Int,
@@ -249,19 +221,17 @@ data class SubmitFeedbackRequest(
     val text: String
 )
 
-// Data class for Support Ticket
 @Serializable
 data class SupportTicket(
     val id: String,
     val subject: String,
-    val status: String, // e.g., "Open", "Closed"
+    val status: String,
     val createdDate: String,
     val lastUpdated: String,
-    val priority: String, // e.g., "Medium", "High"
-    val resolution: String? = null // Present if status is "Closed"
+    val priority: String,
+    val resolution: String? = null
 )
 
-// Data class for Promo Code
 @Serializable
 data class PromoCode(
     val code: String,
@@ -269,7 +239,6 @@ data class PromoCode(
     val description: String
 )
 
-// Data class for Notification
 @Serializable
 data class Notification(
     val id: String,
@@ -279,7 +248,6 @@ data class Notification(
     val read: Boolean
 )
 
-// Data class for Package Creation Request
 @Serializable
 data class CreatePackageRequest(
     val type: String,
