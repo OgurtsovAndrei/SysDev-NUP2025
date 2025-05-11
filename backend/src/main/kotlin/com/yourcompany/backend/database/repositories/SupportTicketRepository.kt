@@ -19,15 +19,11 @@ class SupportTicketRepository {
      * Get support tickets for a user
      */
     fun getUserSupportTickets(userId: String): List<SupportTicketModel> {
-        // Check if user exists
         val user = database.sequenceOf(Users).firstOrNull { it.id eq userId } ?: return emptyList()
-
-        // Get all support tickets for the user
         val supportTickets = database.sequenceOf(SupportTickets)
             .filter { it.userId eq userId }
             .toList()
 
-        // Convert to model objects
         return supportTickets.map { toModel(it) }
     }
 
@@ -50,18 +46,14 @@ class SupportTicketRepository {
      * Initialize the database with mock support ticket data
      */
     fun initializeMockData() {
-        // Check if we already have support tickets
         val existingSupportTicket = database.sequenceOf(SupportTickets).firstOrNull()
         if (existingSupportTicket != null) {
-            return // Data already initialized
+            return
         }
-
-        // Get the user
         val user = database.sequenceOf(Users).firstOrNull { it.id eq "USR12345" } ?: return
 
-        // Use a transaction to ensure all operations are committed
-        database.useTransaction { transaction ->
-            // Create support tickets
+
+        database.useTransaction { _ ->
             insertSupportTicket(
                 id = "TKT001",
                 user = user,

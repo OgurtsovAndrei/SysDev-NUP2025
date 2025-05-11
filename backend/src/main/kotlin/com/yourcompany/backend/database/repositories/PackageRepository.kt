@@ -81,15 +81,12 @@ class PackageRepository {
      * Initialize the database with mock package data
      */
     fun initializeMockData() {
-        // Check if we already have package types
         val existingPackageType = database.sequenceOf(PackageTypes).firstOrNull()
         if (existingPackageType != null) {
-            return // Data already initialized
+            return
         }
 
-        // Use a transaction to ensure all operations are committed
-        database.useTransaction { transaction ->
-            // Create package types
+        database.useTransaction { _ ->
             val packageTypes = listOf(
                 PackageTypeModel(id = "home_internet", name = "Home Internet (limit only speed)"),
                 PackageTypeModel(id = "mobile_hotspot", name = "Mobile Internet (with hotspot)"),
@@ -104,7 +101,6 @@ class PackageRepository {
                 }
             }
 
-            // Create package options for home_internet
             val homeInternetOptions = mapOf(
                 "speeds" to listOf(
                     Option(id = "basic", name = "Basic (50 Mbps)", price = 29.99),
@@ -124,8 +120,6 @@ class PackageRepository {
             )
 
             insertPackageOptions("home_internet", homeInternetOptions)
-
-            // Create package options for mobile_hotspot
             val mobileHotspotOptions = mapOf(
                 "dataPlans" to listOf(
                     Option(id = "10gb", name = "10GB Data", price = 15.99),
@@ -140,8 +134,6 @@ class PackageRepository {
             )
 
             insertPackageOptions("mobile_hotspot", mobileHotspotOptions)
-
-            // Create package options for mobile_no_hotspot
             val mobileNoHotspotOptions = mapOf(
                 "dataPlans" to listOf(
                     Option(id = "10gb", name = "10GB Data", price = 10.99),
@@ -156,8 +148,6 @@ class PackageRepository {
             )
 
             insertPackageOptions("mobile_no_hotspot", mobileNoHotspotOptions)
-
-            // Create package options for mobile_combo
             val mobileComboOptions = mapOf(
                 "plans" to listOf(
                     Option(id = "basic", name = "Basic (5GB + 100 mins + 100 SMS)", price = 19.99),
@@ -207,12 +197,9 @@ class PackageRepository {
             router = orderRequest.options.router,
             userId = userId
         )
-        // Generate a unique ID for the package
         val packageId = "pkg_${System.currentTimeMillis()}"
 
-        // Use a transaction to ensure all operations are committed
-        database.useTransaction { 
-            // Insert the package
+        database.useTransaction {
             database.insert(Packages) {
                 set(it.id, packageId)
                 set(it.type, request.type)
@@ -222,16 +209,12 @@ class PackageRepository {
                 set(it.router, request.router)
                 set(it.createdAt, Instant.now())
             }
-
-            // Insert add-ons if any
             for (addOn in request.addOns) {
                 database.insert(PackageAddOns) {
                     set(it.packageId, packageId)
                     set(it.addOn, addOn)
                 }
             }
-
-            // Associate with user if userId is provided
             if (request.userId != null) {
                 database.insert(UserPackages) {
                     set(it.userId, request.userId)

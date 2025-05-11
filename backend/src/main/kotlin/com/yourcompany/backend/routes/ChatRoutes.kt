@@ -1,6 +1,6 @@
 package com.yourcompany.backend.routes
 
-import com.yourcompany.backend.data.getChatMessagesForUser
+import com.yourcompany.backend.database.repositories.ChatMessageRepository
 import com.yourcompany.backend.models.ApiResponse
 import com.yourcompany.backend.models.ChatMessage
 import com.yourcompany.backend.models.SendChatMessageRequest
@@ -9,20 +9,20 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.time.Instant // For timestamps
 
-// Defines routes related to the chat/support feature
+private val chatMessageRepository = ChatMessageRepository()
+
+fun getChatMessagesForUser(userId: String): List<ChatMessage> {
+    return chatMessageRepository.getChatMessagesForUser(userId)
+}
+
 fun Route.chatRoutes() {
     route("/api/user") {
         // GET /api/user/chat/history (Optional)
         get("/chat/history") {
-            // In a real application, get the authenticated user ID from the JWT token or session
-            val userId = "USR12345" // Simulate authenticated user ID
+            val userId = call.request.headers["Authorization"]?.split(SAFE_DELIMITER)?.last() ?: "NaN"
 
-            // Get the chat messages for the user from mock data
             val messages = getChatMessagesForUser(userId)
-
-            // Return the chat history
             call.respond(HttpStatusCode.OK, messages)
         }
     }
@@ -30,45 +30,33 @@ fun Route.chatRoutes() {
     route("/api/chat") {
         // POST /api/chat/messages
         post("/messages") {
-            // In a real application, get the authenticated user ID from the JWT token or session
-            val userId = "USR12345" // Simulate authenticated user ID
+            val userId = call.request.headers["Authorization"]?.split(SAFE_DELIMITER)?.last() ?: "NaN"
 
             val messageRequest = try {
-                call.receive<SendChatMessageRequest>() // Receive and deserialize the chat message request
+                call.receive<SendChatMessageRequest>()
             } catch (e: Exception) {
-                // Handle invalid request body
                 call.respond(HttpStatusCode.BadRequest, ApiResponse(success = false, message = "Invalid request body"))
                 return@post
             }
 
-            // Get the chat messages list for the user
-            val userMessages = getChatMessagesForUser(userId)
-
-            // Simulate adding the user message to the chat history
-            val newUserMessage = ChatMessage(
-                type = "user",
+            chatMessageRepository.addChatMessage(
+                userId = userId,
                 text = messageRequest.messageText,
-                time = Instant.now().toString() // Use current timestamp
+                isFromUser = true
             )
-            userMessages.add(newUserMessage)
 
-            // Simulate an operator response (basic keyword matching as in frontend mock)
             val operatorResponseText = simulateOperatorResponse(messageRequest.messageText)
-            val operatorMessage = ChatMessage(
-                type = "operator",
+            chatMessageRepository.addChatMessage(
+                userId = userId,
                 text = operatorResponseText,
-                time = Instant.now().toString() // Use current timestamp
+                isFromUser = false
             )
-            userMessages.add(operatorMessage)
 
-
-            // Simulate successful message sending
             call.respond(HttpStatusCode.OK, ApiResponse(success = true, message = "Message sent"))
         }
     }
 }
 
-// Helper function to simulate operator responses (basic implementation)
 fun simulateOperatorResponse(userMessage: String): String {
     val lowerMessage = userMessage.toLowerCase()
     return when {
@@ -93,7 +81,7 @@ fun simulateOperatorResponse(userMessage: String): String {
                 "Let me check that for you. Is there anything else you need help with?",
                 "I'd be happy to help with that. Could you provide more details?"
             )
-            defaultResponses.random() // Select a random default response
+            defaultResponses.random()
         }
     }
 }

@@ -46,10 +46,7 @@ class UserRepository {
         billingAddress: AddressModel
     ): User? {
         var addressId: Int? = null
-
-        // Use a transaction to ensure all operations are committed
-        database.useTransaction { transaction ->
-            // First create the address
+        database.useTransaction { _ ->
             addressId = database.insertAndGenerateKey(Addresses) {
                 set(it.street, billingAddress.street)
                 set(it.city, billingAddress.city)
@@ -58,12 +55,11 @@ class UserRepository {
                 set(it.country, billingAddress.country)
             } as Int
 
-            // Then create the user with a reference to the address
             database.insert(Users) {
                 set(it.id, id)
                 set(it.name, name)
                 set(it.email, email)
-                set(it.password, password) // In a real app, this would be hashed
+                set(it.password, password)
                 set(it.phone, phone)
                 set(it.accountNumber, accountNumber)
                 set(it.accountType, accountType)
@@ -86,19 +82,14 @@ class UserRepository {
         billingAddress: AddressModel? = null
     ): Boolean {
         val user = findUserById(id) ?: return false
-
-        // Use a transaction to ensure all operations are committed
         var result = false
-        database.useTransaction { transaction ->
-            // Update user fields
+        database.useTransaction { _ ->
             if (email != null) {
                 user.email = email
             }
             if (paymentMethod != null) {
                 user.paymentMethod = paymentMethod
             }
-
-            // Update billing address if provided
             if (billingAddress != null) {
                 val address = user.billingAddress
                 address.street = billingAddress.street
@@ -127,18 +118,13 @@ class UserRepository {
             .map { row ->
                 val packageId = row[Packages.id]!!
                 val package_ = database.sequenceOf(Packages).first { it.id eq packageId }
-
-                // Get add-ons for this package
                 val addOns = database
                     .from(PackageAddOns)
                     .select(PackageAddOns.addOn)
                     .where { PackageAddOns.packageId eq packageId }
                     .map { it[PackageAddOns.addOn]!! }
                     .toList()
-
-                // Set add-ons on the package
                 package_.addOns = addOns
-
                 package_
             }
     }
@@ -184,15 +170,12 @@ class UserRepository {
      * Initialize the database with mock data
      */
     fun initializeMockData() {
-        // Check if we already have users
         val existingUser = findUserById("USR12345")
         if (existingUser != null) {
-            return // Data already initialized
+            return
         }
 
-        // Use a transaction to ensure all operations are committed
-        database.useTransaction { transaction ->
-            // Create mock user
+        database.useTransaction { _ ->
             val user = createUser(
                 id = "USR12345",
                 name = "John Doe",
@@ -211,8 +194,6 @@ class UserRepository {
                     country = "USA"
                 )
             )
-
-            // Create packages
             val package1Id = "PKG002"
             val package2Id = "PKG005"
 
@@ -231,7 +212,6 @@ class UserRepository {
                 set(it.router, "premium")
             }
 
-            // Associate packages with user
             database.insert(UserPackages) {
                 set(it.userId, "USR12345")
                 set(it.packageId, package1Id)
@@ -242,7 +222,6 @@ class UserRepository {
                 set(it.packageId, package2Id)
             }
 
-            // Add add-ons to packages
             database.insert(PackageAddOns) {
                 set(it.packageId, package1Id)
                 set(it.addOn, "landline")

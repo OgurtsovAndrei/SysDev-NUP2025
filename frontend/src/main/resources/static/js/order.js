@@ -549,6 +549,7 @@ async function submitOrder() {
     if (response.success) {
       // Show success message
       alert(`Your order has been placed! Order ID: ${response.orderId}`);
+      window.location.href = 'index.html';
 
       // Reset form (optional)
       // resetOrderForm();

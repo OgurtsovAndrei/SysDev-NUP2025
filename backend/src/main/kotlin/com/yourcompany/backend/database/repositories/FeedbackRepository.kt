@@ -20,20 +20,13 @@ class FeedbackRepository {
      * Get feedback summary
      */
     fun getFeedbackSummary(): FeedbackSummary {
-        // Get all feedback entries
         val feedbackEntries = database.sequenceOf(Feedbacks).toList()
-
-        // Calculate average rating
         val averageRating = if (feedbackEntries.isNotEmpty()) {
             feedbackEntries.map { it.rating }.average()
         } else {
             0.0
         }
-
-        // Get total number of reviews
         val totalReviews = feedbackEntries.size
-
-        // Get recent feedback entries (up to 10)
         val recentFeedback = feedbackEntries
             .sortedByDescending { it.timestamp }
             .take(10)
@@ -50,10 +43,8 @@ class FeedbackRepository {
      * Submit feedback
      */
     fun submitFeedback(request: SubmitFeedbackRequest, userName: String = "Anonymous"): String {
-        // Generate a unique ID for the feedback
         val feedbackId = "FB" + UUID.randomUUID().toString().substring(0, 8)
 
-        // Insert the feedback into the database
         database.insert(Feedbacks) {
             set(it.id, feedbackId)
             set(it.rating, request.rating)
@@ -84,15 +75,12 @@ class FeedbackRepository {
      * Initialize the database with mock feedback data
      */
     fun initializeMockData() {
-        // Check if we already have feedback entries
         val existingFeedback = database.sequenceOf(Feedbacks).firstOrNull()
         if (existingFeedback != null) {
-            return // Data already initialized
+            return
         }
 
-        // Use a transaction to ensure all operations are committed
         database.useTransaction { transaction ->
-            // Create feedback entries
             insertFeedback(
                 id = "FB001",
                 rating = 5,

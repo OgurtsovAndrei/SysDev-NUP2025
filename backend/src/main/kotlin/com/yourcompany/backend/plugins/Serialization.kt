@@ -9,8 +9,8 @@ import kotlinx.serialization.json.Json
 fun Application.configureSerialization() {
     install(ContentNegotiation) {
         json(Json {
-            prettyPrint = true // Pretty print JSON responses for readability
-            isLenient = true // Be lenient with JSON parsing (useful during development)
+            prettyPrint = true
+            isLenient = true
         })
     }
 }

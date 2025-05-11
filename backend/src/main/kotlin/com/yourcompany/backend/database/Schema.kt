@@ -1,8 +1,6 @@
 package com.yourcompany.backend.database
 
 import io.ktor.server.application.*
-import org.ktorm.database.Database
-import org.ktorm.support.postgresql.PostgreSqlDialect
 
 /**
  * Database schema initialization
@@ -16,9 +14,7 @@ object Schema {
 
         application.log.info("Initializing database schema")
 
-        // Create tables if they don't exist
         database.useConnection { connection ->
-            // Set auto-commit to true for schema creation
             val originalAutoCommit = connection.autoCommit
             connection.autoCommit = true
 
@@ -168,7 +164,6 @@ object Schema {
                     )
                 """).execute()
             } finally {
-                // Restore original auto-commit setting
                 connection.autoCommit = originalAutoCommit
             }
         }

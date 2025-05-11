@@ -15,13 +15,13 @@ import io.ktor.server.http.content.staticResources
 fun Application.configureRouting() {
     routing {
         // Include route definitions from separate files
-        authRoutes() // Authentication routes
-        userProfileRoutes() // User Profile routes
-         packagesRoutes() // Uncomment when you create this file
-         usageRoutes() // Uncomment when you create this file
-         chatRoutes() // Uncomment when you create this file
-         feedbackRoutes() // Uncomment when you create this file
-         otherUserDataRoutes() // Uncomment when you create this file
+        authRoutes()
+        userProfileRoutes()
+         packagesRoutes()  
+         usageRoutes()  
+         chatRoutes()  
+         feedbackRoutes()  
+         otherUserDataRoutes()  
 
         staticResources("/", "static") {
             application.log.info("Serving static content from classpath:static")

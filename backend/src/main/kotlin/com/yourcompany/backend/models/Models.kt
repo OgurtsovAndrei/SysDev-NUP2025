@@ -273,7 +273,7 @@ data class PromoCode(
 @Serializable
 data class Notification(
     val id: String,
-    val type: String, // e.g., "billing", "promotion", "usage"
+    val type: String,
     val message: String,
     val date: String,
     val read: Boolean
@@ -282,11 +282,11 @@ data class Notification(
 // Data class for Package Creation Request
 @Serializable
 data class CreatePackageRequest(
-    val type: String, // e.g., "mobile_combo", "home_internet"
+    val type: String,
     val name: String,
-    val plan: String? = null, // Specific plan ID if applicable
-    val speed: String? = null, // Specific speed ID if applicable
-    val router: String? = null, // Specific router ID if applicable
-    val addOns: List<String> = emptyList(), // Array of add-on IDs
-    val userId: String? = null // Optional user ID to associate the package with
+    val plan: String? = null,
+    val speed: String? = null,
+    val router: String? = null,
+    val addOns: List<String> = emptyList(),
+    val userId: String? = null
 )

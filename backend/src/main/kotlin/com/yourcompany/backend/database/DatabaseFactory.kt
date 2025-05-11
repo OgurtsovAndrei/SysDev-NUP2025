@@ -32,7 +32,7 @@ object DatabaseFactory {
             this.username = username
             this.password = password
             this.maximumPoolSize = poolSize
-            this.isAutoCommit = true // Set to true for better compatibility with Ktorm
+            this.isAutoCommit = true
             this.transactionIsolation = "TRANSACTION_REPEATABLE_READ"
             this.validate()
         }

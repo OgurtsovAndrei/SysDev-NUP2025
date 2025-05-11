@@ -22,25 +22,19 @@ fun Route.authRoutes() {
         // POST /api/auth/login
         post("/login") {
             val loginRequest = try {
-                call.receive<LoginRequest>() // Receive and deserialize the login request body
+                call.receive<LoginRequest>()
             } catch (e: Exception) {
-                // Handle invalid request body
                 call.respond(HttpStatusCode.BadRequest, ApiResponse(success = false, message = "Invalid request body"))
                 return@post
             }
-
-            // Find user by email
             val user = userRepository.findUserByEmail(loginRequest.email)
 
             if (user != null && user.password == loginRequest.password) {
-                // Successful login
-                // In a real application, generate and return a JWT token here
                 val token = "simulated_jwt_token_for_${user.id}"
                 call.respond(HttpStatusCode.OK,
                     LoginResponse(success = true, message = "Login successful", token = token)
                 )
             } else {
-                // Failed login
                 call.respond(HttpStatusCode.Unauthorized,
                     ApiResponse(success = false, message = "Invalid email or password")
                 )
@@ -50,14 +44,12 @@ fun Route.authRoutes() {
         // POST /api/auth/register
         post("/register") {
             val registerRequest = try {
-                call.receive<RegisterRequest>() // Receive and deserialize the registration request body
+                call.receive<RegisterRequest>()
             } catch (e: Exception) {
-                // Handle invalid request body
                 call.respond(HttpStatusCode.BadRequest, ApiResponse(success = false, message = "Invalid request body"))
                 return@post
             }
 
-            // Basic validation (more robust validation needed in a real app)
             if (registerRequest.password != registerRequest.confirmPassword) {
                 call.respond(HttpStatusCode.BadRequest,
                     ApiResponse(success = false, message = "Passwords do not match")
@@ -71,34 +63,28 @@ fun Route.authRoutes() {
                 return@post
             }
 
-            // Check if email already exists
             if (userRepository.findUserByEmail(registerRequest.email) != null) {
                 call.respond(HttpStatusCode.Conflict, ApiResponse(success = false, message = "Email already exists"))
                 return@post
             }
 
-            // Generate a unique user ID
             val userId = "USR${System.currentTimeMillis()}"
-
-            // Create the user in the database
             val newUser = userRepository.createUser(
                 id = userId,
                 name = registerRequest.fullName,
                 email = registerRequest.email,
-                password = registerRequest.password, // In a real app, hash the password!
-                phone = "", // Default empty
-                accountNumber = "ACC${System.currentTimeMillis()}", // Simple account number
-                accountType = "Basic", // Default type
+                password = registerRequest.password,
+                phone = "",
+                accountNumber = "ACC${System.currentTimeMillis()}",
+                accountType = "Basic",
                 registrationDate = LocalDate.now().toString(),
-                paymentMethod = "", // Default empty
-                billingAddress = Address("", "", "", "", "") // Default empty address
+                paymentMethod = "",
+                billingAddress = Address("", "", "", "", "")
             )
 
             if (newUser != null) {
-                // Successful registration
                 call.respond(HttpStatusCode.Created, ApiResponse(success = true, message = "Registration successful"))
             } else {
-                // Failed registration
                 call.respond(HttpStatusCode.InternalServerError, ApiResponse(success = false, message = "Failed to create user"))
             }
         }

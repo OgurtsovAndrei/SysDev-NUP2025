@@ -19,10 +19,7 @@ class NotificationRepository {
      * Get notifications for a user
      */
     fun getUserNotifications(userId: String): List<NotificationModel> {
-        // Check if user exists
         val user = database.sequenceOf(Users).firstOrNull { it.id eq userId } ?: return emptyList()
-
-        // Get all notifications for the user
         val notifications = database.sequenceOf(Notifications)
             .filter { it.userId eq userId }
             .toList()
@@ -35,14 +32,10 @@ class NotificationRepository {
      * Mark a notification as read
      */
     fun markNotificationAsRead(userId: String, notificationId: String): Boolean {
-        // Check if user exists
         val user = database.sequenceOf(Users).firstOrNull { it.id eq userId } ?: return false
-
-        // Find the notification
         val notification = database.sequenceOf(Notifications)
             .firstOrNull { (it.userId eq userId) and (it.id eq notificationId) } ?: return false
 
-        // Mark as read
         notification.read = true
         return notification.flushChanges() > 0
     }
@@ -64,18 +57,13 @@ class NotificationRepository {
      * Initialize the database with mock notification data
      */
     fun initializeMockData() {
-        // Check if we already have notifications
         val existingNotification = database.sequenceOf(Notifications).firstOrNull()
         if (existingNotification != null) {
             return // Data already initialized
         }
-
-        // Get the user
         val user = database.sequenceOf(Users).firstOrNull { it.id eq "USR12345" } ?: return
 
-        // Use a transaction to ensure all operations are committed
         database.useTransaction { transaction ->
-            // Create notifications
             insertNotification(
                 id = "NTF001",
                 user = user,

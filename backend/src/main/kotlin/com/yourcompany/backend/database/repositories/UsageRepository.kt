@@ -24,9 +24,6 @@ class UsageRepository {
      * Get usage data for a user
      */
     fun getUserUsageData(userId: String): UsageDataResponse? {
-        // Check if user exists
-
-        // Get all usage data for the user
         val usageDataList = database.sequenceOf(UsageDataTable)
             .filter { it.userId eq userId }
             .sortedByDescending { it.billingCycleEnd }
@@ -35,20 +32,12 @@ class UsageRepository {
         if (usageDataList.isEmpty()) {
             return null
         }
-
-        // Group usage data by billing cycle
         val groupedByBillingCycle = usageDataList.groupBy { 
             "${it.billingCycleStart.format(formatter)}_${it.billingCycleEnd.format(formatter)}" 
         }
-
-        // Get current billing cycle (the most recent one)
         val currentBillingCycleKey = groupedByBillingCycle.keys.first()
         val currentBillingCycleData = groupedByBillingCycle[currentBillingCycleKey] ?: return null
-
-        // Create current billing cycle
         val currentBillingCycle = createBillingCycle(currentBillingCycleData)
-
-        // Create previous billing cycles
         val previousBillingCycles = groupedByBillingCycle.entries
             .filter { it.key != currentBillingCycleKey }
             .map { createPreviousBillingCycle(it.value) }
@@ -64,11 +53,8 @@ class UsageRepository {
      * Create a BillingCycle from a list of UsageData
      */
     private fun createBillingCycle(usageDataList: List<UsageData>): BillingCycle {
-        // All usage data in the list should have the same billing cycle start and end dates
         val startDate = usageDataList.first().billingCycleStart.format(formatter)
         val endDate = usageDataList.first().billingCycleEnd.format(formatter)
-
-        // Group usage data by package
         val packageUsages = usageDataList.associate { usageData ->
             usageData.package_.id to createPackageUsage(usageData)
         }
@@ -103,14 +89,9 @@ class UsageRepository {
      * Create a PreviousBillingCycle from a list of UsageData
      */
     private fun createPreviousBillingCycle(usageDataList: List<UsageData>): PreviousBillingCycle {
-        // All usage data in the list should have the same billing cycle start and end dates
         val startDate = usageDataList.first().billingCycleStart
         val endDate = usageDataList.first().billingCycleEnd
-
-        // Format period as "Month Year"
         val period = "${startDate.month.name.lowercase().capitalize()} ${startDate.year}"
-
-        // Group usage data by package
         val packageUsages = usageDataList.associate { usageData ->
             usageData.package_.id to createPreviousPackageUsage(usageData)
         }
@@ -141,20 +122,15 @@ class UsageRepository {
      * Initialize the database with mock usage data
      */
     fun initializeMockData() {
-        // Check if we already have usage data
         val existingUsageData = database.sequenceOf(UsageDataTable).firstOrNull()
         if (existingUsageData != null) {
-            return // Data already initialized
+            return
         }
-
-        // Get the user and packages
         val userId = database.sequenceOf(Users).firstOrNull { it.id eq "USR12345" }?.id ?: return
         val package1 = database.sequenceOf(Packages).firstOrNull { it.id eq "PKG002" } ?: return
         val package2 = database.sequenceOf(Packages).firstOrNull { it.id eq "PKG005" } ?: return
 
-        // Use a transaction to ensure all operations are committed
-        database.useTransaction { transaction ->
-            // Current billing cycle (March 2025)
+        database.useTransaction { _ ->
             insertUsageData(
                 userId = userId,
                 package_ = package1,
@@ -180,7 +156,6 @@ class UsageRepository {
                 devices = 8
             )
 
-            // Previous billing cycle (February 2025)
             insertUsageData(
                 userId = userId,
                 package_ = package1,
@@ -203,7 +178,6 @@ class UsageRepository {
                 dataTotal = BigDecimal("500.0")
             )
 
-            // Previous billing cycle (January 2025)
             insertUsageData(
                 userId = userId,
                 package_ = package1,
@@ -231,8 +205,6 @@ class UsageRepository {
     fun createAndInsertNewOrderData(userId: String, packageId: String, orderRequest: OrderRequest) {
         val package_ = database.sequenceOf(Packages).firstOrNull { it.id eq packageId } ?: return
         val date = LocalDate.now()
-
-        // Extract data based on package type
         val dataTotal: BigDecimal
         val callMinutesTotal: String?
         val smsTotal: String?
@@ -240,11 +212,9 @@ class UsageRepository {
 
         when (orderRequest.packageType) {
             "home_internet" -> {
-                // Home internet packages have unlimited data
                 dataTotal = BigDecimal(99999)
                 callMinutesTotal = null
                 smsTotal = null
-                // Upload speed is typically 1/5 of download speed for home internet
                 uploadSpeed = package_.speed?.let { speed ->
                     val downloadSpeedValue = speed.split(" ")[0].toDoubleOrNull()
                     val unit = speed.split(" ").getOrNull(1) ?: "Mbps"
@@ -253,7 +223,6 @@ class UsageRepository {
                 }
             }
             "mobile_hotspot", "mobile_no_hotspot" -> {
-                // Extract data plan information
                 dataTotal = orderRequest.options.dataPlan?.let { dataPlanId ->
                     when (dataPlanId) {
                         "10gb" -> BigDecimal("10")
@@ -268,7 +237,6 @@ class UsageRepository {
                 uploadSpeed = null
             }
             "mobile_combo" -> {
-                // Extract plan information
                 val planInfo = orderRequest.options.plan
                 println(orderRequest.options.plan)
                 dataTotal = when {
@@ -314,7 +282,7 @@ class UsageRepository {
                 smsTotal = smsTotal,
                 downloadSpeed = package_.speed,
                 uploadSpeed = uploadSpeed,
-                devices = 1 // Default to 1 device for new orders
+                devices = 1
             )
         }
     }
@@ -358,7 +326,6 @@ class UsageRepository {
      * Delete a package from usage data
      */
     fun deletePackage(userId: String, packageId: String): Boolean {
-        // Delete the usage data for the package
         val deletedRows = database.delete(UsageDataTable) {
             (it.userId eq userId) and (it.packageId eq packageId)
         }

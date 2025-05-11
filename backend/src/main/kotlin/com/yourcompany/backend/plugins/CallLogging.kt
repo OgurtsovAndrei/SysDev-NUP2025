@@ -7,7 +7,6 @@ import org.slf4j.event.Level
 // Configures call logging to log incoming requests
 fun Application.configureCallLogging() {
     install(CallLogging) {
-        level = Level.INFO // Log requests at INFO level
-        // You can add filters or specify headers to log here
+        level = Level.INFO
     }
 }

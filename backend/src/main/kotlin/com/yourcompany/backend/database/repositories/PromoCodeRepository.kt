@@ -38,18 +38,16 @@ class PromoCodeRepository {
      * Initialize the database with mock promo code data
      */
     fun initializeMockData() {
-        // Check if we already have promo codes
         val existingPromoCode = database.sequenceOf(PromoCodes).firstOrNull()
         if (existingPromoCode != null) {
-            return // Data already initialized
+            return
         }
 
-        // Use a transaction to ensure all operations are committed
-        database.useTransaction { transaction ->
-            // Create promo codes
+        database.useTransaction { _ ->
             val promoCodes = listOf(
                 PromoCodeModel(code = "WELCOME10", discount = 0.1, description = "10% off for new customers"),
                 PromoCodeModel(code = "LOYALTY25", discount = 0.25, description = "25% off for loyal customers"),
+                PromoCodeModel(code = "STUDENT10", discount = 0.1, description = "10% off for students"),
                 PromoCodeModel(code = "SUMMER2025", discount = 0.15, description = "15% summer discount")
             )
 
