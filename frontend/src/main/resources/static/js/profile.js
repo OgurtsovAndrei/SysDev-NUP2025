@@ -135,7 +135,7 @@ async function saveProfileChanges() {
     } catch (error) {
         console.error('Failed to update profile:', error);
         // Navigate to home page instead of showing error
-        // window.location.href = 'index.html';
+        window.location.href = 'index.html';
     }
 }
 

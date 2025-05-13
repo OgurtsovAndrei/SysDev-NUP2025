@@ -37,6 +37,7 @@ fun Route.feedbackRoutes() {
                 call.respond(HttpStatusCode.BadRequest, ApiResponse(success = false, message = "Feedback topic cannot be empty"))
                 return@post
             }
+            feedbackRepository.submitFeedback(feedbackRequest)
             call.respond(HttpStatusCode.Created, ApiResponse(success = true, message = "Feedback submitted successfully"))
         }
     }
