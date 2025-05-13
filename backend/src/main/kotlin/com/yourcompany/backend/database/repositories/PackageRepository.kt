@@ -57,10 +57,29 @@ class PackageRepository {
      * Convert database PackageType entity to model
      */
     private fun toPackageTypeModel(packageType: PackageType): PackageTypeModel {
+        // Get the base price for this package type
+        val basePrice = getBasePrice(packageType.id)
+
         return PackageTypeModel(
             id = packageType.id,
-            name = packageType.name
+            name = packageType.name,
+            description = packageType.description,
+            basePrice = basePrice
         )
+    }
+
+    /**
+     * Get the base price for a package type
+     */
+    private fun getBasePrice(packageTypeId: String): Double {
+        // Query the database to get the minimum price for this package type
+        val minPrice = database.from(PackageOptions)
+            .select(min(PackageOptions.price))
+            .where { PackageOptions.packageTypeId eq packageTypeId }
+            .map { it.getDouble(1) }
+            .firstOrNull() ?: 0.0
+
+        return minPrice
     }
 
     /**
@@ -88,16 +107,33 @@ class PackageRepository {
 
         database.useTransaction { _ ->
             val packageTypes = listOf(
-                PackageTypeModel(id = "home_internet", name = "Home Internet (limit only speed)"),
-                PackageTypeModel(id = "mobile_hotspot", name = "Mobile Internet (with hotspot)"),
-                PackageTypeModel(id = "mobile_no_hotspot", name = "Mobile Internet (no hotspot)"),
-                PackageTypeModel(id = "mobile_combo", name = "Mobile Internet + Minutes + SMS")
+                PackageTypeModel(
+                    id = "home_internet", 
+                    name = "Home Internet (limit only speed)",
+                    description = "High-speed internet for your home with unlimited data and reliable connection."
+                ),
+                PackageTypeModel(
+                    id = "mobile_hotspot", 
+                    name = "Mobile Internet (with hotspot)",
+                    description = "Stay connected on the go with our mobile hotspot plans."
+                ),
+                PackageTypeModel(
+                    id = "mobile_no_hotspot", 
+                    name = "Mobile Internet (no hotspot)",
+                    description = "Basic mobile data plans for your smartphone needs."
+                ),
+                PackageTypeModel(
+                    id = "mobile_combo", 
+                    name = "Mobile Internet + Minutes + SMS",
+                    description = "Comprehensive package with mobile data, calls, and texts."
+                )
             )
 
             packageTypes.forEach { packageType ->
                 database.insert(PackageTypes) {
                     set(it.id, packageType.id)
                     set(it.name, packageType.name)
+                    set(it.description, packageType.description)
                 }
             }
 

@@ -11,6 +11,24 @@ let currentOrder = {
 
 let packageOptionsData = {};
 
+// Sample images for package types (in a real app, these would come from the API)
+const packageImages = {
+    'home_internet': 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
+    'mobile_hotspot': 'https://images.unsplash.com/photo-1567581935884-3349723552ca?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
+    'mobile_no_hotspot': 'https://images.unsplash.com/photo-1585399000684-d2f72660f092?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
+    'mobile_combo': 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+};
+
+// Package descriptions now come from the API
+
+// Package type names
+const packageNames = {
+    'home_internet': 'Home Internet',
+    'mobile_hotspot': 'Mobile Hotspot',
+    'mobile_no_hotspot': 'Mobile Data',
+    'mobile_combo': 'Mobile Combo'
+};
+
 async function initializePackageTypeDropdown() {
     const packageTypeSelect = document.getElementById('packageType');
     if (!packageTypeSelect) return;
@@ -22,21 +40,54 @@ async function initializePackageTypeDropdown() {
 
         const packageTypes = await getPackageTypes();
 
+        // Store package types data for later use
         packageTypes.forEach(type => {
+            packageTypesData[type.id] = type;
+
             const option = document.createElement('option');
             option.value = type.id;
             option.textContent = type.name;
             packageTypeSelect.appendChild(option);
         });
+
+        // Check if a package type was specified in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const packageTypeFromUrl = urlParams.get('packageType');
+
+        if (packageTypeFromUrl) {
+            // Set the selected package type
+            packageTypeSelect.value = packageTypeFromUrl;
+
+            // Update the package image, title, and description
+            updatePackageDisplay(packageTypeFromUrl);
+
+            // Update the package options
+            updatePackageOptions();
+        }
     } catch (error) {
         console.error('Failed to load package types:', error);
         window.location.href = 'index.html';
     }
 }
 
+function updatePackageDisplay(packageTypeId) {
+    const packageImage = document.getElementById('packageImage');
+    const packageTitle = document.getElementById('packageTitle');
+    const packageDescription = document.getElementById('packageDescription');
+
+    if (packageImage && packageTitle && packageDescription) {
+        packageImage.src = packageImages[packageTypeId] || 'https://via.placeholder.com/400';
+        packageTitle.textContent = packageNames[packageTypeId] || 'Package Title';
+        packageDescription.textContent = packageTypesData[packageTypeId]?.description || 'Package description will appear here.';
+    }
+}
+
 async function updatePackageOptions() {
     const packageType = document.getElementById('packageType').value;
     currentOrder.packageType = packageType;
+
+    // Update the package display
+    updatePackageDisplay(packageType);
 
     document.getElementById('home_internet_options').classList.add('d-none');
     document.getElementById('mobile_hotspot_options').classList.add('d-none');
@@ -72,19 +123,14 @@ async function updatePackageOptions() {
     }
 }
 
-function getBasePrice(packageType) {
-    switch (packageType) {
-        case 'home_internet':
-            return 29.99;
-        case 'mobile_hotspot':
-            return 15.99;
-        case 'mobile_no_hotspot':
-            return 10.99;
-        case 'mobile_combo':
-            return 19.99;
-        default:
-            return 0;
+// Base prices now come from the API
+let packageTypesData = {}; // Will store package types data from API
+
+function getBasePrice(packageTypeId) {
+    if (packageTypesData[packageTypeId]) {
+        return packageTypesData[packageTypeId].basePrice;
     }
+    return 0;
 }
 
 function populateHomeInternetOptions() {

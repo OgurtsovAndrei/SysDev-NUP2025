@@ -90,7 +90,9 @@ data class UpdateProfileRequest(
 @Serializable
 data class PackageType(
     val id: String,
-    val name: String
+    val name: String,
+    val description: String = "",
+    val basePrice: Double = 0.0
 )
 
 @Serializable

@@ -9,6 +9,29 @@
         body { padding-top: 60px; }
         .hero-section { padding: 3rem 0; }
         footer { margin-top: 3rem; padding: 1.5rem 0; background-color: #f8f9fa; }
+        .card {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            cursor: pointer;
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            margin-top: 0.5rem;
+        }
+        .card-text.text-primary {
+            font-size: 1.1rem;
+        }
+        .package-grid-section {
+            padding: 2rem 0;
+        }
     </style>
 </head>
 <body>
@@ -50,12 +73,19 @@
         <div class="col-lg-8 mx-auto text-center">
             <h1 class="mb-4">Welcome to G4UltimateMobile!</h1>
             <p class="lead mb-4">Your all-in-one customer relationship management system for managing mobile services, viewing usage, and getting support.</p>
+        </div>
+    </div>
 
-            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="goToOrderPage()">Order a Package</button>
-                <button type="button" class="btn btn-outline-primary btn-lg px-4" onclick="goToUsagePage()">View Usage</button>
-                <button type="button" class="btn btn-outline-primary btn-lg px-4" onclick="goToChatPage()">Chat with Support</button>
-                <button type="button" class="btn btn-outline-primary btn-lg px-4" onclick="goToFeedbackPage()">Leave Feedback</button>
+    <!-- Package Types Grid -->
+    <div class="container mt-5 package-grid-section">
+        <h2 class="text-center mb-4">Choose Your Plan</h2>
+        <div class="row" id="packageTypesGrid">
+            <!-- Package types will be populated dynamically -->
+            <div class="text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading available plans...</p>
             </div>
         </div>
     </div>

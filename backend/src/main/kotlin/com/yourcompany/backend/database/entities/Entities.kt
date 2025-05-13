@@ -139,6 +139,7 @@ interface PackageType : Entity<PackageType> {
 
     val id: String
     var name: String
+    var description: String
 }
 
 interface PackageOption : Entity<PackageOption> {
@@ -251,6 +252,7 @@ object Feedbacks : Table<Feedback>("feedback") {
 object PackageTypes : Table<PackageType>("package_types") {
     val id = varchar("id").primaryKey().bindTo { it.id }
     val name = varchar("name").bindTo { it.name }
+    val description = text("description").bindTo { it.description }
 }
 
 object PackageOptions : Table<PackageOption>("package_options") {

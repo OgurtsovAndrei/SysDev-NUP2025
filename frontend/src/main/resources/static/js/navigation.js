@@ -8,6 +8,16 @@ function goToOrderPage() {
     window.location.href = "order.html";
 }
 
+function goToOrderPageWithPackage(packageTypeId) {
+    console.log("Navigating to Order Page with package type:", packageTypeId);
+    if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
+        console.log("User not logged in, redirecting to login page");
+        window.location.href = "login.html";
+        return;
+    }
+    window.location.href = `order.html?packageType=${packageTypeId}`;
+}
+
 function goToUsagePage() {
     console.log("Navigating to Usage Page");
     if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
