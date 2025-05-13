@@ -13,16 +13,6 @@ function displayAvailablePackages() {
         .then(packageTypes => {
             console.log("Displaying available packages:", packageTypes);
 
-            // Sample images for package types (in a real app, these would come from the API)
-            const packageImages = {
-                'home_internet': 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                'mobile_hotspot': 'https://images.unsplash.com/photo-1567581935884-3349723552ca?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                'mobile_no_hotspot': 'https://images.unsplash.com/photo-1585399000684-d2f72660f092?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                'mobile_combo': 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-            };
-
-            // Package descriptions and base prices now come from the API
-
             packageTypes.forEach(packageType => {
                 const col = document.createElement('div');
                 col.className = 'col-md-6 col-lg-3 mb-4';

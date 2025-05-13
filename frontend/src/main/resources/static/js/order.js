@@ -41,8 +41,8 @@ async function initializePackageTypeDropdown() {
 
         // Store package types data for later use
         packageTypes.forEach(type => {
+            type.basePrice = type.basePrice || 0.0;
             packageTypesData[type.id] = type;
-
             const option = document.createElement('option');
             option.value = type.id;
             option.textContent = type.name;
@@ -327,7 +327,7 @@ function populateMobileComboOptions() {
 function updateOrderSummary() {
     if (!currentOrder.packageType) return;
 
-    let totalPrice = currentOrder.basePrice;
+    let totalPrice = currentOrder.basePrice || 0;
     const summaryDetails = document.getElementById('orderSummaryDetails');
     let summaryHTML = `<p><strong>Base Package:</strong> $${(currentOrder.basePrice || 0).toFixed(2)}</p>`;
 
