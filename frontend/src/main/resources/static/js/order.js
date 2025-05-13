@@ -18,13 +18,6 @@ let currentOrder = {
 let packageOptionsData = {};
 
 // Sample images for package types (in a real app, these would come from the API)
-const packageImages = {
-    'home_internet': 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
-    'mobile_hotspot': 'https://images.unsplash.com/photo-1567581935884-3349723552ca?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
-    'mobile_no_hotspot': 'https://images.unsplash.com/photo-1585399000684-d2f72660f092?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
-    'mobile_combo': 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
-};
-
 // Package descriptions now come from the API
 
 // Package type names
@@ -72,7 +65,6 @@ async function initializePackageTypeDropdown() {
         }
     } catch (error) {
         console.error('Failed to load package types:', error);
-        window.location.href = 'index.html';
     }
 }
 
@@ -125,7 +117,6 @@ async function updatePackageOptions() {
         updateOrderSummary();
     } catch (error) {
         console.error(`Failed to fetch options for package type ${packageType}:`, error);
-        window.location.href = 'index.html';
     }
 }
 
