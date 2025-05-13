@@ -3,13 +3,15 @@
 // Uses the API endpoint definitions from api-routes.js.
 
 import {
-    AUTH_ENDPOINTS,
-    USER_ENDPOINTS,
-    PACKAGES_ENDPOINTS,
-    ORDER_ENDPOINTS,
-    USAGE_ENDPOINTS,
-    FEEDBACK_ENDPOINTS,
-    CHAT_ENDPOINTS
+  AUTH_ENDPOINTS,
+  USER_ENDPOINTS,
+  PACKAGES_ENDPOINTS,
+  ORDER_ENDPOINTS,
+  USAGE_ENDPOINTS,
+  FEEDBACK_ENDPOINTS,
+  CHAT_ENDPOINTS,
+  API_BASE_URL,
+  BASE_URL,
 } from './api-routes.js'; // Ensure the correct path to api-routes.js
 
 // --- Type Definitions for API Responses ---
@@ -229,11 +231,11 @@ import {
  * @throws {Error} If the response status is not OK.
  */
 async function handleApiResponse(response) {
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || `API request failed with status ${response.status}`);
-    }
-    return response.json();
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || `API request failed with status ${response.status}`);
+  }
+  return response.json();
 }
 
 // Helper function to get the authentication token (replace with your actual token storage logic)
@@ -242,9 +244,9 @@ async function handleApiResponse(response) {
  * @returns {string|null} The authentication token, or null if not found.
  */
 function getAuthToken() {
-    // This is a placeholder. In a real application, you would get the token
-    // from localStorage, sessionStorage, or a state management system.
-    return localStorage.getItem('authToken'); // Example: getting from localStorage
+  // This is a placeholder. In a real application, you would get the token
+  // from localStorage, sessionStorage, or a state management system.
+  return localStorage.getItem('authToken'); // Example: getting from localStorage
 }
 
 // Helper function to include the auth token in headers
@@ -253,16 +255,16 @@ function getAuthToken() {
  * @returns {HeadersInit} The headers object.
  */
 function getAuthHeaders() {
-    const token = getAuthToken();
-    const headers = {
-        'Content-Type': 'application/json'
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`; // Assuming JWT Bearer token
-    }
-    console.log(token)
-    console.log(headers)
-    return headers;
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`; // Assuming JWT Bearer token
+  }
+  console.log(token)
+  console.log(headers)
+  return headers;
 }
 
 // --- Authentication API Calls ---
@@ -276,28 +278,28 @@ function getAuthHeaders() {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function loginUser(email, password, rememberMe) {
-    try {
-        const response = await fetch(AUTH_ENDPOINTS.LOGIN, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email,
-                password,
-                rememberMe
-            })
-        });
-        const data = await handleApiResponse(response);
-        // In a real app, you would store the token here:
-        // if (data.success && data.token) {
-        //     localStorage.setItem('authToken', data.token);
-        // }
-        return data;
-    } catch (error) {
-        console.error('Login failed:', error);
-        throw error; // Re-throw to be handled by the caller
-    }
+  try {
+    const response = await fetch(AUTH_ENDPOINTS.LOGIN, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        rememberMe
+      })
+    });
+    const data = await handleApiResponse(response);
+    // In a real app, you would store the token here:
+    // if (data.success && data.token) {
+    //     localStorage.setItem('authToken', data.token);
+    // }
+    return data;
+  } catch (error) {
+    console.error('Login failed:', error);
+    throw error; // Re-throw to be handled by the caller
+  }
 }
 
 /**
@@ -311,25 +313,25 @@ async function loginUser(email, password, rememberMe) {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function registerUser(fullName, email, password, confirmPassword, agreeTerms) {
-    try {
-        const response = await fetch(AUTH_ENDPOINTS.REGISTER, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                fullName,
-                email,
-                password,
-                confirmPassword,
-                agreeTerms
-            })
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Registration failed:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(AUTH_ENDPOINTS.REGISTER, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        fullName,
+        email,
+        password,
+        confirmPassword,
+        agreeTerms
+      })
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Registration failed:', error);
+    throw error;
+  }
 }
 
 // --- User Profile API Calls ---
@@ -340,16 +342,16 @@ async function registerUser(fullName, email, password, confirmPassword, agreeTer
  * @throws {Error} If the API request fails or returns an error.
  */
 async function getUserProfile() {
-    try {
-        const response = await fetch(USER_ENDPOINTS.PROFILE, {
-            method: 'GET',
-            headers: getAuthHeaders()
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to fetch user profile:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(USER_ENDPOINTS.PROFILE, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error);
+    throw error;
+  }
 }
 
 /**
@@ -362,17 +364,17 @@ async function getUserProfile() {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function updateUserProfile(profileData) {
-    try {
-        const response = await fetch(USER_ENDPOINTS.PROFILE, {
-            method: 'PUT', // Or 'PATCH' depending on your API spec
-            headers: getAuthHeaders(),
-            body: JSON.stringify(profileData)
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to update user profile:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(USER_ENDPOINTS.PROFILE, {
+      method: 'PUT', // Or 'PATCH' depending on your API spec
+      headers: getAuthHeaders(),
+      body: JSON.stringify(profileData)
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to update user profile:', error);
+    throw error;
+  }
 }
 
 /**
@@ -381,16 +383,16 @@ async function updateUserProfile(profileData) {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function getUserSupportTickets() {
-    try {
-        const response = await fetch(USER_ENDPOINTS.SUPPORT_TICKETS, {
-            method: 'GET',
-            headers: getAuthHeaders()
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to fetch support tickets:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(USER_ENDPOINTS.SUPPORT_TICKETS, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to fetch support tickets:', error);
+    throw error;
+  }
 }
 
 /**
@@ -399,16 +401,16 @@ async function getUserSupportTickets() {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function getUserNotifications() {
-    try {
-        const response = await fetch(USER_ENDPOINTS.NOTIFICATIONS, {
-            method: 'GET',
-            headers: getAuthHeaders()
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to fetch notifications:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(USER_ENDPOINTS.NOTIFICATIONS, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to fetch notifications:', error);
+    throw error;
+  }
 }
 
 /**
@@ -418,16 +420,16 @@ async function getUserNotifications() {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function markNotificationAsRead(notificationId) {
-    try {
-        const response = await fetch(USER_ENDPOINTS.MARK_NOTIFICATION_READ(notificationId), {
-            method: 'PATCH', // Or 'PUT' depending on your API spec
-            headers: getAuthHeaders()
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error(`Failed to mark notification ${notificationId} as read:`, error);
-        throw error;
-    }
+  try {
+    const response = await fetch(USER_ENDPOINTS.MARK_NOTIFICATION_READ(notificationId), {
+      method: 'PATCH', // Or 'PUT' depending on your API spec
+      headers: getAuthHeaders()
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error(`Failed to mark notification ${notificationId} as read:`, error);
+    throw error;
+  }
 }
 
 
@@ -439,16 +441,20 @@ async function markNotificationAsRead(notificationId) {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function getPackageTypes() {
-    try {
-        const response = await fetch(PACKAGES_ENDPOINTS.PACKAGE_TYPES, {
-            method: 'GET',
-            headers: getAuthHeaders() // May or may not require auth depending on API
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to fetch package types:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(PACKAGES_ENDPOINTS.PACKAGE_TYPES, {
+      method: 'GET',
+      headers: getAuthHeaders() // May or may not require auth depending on API
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to fetch package types:', error);
+    throw error;
+  }
+}
+
+function getPackageImageLink(id) {
+  return `${BASE_URL}/images/${id}.jpg`
 }
 
 /**
@@ -458,16 +464,16 @@ async function getPackageTypes() {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function getPackageOptions(packageTypeId) {
-    try {
-        const response = await fetch(PACKAGES_ENDPOINTS.PACKAGE_OPTIONS(packageTypeId), {
-            method: 'GET',
-            headers: getAuthHeaders() // May or may not require auth depending on API
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error(`Failed to fetch options for package type ${packageTypeId}:`, error);
-        throw error;
-    }
+  try {
+    const response = await fetch(PACKAGES_ENDPOINTS.PACKAGE_OPTIONS(packageTypeId), {
+      method: 'GET',
+      headers: getAuthHeaders() // May or may not require auth depending on API
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error(`Failed to fetch options for package type ${packageTypeId}:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -477,21 +483,21 @@ async function getPackageOptions(packageTypeId) {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function validatePromoCode(promoCode) {
-    try {
-        const response = await fetch(ORDER_ENDPOINTS.VALIDATE_PROMO_CODE, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }, // May or may not require auth depending on API
-            body: JSON.stringify({
-                promoCode
-            })
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to validate promo code:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(ORDER_ENDPOINTS.VALIDATE_PROMO_CODE, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }, // May or may not require auth depending on API
+      body: JSON.stringify({
+        promoCode
+      })
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to validate promo code:', error);
+    throw error;
+  }
 }
 
 /**
@@ -501,18 +507,18 @@ async function validatePromoCode(promoCode) {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function submitOrder(orderDetails) {
-    try {
-        const response = await fetch(ORDER_ENDPOINTS.SUBMIT_ORDER, {
-            method: 'POST',
-            headers: getAuthHeaders(), // Placing an order likely requires auth
-            body: JSON.stringify(orderDetails)
-        });
-        console.log(`After call: ${response}`)
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to submit order:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(ORDER_ENDPOINTS.SUBMIT_ORDER, {
+      method: 'POST',
+      headers: getAuthHeaders(), // Placing an order likely requires auth
+      body: JSON.stringify(orderDetails)
+    });
+    console.log(`After call: ${response}`)
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to submit order:', error);
+    throw error;
+  }
 }
 
 // --- Usage Data API Calls ---
@@ -523,16 +529,16 @@ async function submitOrder(orderDetails) {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function getUserUsage() {
-    try {
-        const response = await fetch(USAGE_ENDPOINTS.USER_USAGE, {
-            method: 'GET',
-            headers: getAuthHeaders() // Usage data requires auth
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to fetch user usage data:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(USAGE_ENDPOINTS.USER_USAGE, {
+      method: 'GET',
+      headers: getAuthHeaders() // Usage data requires auth
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to fetch user usage data:', error);
+    throw error;
+  }
 }
 
 // --- Feedback API Calls ---
@@ -543,16 +549,16 @@ async function getUserUsage() {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function getFeedbackSummary() {
-    try {
-        const response = await fetch(FEEDBACK_ENDPOINTS.FEEDBACK_SUMMARY, {
-            method: 'GET',
-            headers: getAuthHeaders() // May or may not require auth depending on API
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to fetch feedback summary:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(FEEDBACK_ENDPOINTS.FEEDBACK_SUMMARY, {
+      method: 'GET',
+      headers: getAuthHeaders() // May or may not require auth depending on API
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to fetch feedback summary:', error);
+    throw error;
+  }
 }
 
 /**
@@ -562,17 +568,17 @@ async function getFeedbackSummary() {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function submitFeedback(feedbackData) {
-    try {
-        const response = await fetch(FEEDBACK_ENDPOINTS.SUBMIT_FEEDBACK, {
-            method: 'POST',
-            headers: getAuthHeaders(), // Submitting feedback may require auth
-            body: JSON.stringify(feedbackData)
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to submit feedback:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(FEEDBACK_ENDPOINTS.SUBMIT_FEEDBACK, {
+      method: 'POST',
+      headers: getAuthHeaders(), // Submitting feedback may require auth
+      body: JSON.stringify(feedbackData)
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to submit feedback:', error);
+    throw error;
+  }
 }
 
 
@@ -584,16 +590,16 @@ async function submitFeedback(feedbackData) {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function getChatHistory() {
-    try {
-        const response = await fetch(CHAT_ENDPOINTS.CHAT_HISTORY, {
-            method: 'GET',
-            headers: getAuthHeaders() // Chat history requires auth
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to fetch chat history:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(CHAT_ENDPOINTS.CHAT_HISTORY, {
+      method: 'GET',
+      headers: getAuthHeaders() // Chat history requires auth
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to fetch chat history:', error);
+    throw error;
+  }
 }
 
 /**
@@ -603,19 +609,19 @@ async function getChatHistory() {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function sendChatMessage(messageText) {
-    try {
-        const response = await fetch(CHAT_ENDPOINTS.SEND_MESSAGE, {
-            method: 'POST',
-            headers: getAuthHeaders(), // Sending a message requires auth
-            body: JSON.stringify({
-                messageText
-            })
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error('Failed to send chat message:', error);
-        throw error;
-    }
+  try {
+    const response = await fetch(CHAT_ENDPOINTS.SEND_MESSAGE, {
+      method: 'POST',
+      headers: getAuthHeaders(), // Sending a message requires auth
+      body: JSON.stringify({
+        messageText
+      })
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error('Failed to send chat message:', error);
+    throw error;
+  }
 }
 
 /**
@@ -625,36 +631,36 @@ async function sendChatMessage(messageText) {
  * @throws {Error} If the API request fails or returns an error.
  */
 async function deletePackage(packageId) {
-    try {
-        const response = await fetch(USAGE_ENDPOINTS.DELETE_PACKAGE(packageId), {
-            method: 'DELETE',
-            headers: getAuthHeaders() // Usage data requires auth
-        });
-        return handleApiResponse(response);
-    } catch (error) {
-        console.error(`Failed to delete package ${packageId}:`, error);
-        throw error;
-    }
+  try {
+    const response = await fetch(USAGE_ENDPOINTS.DELETE_PACKAGE(packageId), {
+      method: 'DELETE',
+      headers: getAuthHeaders() // Usage data requires auth
+    });
+    return handleApiResponse(response);
+  } catch (error) {
+    console.error(`Failed to delete package ${packageId}:`, error);
+    throw error;
+  }
 }
 
 // Export the API interaction functions
 export {
-    loginUser,
-    registerUser,
-    getUserProfile,
-    updateUserProfile,
-    getUserSupportTickets,
-    getUserNotifications,
-    markNotificationAsRead,
-    getPackageTypes,
-    getPackageOptions,
-    validatePromoCode,
-    submitOrder,
-    getUserUsage,
-    deletePackage,
-    getFeedbackSummary,
-    submitFeedback,
-    getChatHistory,
-    sendChatMessage,
-    // Add other exported functions as you create them
+  loginUser,
+  registerUser,
+  getUserProfile,
+  updateUserProfile,
+  getUserSupportTickets,
+  getUserNotifications,
+  markNotificationAsRead,
+  getPackageTypes,
+  getPackageOptions,
+  validatePromoCode,
+  submitOrder,
+  getUserUsage,
+  deletePackage,
+  getFeedbackSummary,
+  submitFeedback,
+  getChatHistory,
+  sendChatMessage,
+  getPackageImageLink,
 };

@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:8081/api';
+const BASE_URL = 'http://localhost:8081';
+const API_BASE_URL = `${BASE_URL}/api`;
 
 const AUTH_ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/auth/login`,
@@ -44,5 +45,7 @@ export {
     ORDER_ENDPOINTS,
     USAGE_ENDPOINTS,
     FEEDBACK_ENDPOINTS,
-    CHAT_ENDPOINTS
+    CHAT_ENDPOINTS,
+    API_BASE_URL,
+    BASE_URL,
 };

@@ -1,6 +1,6 @@
 console.log("G4UltimateMobile CRM Prototype Initialized");
 
-import {getUserProfile, getPackageTypes} from './model.js';
+import {getUserProfile, getPackageTypes, getPackageImageLink} from './model.js';
 
 function displayAvailablePackages() {
     const packageTypesGrid = document.getElementById('packageTypesGrid');
@@ -35,7 +35,7 @@ function displayAvailablePackages() {
                 };
 
                 const img = document.createElement('img');
-                img.src = packageImages[packageType.id] || 'https://via.placeholder.com/300';
+                img.src = getPackageImageLink(packageType.id);
                 img.className = 'card-img-top';
                 img.alt = packageType.name;
 
@@ -48,7 +48,7 @@ function displayAvailablePackages() {
 
                 const price = document.createElement('p');
                 price.className = 'card-text text-primary fw-bold';
-                price.textContent = `from $${packageType.basePrice.toFixed(2)}`;
+                price.textContent = `from $${(packageType.basePrice || 0).toFixed(2)}`;
 
                 const description = document.createElement('p');
                 description.className = 'card-text';

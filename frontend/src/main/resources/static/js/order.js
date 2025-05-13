@@ -1,4 +1,10 @@
-import {getPackageTypes, getPackageOptions, validatePromoCode, submitOrder as submitOrderAPI} from './model.js';
+import {
+    getPackageTypes,
+    getPackageOptions,
+    validatePromoCode,
+    submitOrder as submitOrderAPI,
+    getPackageImageLink
+} from './model.js';
 
 let currentOrder = {
     packageType: '',
@@ -76,7 +82,7 @@ function updatePackageDisplay(packageTypeId) {
     const packageDescription = document.getElementById('packageDescription');
 
     if (packageImage && packageTitle && packageDescription) {
-        packageImage.src = packageImages[packageTypeId] || 'https://via.placeholder.com/400';
+        packageImage.src = getPackageImageLink(packageTypeId);
         packageTitle.textContent = packageNames[packageTypeId] || 'Package Title';
         packageDescription.textContent = packageTypesData[packageTypeId]?.description || 'Package description will appear here.';
     }
@@ -332,7 +338,7 @@ function updateOrderSummary() {
 
     let totalPrice = currentOrder.basePrice;
     const summaryDetails = document.getElementById('orderSummaryDetails');
-    let summaryHTML = `<p><strong>Base Package:</strong> $${currentOrder.basePrice.toFixed(2)}</p>`;
+    let summaryHTML = `<p><strong>Base Package:</strong> $${(currentOrder.basePrice || 0).toFixed(2)}</p>`;
 
     const options = packageOptionsData[currentOrder.packageType];
     if (!options) return;
@@ -466,7 +472,7 @@ function updateOrderSummary() {
     }
 
     summaryDetails.innerHTML = summaryHTML;
-    document.getElementById('orderTotal').textContent = `$${totalPrice.toFixed(2)}`;
+    document.getElementById('orderTotal').textContent = `$${(totalPrice || 0).toFixed(2)}`;
     currentOrder.totalPrice = totalPrice;
   }
 async function applyPromoCode() {

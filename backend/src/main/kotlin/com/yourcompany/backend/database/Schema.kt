@@ -76,7 +76,8 @@ object Schema {
                 connection.prepareStatement("""
                     CREATE TABLE IF NOT EXISTS package_types (
                         id VARCHAR(50) PRIMARY KEY,
-                        name VARCHAR(255) NOT NULL
+                        name VARCHAR(255) NOT NULL,
+                        description TEXT
                     )
                 """).execute()
 
