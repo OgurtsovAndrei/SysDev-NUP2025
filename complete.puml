@@ -1,7 +1,212 @@
-@startuml Complete MVC Architecture Diagram
+@startuml Complete System Class Diagram (MVC)
 
-' =================== MODEL LAYER (BACKEND) ===================
-package "Model" #lightblue {
+' =================== FRONTEND VIEW LAYER ===================
+package "Frontend View" #lightpink {
+  class UserDashboardView {
+    +renderUserProfile()
+    +renderUsageData()
+    +renderPackages()
+    +renderBillingInfo()
+  }
+
+  class PackageView {
+    +renderAvailablePackages()
+    +renderPackageDetails()
+    +renderOrderForm()
+    +renderPromoCodeInput()
+  }
+
+  class SupportView {
+    +renderTicketList()
+    +renderTicketDetails()
+    +renderCreateTicketForm()
+    +renderChatInterface()
+  }
+
+  class FeedbackView {
+    +renderFeedbackForm()
+  }
+
+  class LoginView {
+    +renderLoginForm()
+    +renderRegistrationForm()
+    +renderForgotPasswordForm()
+  }
+
+  class HtmlPages {
+    +index.html
+    +dashboard.html
+    +packages.html
+    +support.html
+    +feedback.html
+    +login.html
+    +register.html
+    +profile.html
+    +usage.html
+  }
+}
+
+' =================== FRONTEND CONTROLLER LAYER ===================
+package "Frontend Controller" #lightyellow {
+  class UserController {
+    +registerUser(userData)
+    +loginUser(credentials)
+    +logoutUser()
+    +getUserProfile()
+    +updateUserProfile(userData)
+    +handleRegistrationForm()
+    +handleLoginForm()
+    +handleProfileUpdateForm()
+  }
+
+  class PackageController {
+    +getPackageTypes()
+    +getPackageOptions(typeId)
+    +validatePromoCode(code)
+    +orderPackage(packageData)
+    +handlePackageSelection()
+    +handlePromoCodeValidation()
+    +handlePackageOrder()
+  }
+
+  class UsageController {
+    +getUserUsageData()
+    +refreshUsageData()
+    +handleUsageDataFilters()
+    +initializeUsagePage()
+    +createPackageSection(pkg)
+    +deletePackage(packageId)
+  }
+
+  class SupportController {
+    +getSupportTickets()
+    +createSupportTicket(ticketData)
+    +updateSupportTicket(ticketId, data)
+    +getChatHistory()
+    +sendChatMessage(message)
+    +handleTicketForm()
+    +handleChatInput()
+  }
+
+  class FeedbackController {
+    +submitFeedback(feedbackData)
+    +handleFeedbackForm()
+  }
+}
+
+' =================== FRONTEND CLIENT API MODEL LAYER ===================
+package "Frontend Client Api model" #lightgreen {
+  class ApiService {
+    +get(endpoint, params)
+    +post(endpoint, data)
+    +put(endpoint, data)
+    +delete(endpoint)
+    +handleApiResponse(response)
+    +getAuthHeaders()
+  }
+
+  class UserModel {
+    +loginUser(email, password, rememberMe)
+    +registerUser(fullName, email, password, confirmPassword, agreeTerms)
+    +getUserProfile()
+    +updateUserProfile(profileData)
+    +getUserSupportTickets()
+    +getUserNotifications()
+    +markNotificationAsRead(notificationId)
+  }
+
+  class PackageModel {
+    +getPackageTypes()
+    +getPackageOptions(packageTypeId)
+    +validatePromoCode(promoCode)
+    +submitOrder(orderDetails)
+  }
+
+  class UsageModel {
+    +getUserUsage()
+    +deletePackage(packageId)
+  }
+
+  class FeedbackModel {
+    +getFeedbackSummary()
+    +submitFeedback(feedbackData)
+  }
+
+  class ChatModel {
+    +getChatHistory()
+    +sendChatMessage(messageText)
+  }
+}
+
+' =================== REST API INTERFACE ===================
+interface "REST API" as RestApi #orange {
+  /users/**
+  /packages/**
+  /usage/**
+  /tickets/**
+  /chat/**
+  /feedback/**
+}
+
+' =================== BACKEND CONTROLLER LAYER ===================
+package "Backend Controller" #lightcyan {
+  class ApiServer {
+    +port: Integer
+    +host: String
+    +routes: Map<String, Object>
+    +start(): void
+    +stop(): void
+    +handleRequest(request: Request): Response
+    +registerRoute(path: String, method: String, handler: Function): void
+    +getRoutesInfo(): List<RouteInfo>
+    +getServerStatus(): ServerStatus
+  }
+
+  class BackendUserController {
+    +register(request: UserRegistrationRequest): Response
+    +login(request: LoginRequest): Response
+    +logout(request: LogoutRequest): Response
+    +getUserProfile(userId: String): Response
+    +updateUserProfile(userId: String, data: UserProfileUpdateRequest): Response
+  }
+
+  class BackendPackageController {
+    +getAllPackages(): Response
+    +getPackageById(id: String): Response
+    +getPackageTypes(): Response
+    +getPackagesByType(typeId: String): Response
+    +getUserPackages(userId: String): Response
+    +orderPackage(request: PackageOrderRequest): Response
+    +validatePromoCode(code: String): Response
+  }
+
+  class BackendUsageController {
+    +getUserUsageData(userId: String): Response
+    +getUserUsageByType(userId: String, type: UsageType): Response
+    +getUserUsageByDateRange(userId: String, startDate: Date, endDate: Date): Response
+  }
+
+  class BackendSupportController {
+    +getUserTickets(userId: String): Response
+    +getTicketById(ticketId: String): Response
+    +createTicket(request: TicketCreateRequest): Response
+    +updateTicket(ticketId: String, request: TicketUpdateRequest): Response
+  }
+
+  class BackendChatController {
+    +getTicketChatHistory(ticketId: String): Response
+    +sendChatMessage(request: ChatMessageRequest): Response
+  }
+
+  class BackendFeedbackController {
+    +submitFeedback(request: FeedbackRequest): Response
+    +getFeedbackById(feedbackId: String): Response
+    +getUserFeedback(userId: String): Response
+  }
+}
+
+' =================== BACKEND MODEL LAYER (DATABASE) ===================
+package "Backend Model" #lightblue {
   class User {
     -id: String
     -email: String
@@ -143,344 +348,90 @@ package "Model" #lightblue {
   }
 }
 
-' =================== BACKEND CONTROLLER LAYER ===================
-package "Backend Controller" #lightgreen {
-  class ApiServer {
-    +port: Integer
-    +host: String
-    +routes: Map<String, Object>
-    +start(): void
-    +stop(): void
-    +handleRequest(request: Request): Response
-    +registerRoute(path: String, method: String, handler: Function): void
-    +getRoutesInfo(): List<RouteInfo>
-    +getServerStatus(): ServerStatus
-  }
+' =================== FRONTEND RELATIONSHIPS ===================
 
-  class BackendUserController {
-    +register(request: UserRegistrationRequest): Response
-    +login(request: LoginRequest): Response
-    +logout(request: LogoutRequest): Response
-    +getUserProfile(userId: String): Response
-    +updateUserProfile(userId: String, data: UserProfileUpdateRequest): Response
-  }
+' Frontend View to Frontend Controller relationships
+UserDashboardView "1" --o "1" UserController : uses >
+UserDashboardView "1" --o "1" UsageController : uses >
+UserDashboardView "1" --o "1" PackageController : uses >
 
-  class BackendPackageController {
-    +getAllPackages(): Response
-    +getPackageById(id: String): Response
-    +getPackageTypes(): Response
-    +getPackagesByType(typeId: String): Response
-    +getUserPackages(userId: String): Response
-    +orderPackage(request: PackageOrderRequest): Response
-    +validatePromoCode(code: String): Response
-  }
+PackageView "1" --o "1" PackageController : uses >
 
-  class BackendUsageController {
-    +getUserUsageData(userId: String): Response
-    +getUserUsageByType(userId: String, type: UsageType): Response
-    +getUserUsageByDateRange(userId: String, startDate: Date, endDate: Date): Response
-  }
+SupportView "1" --o "1" SupportController : uses >
 
-  class BackendSupportController {
-    +getUserTickets(userId: String): Response
-    +getTicketById(ticketId: String): Response
-    +createTicket(request: TicketCreateRequest): Response
-    +updateTicket(ticketId: String, request: TicketUpdateRequest): Response
-  }
+FeedbackView "1" --o "1" FeedbackController : uses >
 
-  class BackendChatController {
-    +getTicketChatHistory(ticketId: String): Response
-    +sendChatMessage(request: ChatMessageRequest): Response
-  }
+LoginView "1" --o "1" UserController : uses >
 
-  class BackendFeedbackController {
-    +submitFeedback(request: FeedbackRequest): Response
-    +getFeedbackById(feedbackId: String): Response
-    +getUserFeedback(userId: String): Response
-  }
-}
+' Frontend Controller to Frontend Client Api model relationships
+UserController "1" --o "1" UserModel : uses >
+PackageController "1" --o "1" PackageModel : uses >
+UsageController "1" --o "1" UsageModel : uses >
+SupportController "1" --o "1" UserModel : uses >
+SupportController "1" --o "1" ChatModel : uses >
+FeedbackController "1" --o "1" FeedbackModel : uses >
 
-' =================== REST API INTERFACE ===================
-interface "REST API" as RestApi #orange {
-  /users/**
-  /packages/**
-  /usage/**
-  /tickets/**
-  /chat/**
-  /feedback/**
-}
+' Frontend Client Api model to API Service relationships
+UserModel "1" --o "1" ApiService : uses >
+PackageModel "1" --o "1" ApiService : uses >
+UsageModel "1" --o "1" ApiService : uses >
+FeedbackModel "1" --o "1" ApiService : uses >
+ChatModel "1" --o "1" ApiService : uses >
 
-' =================== FRONTEND VIEW LAYER ===================
-package "View" #pink {
-  class UserDashboardView {
-    +renderUserProfile()
-    +renderUsageData()
-    +renderPackages()
-    +renderBillingInfo()
-  }
+' HTML Pages to View components relationships
+HtmlPages "1" --o "1" UserDashboardView : rendered by >
+HtmlPages "1" --o "1" PackageView : rendered by >
+HtmlPages "1" --o "1" SupportView : rendered by >
+HtmlPages "1" --o "1" FeedbackView : rendered by >
+HtmlPages "1" --o "1" LoginView : rendered by >
 
-  class PackageView {
-    +renderAvailablePackages()
-    +renderPackageDetails()
-    +renderOrderForm()
-    +renderPromoCodeInput()
-  }
+' Frontend Client Api model data relationships
+UserModel "1" --o "*" PackageModel : user has packages >
+UserModel "1" --o "*" UsageModel : user has usage data >
+UserModel "1" --o "*" FeedbackModel : user submits feedback >
+UserModel "1" --o "*" ChatModel : user has chat history >
+PackageModel "1" --o "*" UsageModel : package tracks usage >
 
-  class SupportView {
-    +renderTicketList()
-    +renderTicketDetails()
-    +renderCreateTicketForm()
-    +renderChatInterface()
-  }
+' =================== BACKEND RELATIONSHIPS ===================
 
-  class FeedbackView {
-    +renderFeedbackForm()
-    +renderThankYouPage()
-  }
+' Backend Controller to Backend Model relationships
+BackendUserController "1" --o "1..*" User : manages >
+BackendUserController "1" --o "1..*" UserProfile : manages >
+BackendPackageController "1" --o "1..*" Package : manages >
+BackendPackageController "1" --o "1..*" UserPackage : manages >
+BackendUsageController "1" --o "1..*" UsageData : manages >
+BackendSupportController "1" --o "1..*" SupportTicket : manages >
+BackendChatController "1" --o "1..*" ChatMessage : manages >
+BackendFeedbackController "1" --o "1..*" Feedback : manages >
 
-  class LoginView {
-    +renderLoginForm()
-    +renderRegistrationForm()
-    +renderForgotPasswordForm()
-  }
+' REST API to Backend Controller relationships
+RestApi "1" --o "1" ApiServer : exposes and handles >
+ApiServer "1" --o "1" BackendUserController : routes requests to >
+ApiServer "1" --o "1" BackendPackageController : routes requests to >
+ApiServer "1" --o "1" BackendUsageController : routes requests to >
+ApiServer "1" --o "1" BackendSupportController : routes requests to >
+ApiServer "1" --o "1" BackendChatController : routes requests to >
+ApiServer "1" --o "1" BackendFeedbackController : routes requests to >
 
-  class CommonComponents {
-    +renderHeader()
-    +renderFooter()
-    +renderNavigation()
-    +renderNotification()
-    +renderLoading()
-    +renderError()
-  }
+' Backend Model relationship notations
+User "1" --o "1" UserProfile : has >
+User "1" --o "*" UserPackage : subscribes to >
+Package "1" --o "*" UserPackage : subscribed by >
+User "1" --o "*" UsageData : generates >
+Package "1" --o "*" UsageData : tracked in >
+User "1" --o "*" SupportTicket : creates >
+SupportTicket "1" --o "*" ChatMessage : contains >
+User "1" --o "*" Feedback : submits >
 
-  class HomePage {
-    +renderDashboard()
-    +displayUsageData()
-    +showPackageInfo()
-  }
+' Backend Type enumerations
+Package "1" -- "1" PackageType : has type >
+UserPackage "1" -- "1" PackageStatus : has status >
+UsageData "1" -- "1" UsageType : has type >
+SupportTicket "1" -- "1" TicketStatus : has status >
 
-  class ProfilePage {
-    +renderUserProfile()
-    +editProfileForm()
-    +updateProfileInfo()
-  }
+' =================== FRONTEND-BACKEND CONNECTION ===================
 
-  class PackagesPage {
-    +displayAvailablePackages()
-    +showPackageDetails()
-    +orderNewPackage()
-    +applyPromoCode()
-  }
-
-  class ChatPage {
-    +renderChatInterface()
-    +displayChatHistory()
-    +sendMessage()
-  }
-
-  class RegisterPage {
-    +renderRegistrationForm()
-    +submitRegistration()
-  }
-
-  class UIComponents {
-    +renderNavigation()
-    +showNotification()
-    +displayErrorMessage()
-    +renderLoading()
-  }
-}
-
-' =================== FRONTEND CONTROLLER LAYER ===================
-package "Front Controller" #lightyellow {
-  class UserController {
-    +registerUser(userData)
-    +loginUser(credentials)
-    +logoutUser()
-    +getUserProfile()
-    +updateUserProfile(userData)
-    +handleRegistrationForm()
-    +handleLoginForm()
-    +handleProfileUpdateForm()
-  }
-
-  class PackageController {
-    +getPackageTypes()
-    +getPackageOptions(typeId)
-    +validatePromoCode(code)
-    +orderPackage(packageData)
-    +handlePackageSelection()
-    +handlePromoCodeValidation()
-    +handlePackageOrder()
-  }
-
-  class UsageController {
-    +getUserUsageData()
-    +refreshUsageData()
-    +handleUsageDataFilters()
-  }
-
-  class SupportController {
-    +getSupportTickets()
-    +createSupportTicket(ticketData)
-    +updateSupportTicket(ticketId, data)
-    +getChatHistory()
-    +sendChatMessage(message)
-    +handleTicketForm()
-    +handleChatInput()
-  }
-
-  class FeedbackController {
-    +submitFeedback(feedbackData)
-    +handleFeedbackForm()
-  }
-
-  class ApiClient {
-    +baseUrl: String
-    +headers: Object
-    +timeout: Integer
-    +retryCount: Integer
-    +get(endpoint: String): Promise
-    +post(endpoint: String, data: Object): Promise
-    +put(endpoint: String, data: Object): Promise
-    +delete(endpoint: String): Promise
-    +handleResponse(response: Response): Promise
-    +handleError(error: Error): Promise
-  }
-
-  class UserService {
-    -apiClient: ApiClient
-    +login(email: String, password: String): Promise
-    +register(userData: Object): Promise
-    +getUserProfile(): Promise
-    +updateUserProfile(profileData: Object): Promise
-    +logout(): Promise
-  }
-
-  class PackageService {
-    -apiClient: ApiClient
-    +getPackageTypes(): Promise
-    +getPackageOptions(packageTypeId: String): Promise
-    +getUserPackages(): Promise
-    +orderPackage(orderData: Object): Promise
-    +validatePromoCode(code: String): Promise
-  }
-
-  class UsageService {
-    -apiClient: ApiClient
-    +getUserUsageData(): Promise
-  }
-
-  class SupportService {
-    -apiClient: ApiClient
-    +getSupportTickets(): Promise
-    +createSupportTicket(ticketData: Object): Promise
-    +updateSupportTicket(ticketId: String, updateData: Object): Promise
-  }
-
-  class ChatService {
-    -apiClient: ApiClient
-    +getChatHistory(): Promise
-    +sendChatMessage(message: String): Promise
-  }
-
-  class FeedbackService {
-    -apiClient: ApiClient
-    +submitFeedback(feedbackData: Object): Promise
-    +getFeedbackSummary(): Promise
-  }
-
-  class StateManager {
-    +userState: Object
-    +packageState: Object
-    +usageState: Object
-    +supportState: Object
-    +chatState: Object
-    +updateState(key: String, value: Object)
-    +getState(key: String): Object
-    +clearState()
-  }
-}
-
-' =================== RELATIONSHIPS ===================
-
-' Frontend View to Controller relationships
-UserDashboardView ..> UserController : uses
-UserDashboardView ..> UsageController : uses
-UserDashboardView ..> PackageController : uses
-PackageView ..> PackageController : uses
-SupportView ..> SupportController : uses
-FeedbackView ..> FeedbackController : uses
-LoginView ..> UserController : uses
-
-HomePage ..> UsageService : uses
-HomePage ..> PackageService : uses
-ProfilePage ..> UserService : uses
-PackagesPage ..> PackageService : uses
-SupportView ..> SupportService : uses
-ChatPage ..> ChatService : uses
-FeedbackView ..> FeedbackService : uses
-LoginView ..> UserService : uses
-RegisterPage ..> UserService : uses
-
-' Frontend Controllers to ApiClient relationships
-UserController --> ApiClient : uses
-PackageController --> ApiClient : uses
-UsageController --> ApiClient : uses
-SupportController --> ApiClient : uses
-FeedbackController --> ApiClient : uses
-
-' Services to ApiClient relationships
-UserService --> ApiClient : uses
-PackageService --> ApiClient : uses
-UsageService --> ApiClient : uses
-SupportService --> ApiClient : uses
-ChatService --> ApiClient : uses
-FeedbackService --> ApiClient : uses
-
-' API Client to REST API interface
-ApiClient ..> RestApi : sends HTTP requests
-
-' REST API interface to ApiServer
-RestApi <.. ApiServer : exposes and handles
-
-' Backend Controllers to ApiServer relationships
-ApiServer --> BackendUserController : routes requests to
-ApiServer --> BackendPackageController : routes requests to
-ApiServer --> BackendUsageController : routes requests to
-ApiServer --> BackendSupportController : routes requests to
-ApiServer --> BackendChatController : routes requests to
-ApiServer --> BackendFeedbackController : routes requests to
-
-' StateManager relationships
-HomePage ..> StateManager : uses
-ProfilePage ..> StateManager : uses
-PackagesPage ..> StateManager : uses
-SupportView ..> StateManager : uses
-ChatPage ..> StateManager : uses
-FeedbackView ..> StateManager : uses
-LoginView ..> StateManager : uses
-RegisterPage ..> StateManager : uses
-
-' Backend Controller to Model relationships
-BackendUserController --> User : manages
-BackendUserController --> UserProfile : manages
-BackendPackageController --> Package : manages
-BackendPackageController --> UserPackage : manages
-BackendUsageController --> UsageData : manages
-BackendSupportController --> SupportTicket : manages
-BackendChatController --> ChatMessage : manages
-BackendFeedbackController --> Feedback : manages
-
-' Common dependencies
-CommonComponents <-- UserDashboardView : includes
-CommonComponents <-- PackageView : includes
-CommonComponents <-- SupportView : includes
-CommonComponents <-- FeedbackView : includes
-CommonComponents <-- LoginView : includes
-
-'REST API Communication
-ApiClient <--> RestApi : HTTP requests/responses
-RestApi <--> ApiServer : processes
+' Frontend to Backend connection via REST API
+ApiService "1" --o "1" RestApi : sends requests to >
 
 @enduml

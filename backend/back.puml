@@ -1,144 +1,250 @@
-@startuml Frontend Class Diagram (MVC)
+@startuml Backend Class Diagram (MVC)
 
-package "View" {
-  class UserDashboardView {
-    +renderUserProfile()
-    +renderUsageData()
-    +renderPackages()
-    +renderBillingInfo()
+' =================== MODEL LAYER (DATABASE) ===================
+package "Model" #lightblue {
+  class User {
+    -id: String
+    -email: String
+    -password: String
+    -name: String
+    -profile: UserProfile
+    +getId(): String
+    +getEmail(): String
+    +getName(): String
+    +getProfile(): UserProfile
+    +setProfile(profile: UserProfile)
   }
 
-  class PackageView {
-    +renderAvailablePackages()
-    +renderPackageDetails()
-    +renderOrderForm()
-    +renderPromoCodeInput()
+  class UserProfile {
+    -userId: String
+    -address: String
+    -phoneNumber: String
+    -preferences: Map<String, Object>
+    +getUserId(): String
+    +getAddress(): String
+    +getPhoneNumber(): String
+    +getPreferences(): Map<String, Object>
   }
 
-  class SupportView {
-    +renderTicketList()
-    +renderTicketDetails()
-    +renderCreateTicketForm()
-    +renderChatInterface()
+  class Package {
+    -id: String
+    -name: String
+    -type: PackageType
+    -price: Double
+    -features: List<String>
+    -isActive: Boolean
+    +getId(): String
+    +getName(): String
+    +getType(): PackageType
+    +getPrice(): Double
+    +getFeatures(): List<String>
+    +isActive(): Boolean
   }
 
-  class FeedbackView {
-    +renderFeedbackForm()
-    +renderThankYouPage()
+  class UserPackage {
+    -id: String
+    -userId: String
+    -packageId: String
+    -startDate: Date
+    -endDate: Date
+    -status: PackageStatus
+    +getId(): String
+    +getUserId(): String
+    +getPackageId(): String
+    +getStartDate(): Date
+    +getEndDate(): Date
+    +getStatus(): PackageStatus
   }
 
-  class LoginView {
-    +renderLoginForm()
-    +renderRegistrationForm()
-    +renderForgotPasswordForm()
+  class UsageData {
+    -id: String
+    -userId: String
+    -packageId: String
+    -usageType: UsageType
+    -amount: Double
+    -date: Date
+    +getId(): String
+    +getUserId(): String
+    +getPackageId(): String
+    +getUsageType(): UsageType
+    +getAmount(): Double
+    +getDate(): Date
   }
 
-  class CommonComponents {
-    +renderHeader()
-    +renderFooter()
-    +renderNavigation()
-    +renderNotification()
-    +renderLoading()
-    +renderError()
+  class SupportTicket {
+    -id: String
+    -userId: String
+    -subject: String
+    -description: String
+    -status: TicketStatus
+    -createdAt: Date
+    -updatedAt: Date
+    +getId(): String
+    +getUserId(): String
+    +getSubject(): String
+    +getDescription(): String
+    +getStatus(): TicketStatus
+    +getCreatedAt(): Date
+    +getUpdatedAt(): Date
+  }
+
+  class ChatMessage {
+    -id: String
+    -ticketId: String
+    -senderId: String
+    -message: String
+    -timestamp: Date
+    +getId(): String
+    +getTicketId(): String
+    +getSenderId(): String
+    +getMessage(): String
+    +getTimestamp(): Date
+  }
+
+  class Feedback {
+    -id: String
+    -userId: String
+    -rating: Integer
+    -comments: String
+    -submittedDate: Date
+    +getId(): String
+    +getUserId(): String
+    +getRating(): Integer
+    +getComments(): String
+    +getSubmittedDate(): Date
+  }
+
+  enum PackageType {
+    BASIC
+    STANDARD
+    PREMIUM
+    ENTERPRISE
+  }
+
+  enum PackageStatus {
+    ACTIVE
+    SUSPENDED
+    CANCELLED
+    EXPIRED
+  }
+
+  enum UsageType {
+    DATA
+    VOICE
+    SMS
+    ROAMING
+  }
+
+  enum TicketStatus {
+    OPEN
+    IN_PROGRESS
+    RESOLVED
+    CLOSED
   }
 }
 
-package "Front Controller" {
-  class UserController {
-    +registerUser(userData)
-    +loginUser(credentials)
-    +logoutUser()
-    +getUserProfile()
-    +updateUserProfile(userData)
-    +handleRegistrationForm()
-    +handleLoginForm()
-    +handleProfileUpdateForm()
+' =================== BACKEND CONTROLLER LAYER ===================
+package "Backend Controller" #lightgreen {
+  class ApiServer {
+    +port: Integer
+    +host: String
+    +routes: Map<String, Object>
+    +start(): void
+    +stop(): void
+    +handleRequest(request: Request): Response
+    +registerRoute(path: String, method: String, handler: Function): void
+    +getRoutesInfo(): List<RouteInfo>
+    +getServerStatus(): ServerStatus
   }
 
-  class PackageController {
-    +getPackageTypes()
-    +getPackageOptions(typeId)
-    +validatePromoCode(code)
-    +orderPackage(packageData)
-    +handlePackageSelection()
-    +handlePromoCodeValidation()
-    +handlePackageOrder()
+  class BackendUserController {
+    +register(request: UserRegistrationRequest): Response
+    +login(request: LoginRequest): Response
+    +logout(request: LogoutRequest): Response
+    +getUserProfile(userId: String): Response
+    +updateUserProfile(userId: String, data: UserProfileUpdateRequest): Response
   }
 
-  class UsageController {
-    +getUserUsageData()
-    +refreshUsageData()
-    +handleUsageDataFilters()
+  class BackendPackageController {
+    +getAllPackages(): Response
+    +getPackageById(id: String): Response
+    +getPackageTypes(): Response
+    +getPackagesByType(typeId: String): Response
+    +getUserPackages(userId: String): Response
+    +orderPackage(request: PackageOrderRequest): Response
+    +validatePromoCode(code: String): Response
   }
 
-  class SupportController {
-    +getSupportTickets()
-    +createSupportTicket(ticketData)
-    +updateSupportTicket(ticketId, data)
-    +getChatHistory()
-    +sendChatMessage(message)
-    +handleTicketForm()
-    +handleChatInput()
+  class BackendUsageController {
+    +getUserUsageData(userId: String): Response
+    +getUserUsageByType(userId: String, type: UsageType): Response
+    +getUserUsageByDateRange(userId: String, startDate: Date, endDate: Date): Response
   }
 
-  class FeedbackController {
-    +submitFeedback(feedbackData)
-    +handleFeedbackForm()
+  class BackendSupportController {
+    +getUserTickets(userId: String): Response
+    +getTicketById(ticketId: String): Response
+    +createTicket(request: TicketCreateRequest): Response
+    +updateTicket(ticketId: String, request: TicketUpdateRequest): Response
   }
 
-  class ApiService {
-    +get(endpoint, params)
-    +post(endpoint, data)
-    +put(endpoint, data)
-    +delete(endpoint)
-    +handleApiError(error)
+  class BackendChatController {
+    +getTicketChatHistory(ticketId: String): Response
+    +sendChatMessage(request: ChatMessageRequest): Response
+  }
+
+  class BackendFeedbackController {
+    +submitFeedback(request: FeedbackRequest): Response
+    +getFeedbackById(feedbackId: String): Response
+    +getUserFeedback(userId: String): Response
   }
 }
 
-package "Backend Controller" #lightgray {
-  class BackendUserController #lightgray
-  class BackendPackageController #lightgray
-  class BackendUsageController #lightgray
-  class BackendSupportController #lightgray
-  class BackendChatController #lightgray
-  class BackendFeedbackController #lightgray
+' =================== REST API INTERFACE ===================
+interface "REST API" as RestApi #orange {
+  /users/**
+  /packages/**
+  /usage/**
+  /tickets/**
+  /chat/**
+  /feedback/**
 }
 
-' View to Front Controller relationships
-UserDashboardView ..> UserController : uses
-UserDashboardView ..> UsageController : uses
-UserDashboardView ..> PackageController : uses
+' =================== RELATIONSHIPS ===================
 
-PackageView ..> PackageController : uses
+' Backend Controller to Model relationships
+BackendUserController "1" --o "1..*" User : manages >
+BackendUserController "1" --o "1..*" UserProfile : manages >
+BackendPackageController "1" --o "1..*" Package : manages >
+BackendPackageController "1" --o "1..*" UserPackage : manages >
+BackendUsageController "1" --o "1..*" UsageData : manages >
+BackendSupportController "1" --o "1..*" SupportTicket : manages >
+BackendChatController "1" --o "1..*" ChatMessage : manages >
+BackendFeedbackController "1" --o "1..*" Feedback : manages >
 
-SupportView ..> SupportController : uses
+' REST API to Backend Controller relationships
+RestApi "1" --o "1" ApiServer : exposes and handles >
+ApiServer "1" --o "1" BackendUserController : routes requests to >
+ApiServer "1" --o "1" BackendPackageController : routes requests to >
+ApiServer "1" --o "1" BackendUsageController : routes requests to >
+ApiServer "1" --o "1" BackendSupportController : routes requests to >
+ApiServer "1" --o "1" BackendChatController : routes requests to >
+ApiServer "1" --o "1" BackendFeedbackController : routes requests to >
 
-FeedbackView ..> FeedbackController : uses
+' Model relationship notations
+User "1" --o "1" UserProfile : has >
+User "1" --o "*" UserPackage : subscribes to >
+Package "1" --o "*" UserPackage : subscribed by >
+User "1" --o "*" UsageData : generates >
+Package "1" --o "*" UsageData : tracked in >
+User "1" --o "*" SupportTicket : creates >
+SupportTicket "1" --o "*" ChatMessage : contains >
+User "1" --o "*" Feedback : submits >
 
-LoginView ..> UserController : uses
-
-' Front Controller to Backend Controller relationships
-UserController --> ApiService : uses
-UserController --> BackendUserController : sends requests to
-
-PackageController --> ApiService : uses
-PackageController --> BackendPackageController : sends requests to
-
-UsageController --> ApiService : uses
-UsageController --> BackendUsageController : sends requests to
-
-SupportController --> ApiService : uses
-SupportController --> BackendSupportController : sends requests to
-SupportController --> BackendChatController : sends requests to
-
-FeedbackController --> ApiService : uses
-FeedbackController --> BackendFeedbackController : sends requests to
-
-' Common dependencies
-CommonComponents <-- UserDashboardView : includes
-CommonComponents <-- PackageView : includes
-CommonComponents <-- SupportView : includes
-CommonComponents <-- FeedbackView : includes
-CommonComponents <-- LoginView : includes
+' Type enumerations
+Package "1" -- "1" PackageType : has type >
+UserPackage "1" -- "1" PackageStatus : has status >
+UsageData "1" -- "1" UsageType : has type >
+SupportTicket "1" -- "1" TicketStatus : has status >
 
 @enduml

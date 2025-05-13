@@ -1,300 +1,197 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "initial_id",
-   "metadata": {
-    "collapsed": true
-   },
-   "outputs": [],
-   "source": [
-    "# Import necessary libraries\n",
-    "import pandas as pd\n",
-    "import numpy as np\n",
-    "import matplotlib.pyplot as plt\n",
-    "import seaborn as"
-   ]
-  },
-  {
-   "metadata": {},
-   "cell_type": "markdown",
-   "source": [
-    "# Frontend MVC Architecture Diagram Analysis\n",
-    "\n",
-    "This notebook analyzes the UML diagram of a frontend MVC (Model-View-Controller) architecture for a web application. The analysis will focus on the structure, components, and relationships in the diagram."
-   ],
-   "id": "433d989667c0754a"
-  },
-  {
-   "metadata": {},
-   "cell_type": "code",
-   "outputs": [],
-   "execution_count": null,
-   "source": [
-    "# Install required package for UML visualization\n",
-    "!pip install plan"
-   ],
-   "id": "83eeb1b430de317b"
-  },
-  {
-   "metadata": {},
-   "cell_type": "code",
-   "outputs": [],
-   "execution_count": null,
-   "source": [
-    "# Create UML file from the diagram description\n",
-    "uml_content = \"\"\"\n",
-    "@startuml Frontend Class Diagram (MVC)\n",
-    "\n",
-    "package \"View\" {\n",
-    "  class HomePage {\n",
-    "    +renderDashboard()\n",
-    "    +displayUsageData()\n",
-    "    +showPackageInfo()\n",
-    "  }\n",
-    "\n",
-    "  class ProfilePage {\n",
-    "    +renderUserProfile()\n",
-    "    +editProfileForm()\n",
-    "    +updateProfileInfo()\n",
-    "  }\n",
-    "\n",
-    "  class PackagesPage {\n",
-    "    +displayAvailablePackages()\n",
-    "    +showPackageDetails()\n",
-    "    +orderNewPackage()\n",
-    "    +applyPromoCode()\n",
-    "  }\n",
-    "\n",
-    "  class SupportPage {\n",
-    "    +renderTicketList()\n",
-    "    +createTicketForm()\n",
-    "    +viewTicketDetails()\n",
-    "    +updateTicket()\n",
-    "  }\n",
-    "\n",
-    "  class ChatPage {\n",
-    "    +renderChatInterface()\n",
-    "    +displayChatHistory()\n",
-    "    +sendMessage()\n",
-    "  }\n",
-    "\n",
-    "  class FeedbackPage {\n",
-    "    +renderFeedbackForm()\n",
-    "    +submitFeedback()\n",
-    "    +viewFeedbackSummary()\n",
-    "  }\n",
-    "\n",
-    "  class LoginPage {\n",
-    "    +renderLoginForm()\n",
-    "    +submitLogin()\n",
-    "  }\n",
-    "\n",
-    "  class RegisterPage {\n",
-    "    +renderRegistrationForm()\n",
-    "    +submitRegistration()\n",
-    "  }\n",
-    "\n",
-    "  class UIComponents {\n",
-    "    +renderNavigation()\n",
-    "    +showNotification()\n",
-    "    +displayErrorMessage()\n",
-    "    +renderLoading()\n",
-    "  }\n",
-    "}\n",
-    "\n",
-    "package \"Front Controller\" {\n",
-    "  class ApiClient {\n",
-    "    +baseUrl: String\n",
-    "    +headers: Object\n",
-    "    +get(endpoint: String): Promise\n",
-    "    +post(endpoint: String, data: Object): Promise\n",
-    "    +put(endpoint: String, data: Object): Promise\n",
-    "    +delete(endpoint: String): Promise\n",
-    "    +handleResponse(response: Response): Promise\n",
-    "    +handleError(error: Error): Promise\n",
-    "  }\n",
-    "\n",
-    "  class UserService {\n",
-    "    -apiClient: ApiClient\n",
-    "    +login(email: String, password: String): Promise\n",
-    "    +register(userData: Object): Promise\n",
-    "    +getUserProfile(): Promise\n",
-    "    +updateUserProfile(profileData: Object): Promise\n",
-    "    +logout(): Promise\n",
-    "  }\n",
-    "\n",
-    "  class PackageService {\n",
-    "    -apiClient: ApiClient\n",
-    "    +getPackageTypes(): Promise\n",
-    "    +getPackageOptions(packageTypeId: String): Promise\n",
-    "    +getUserPackages(): Promise\n",
-    "    +orderPackage(orderData: Object): Promise\n",
-    "    +validatePromoCode(code: String): Promise\n",
-    "  }\n",
-    "\n",
-    "  class UsageService {\n",
-    "    -apiClient: ApiClient\n",
-    "    +getUserUsageData(): Promise\n",
-    "  }\n",
-    "\n",
-    "  class SupportService {\n",
-    "    -apiClient: ApiClient\n",
-    "    +getSupportTickets(): Promise\n",
-    "    +createSupportTicket(ticketData: Object): Promise\n",
-    "    +updateSupportTicket(ticketId: String, updateData: Object): Promise\n",
-    "  }\n",
-    "\n",
-    "  class ChatService {\n",
-    "    -apiClient: ApiClient\n",
-    "    +getChatHistory(): Promise\n",
-    "    +sendChatMessage(message: String): Promise\n",
-    "  }\n",
-    "\n",
-    "  class FeedbackService {\n",
-    "    -apiClient: ApiClient\n",
-    "    +submitFeedback(feedbackData: Object): Promise\n",
-    "    +getFeedbackSummary(): Promise\n",
-    "  }\n",
-    "\n",
-    "  class StateManager {\n",
-    "    +userState: Object\n",
-    "    +packageState: Object\n",
-    "    +usageState: Object\n",
-    "    +supportState: Object\n",
-    "    +chatState: Object\n",
-    "    +updateState(key: String, value: Object)\n",
-    "    +getState(key: String): Object\n",
-    "    +clearState()\n",
-    "  }\n",
-    "}\n",
-    "\n",
-    "' Relationships between View and Front Controller\n",
-    "HomePage ..> UsageService : uses\n",
-    "HomePage ..> PackageService : uses\n",
-    "ProfilePage ..> UserService : uses\n",
-    "PackagesPage ..> PackageService : uses\n",
-    "SupportPage ..> SupportService : uses\n",
-    "ChatPage ..> ChatService : uses\n",
-    "FeedbackPage ..> FeedbackService : uses\n",
-    "LoginPage ..> UserService : uses\n",
-    "RegisterPage ..> UserService : uses\n",
-    "\n",
-    "' ApiClient relationships\n",
-    "UserService --> ApiClient : uses\n",
-    "PackageService --> ApiClient : uses\n",
-    "UsageService --> ApiClient : uses\n",
-    "SupportService --> ApiClient : uses\n",
-    "ChatService --> ApiClient : uses\n",
-    "FeedbackService --> ApiClient : uses\n",
-    "\n",
-    "' StateManager relationships\n",
-    "HomePage ..> StateManager : uses\n",
-    "ProfilePage ..> StateManager : uses\n",
-    "PackagesPage ..> StateManager : uses\n",
-    "SupportPage ..> StateManager : uses\n",
-    "ChatPage ..> StateManager : uses\n",
-    "FeedbackPage ..> StateManager : uses\n",
-    "LoginPage ..> StateManager : uses\n",
-    "RegisterPage ..> StateManager : uses\n",
-    "\n",
-    "' Connections to Backend Controllers (represented as external)\n",
-    "note \"Communicates with Backend\\\\nUserController\" as N1\n",
-    "note \"Communicates with Backend\\\\nPackageController\" as N2\n",
-    "note \"Communicates with Backend\\\\nUsageController\" as N3\n",
-    "note \"Communicates with Backend\\\\nSupportController\" as N4\n",
-    "note \"Communicates with Backend\\\\nChatController\" as N5\n",
-    "note \"Communicates with Backend\\\\nFeedbackController\" as N6\n",
-    "\n",
-    "UserService .. N1\n",
-    "PackageService .. N2\n",
-    "UsageService .. N3\n",
-    "SupportService .. N4\n",
-    "ChatService .. N5\n",
-    "FeedbackService .. N6\n",
-    "\n",
-    "@enduml\n",
-    "\"\"\"\n",
-    "\n",
-    "with open('frontend_uml.txt', 'w') as f:\n",
-    "    f.write(uml_"
-   ],
-   "id": "9845d4e3ca43312e"
-  },
-  {
-   "metadata": {},
-   "cell_type": "code",
-   "outputs": [],
-   "execution_count": null,
-   "source": [
-    "# Try to generate UML diagram image (this might not work in all environments)\n",
-    "try:\n",
-    "    import os\n",
-    "    from plantuml import PlantUML\n",
-    "\n",
-    "    os.environ['PLANTUML_LIMIT_SIZE'] = '8192'\n",
-    "\n",
-    "    # Set up PlantUML server\n",
-    "    server = 'http://www.plantuml.com/plantuml/img/'\n",
-    "    plantuml = PlantUML(server)\n",
-    "\n",
-    "    # Generate diagram\n",
-    "    plantuml.processes_file('frontend_uml.txt')\n",
-    "\n",
-    "    print(\"UML diagram generated successfully!\")\n",
-    "except Exception as e:\n",
-    "    print(f\"Could not generate UML diagram: {e}\")\n",
-    "    print(\"Using"
-   ],
-   "id": "7c15389f9c2d578"
-  },
-  {
-   "metadata": {},
-   "cell_type": "markdown",
-   "source": [
-    "## Architecture Overview\n",
-    "\n",
-    "The frontend architecture follows the MVC (Model-View-Controller) pattern with a clear separation of concerns:\n",
-    "\n",
-    "1. **View Layer**: Contains page components responsible for rendering UI elements\n",
-    "2. **Front Controller Layer**: Contains services and API client for handling data and business logic\n",
-    "3. **State Management"
-   ],
-   "id": "76bea5b917821e1"
-  },
-  {
-   "metadata": {},
-   "cell_type": "code",
-   "outputs": [],
-   "execution_count": null,
-   "source": [
-    "# Extract and analyze the View components\n",
-    "view_components = [\n",
-    "    {\"name\": \"HomePage\", \"methods\": [\"renderDashboard\", \"displayUsageData\","
-   ],
-   "id": "34473d8ceddbdbec"
+@startuml Frontend Class Diagram (MVC)
+
+package "View" {
+  class UserDashboardView {
+    +renderUserProfile()
+    +renderUsageData()
+    +renderPackages()
+    +renderBillingInfo()
   }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 2
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython2",
-   "version": "2.7.6"
+
+  class PackageView {
+    +renderAvailablePackages()
+    +renderPackageDetails()
+    +renderOrderForm()
+    +renderPromoCodeInput()
   }
- },
- "nbformat": 4,
- "nbformat_minor": 5
+
+  class SupportView {
+    +renderTicketList()
+    +renderTicketDetails()
+    +renderCreateTicketForm()
+    +renderChatInterface()
+  }
+
+  class FeedbackView {
+    +renderFeedbackForm()
+    +renderThankYouPage()
+  }
+
+  class LoginView {
+    +renderLoginForm()
+    +renderRegistrationForm()
+    +renderForgotPasswordForm()
+  }
+
+  class CommonComponents {
+    +renderHeader()
+    +renderFooter()
+    +renderNavigation()
+    +renderNotification()
+    +renderLoading()
+    +renderError()
+  }
 }
+
+package "Front Controller" {
+  class UserController {
+    +registerUser(userData)
+    +loginUser(credentials)
+    +logoutUser()
+    +getUserProfile()
+    +updateUserProfile(userData)
+    +handleRegistrationForm()
+    +handleLoginForm()
+    +handleProfileUpdateForm()
+  }
+
+  class PackageController {
+    +getPackageTypes()
+    +getPackageOptions(typeId)
+    +validatePromoCode(code)
+    +orderPackage(packageData)
+    +handlePackageSelection()
+    +handlePromoCodeValidation()
+    +handlePackageOrder()
+  }
+
+  class UsageController {
+    +getUserUsageData()
+    +refreshUsageData()
+    +handleUsageDataFilters()
+    +initializeUsagePage()
+    +createPackageSection(pkg)
+    +deletePackage(packageId)
+  }
+
+  class SupportController {
+    +getSupportTickets()
+    +createSupportTicket(ticketData)
+    +updateSupportTicket(ticketId, data)
+    +getChatHistory()
+    +sendChatMessage(message)
+    +handleTicketForm()
+    +handleChatInput()
+  }
+
+  class FeedbackController {
+    +submitFeedback(feedbackData)
+    +handleFeedbackForm()
+  }
+}
+
+package "Model" {
+  class ApiService {
+    +get(endpoint, params)
+    +post(endpoint, data)
+    +put(endpoint, data)
+    +delete(endpoint)
+    +handleApiResponse(response)
+    +getAuthHeaders()
+  }
+
+  class UserModel {
+    +loginUser(email, password, rememberMe)
+    +registerUser(fullName, email, password, confirmPassword, agreeTerms)
+    +getUserProfile()
+    +updateUserProfile(profileData)
+    +getUserSupportTickets()
+    +getUserNotifications()
+    +markNotificationAsRead(notificationId)
+  }
+
+  class PackageModel {
+    +getPackageTypes()
+    +getPackageOptions(packageTypeId)
+    +validatePromoCode(promoCode)
+    +submitOrder(orderDetails)
+  }
+
+  class UsageModel {
+    +getUserUsage()
+    +deletePackage(packageId)
+  }
+
+  class FeedbackModel {
+    +getFeedbackSummary()
+    +submitFeedback(feedbackData)
+  }
+
+  class ChatModel {
+    +getChatHistory()
+    +sendChatMessage(messageText)
+  }
+}
+
+package "Backend API" #lightgray {
+  class BackendUserController #lightgray
+  class BackendPackageController #lightgray
+  class BackendUsageController #lightgray
+  class BackendSupportController #lightgray
+  class BackendChatController #lightgray
+  class BackendFeedbackController #lightgray
+}
+
+' =================== RELATIONSHIPS ===================
+
+' View to Front Controller relationships
+UserDashboardView "1" --o "1" UserController : uses >
+UserDashboardView "1" --o "1" UsageController : uses >
+UserDashboardView "1" --o "1" PackageController : uses >
+
+PackageView "1" --o "1" PackageController : uses >
+
+SupportView "1" --o "1" SupportController : uses >
+
+FeedbackView "1" --o "1" FeedbackController : uses >
+
+LoginView "1" --o "1" UserController : uses >
+
+' Front Controller to Model relationships
+UserController "1" --o "1" UserModel : uses >
+PackageController "1" --o "1" PackageModel : uses >
+UsageController "1" --o "1" UsageModel : uses >
+SupportController "1" --o "1" UserModel : uses >
+SupportController "1" --o "1" ChatModel : uses >
+FeedbackController "1" --o "1" FeedbackModel : uses >
+
+' Model to API Service relationships
+UserModel "1" --o "1" ApiService : uses >
+PackageModel "1" --o "1" ApiService : uses >
+UsageModel "1" --o "1" ApiService : uses >
+FeedbackModel "1" --o "1" ApiService : uses >
+ChatModel "1" --o "1" ApiService : uses >
+
+' Model to Backend API relationships
+ApiService "1" --o "*" BackendUserController : sends requests to >
+ApiService "1" --o "*" BackendPackageController : sends requests to >
+ApiService "1" --o "*" BackendUsageController : sends requests to >
+ApiService "1" --o "*" BackendSupportController : sends requests to >
+ApiService "1" --o "*" BackendChatController : sends requests to >
+ApiService "1" --o "*" BackendFeedbackController : sends requests to >
+
+' Common dependencies
+CommonComponents "1" --* "1..*" UserDashboardView : included in >
+CommonComponents "1" --* "1..*" PackageView : included in >
+CommonComponents "1" --* "1..*" SupportView : included in >
+CommonComponents "1" --* "1..*" FeedbackView : included in >
+CommonComponents "1" --* "1..*" LoginView : included in >
+
+' Model data relationships
+UserModel "1" --o "*" PackageModel : user has packages >
+UserModel "1" --o "*" UsageModel : user has usage data >
+UserModel "1" --o "*" FeedbackModel : user submits feedback >
+UserModel "1" --o "*" ChatModel : user has chat history >
+PackageModel "1" --o "*" UsageModel : package tracks usage >
+
+@enduml
