@@ -1,0 +1,144 @@
+@startuml Frontend Class Diagram (MVC)
+
+package "View" {
+  class UserDashboardView {
+    +renderUserProfile()
+    +renderUsageData()
+    +renderPackages()
+    +renderBillingInfo()
+  }
+
+  class PackageView {
+    +renderAvailablePackages()
+    +renderPackageDetails()
+    +renderOrderForm()
+    +renderPromoCodeInput()
+  }
+
+  class SupportView {
+    +renderTicketList()
+    +renderTicketDetails()
+    +renderCreateTicketForm()
+    +renderChatInterface()
+  }
+
+  class FeedbackView {
+    +renderFeedbackForm()
+    +renderThankYouPage()
+  }
+
+  class LoginView {
+    +renderLoginForm()
+    +renderRegistrationForm()
+    +renderForgotPasswordForm()
+  }
+
+  class CommonComponents {
+    +renderHeader()
+    +renderFooter()
+    +renderNavigation()
+    +renderNotification()
+    +renderLoading()
+    +renderError()
+  }
+}
+
+package "Front Controller" {
+  class UserController {
+    +registerUser(userData)
+    +loginUser(credentials)
+    +logoutUser()
+    +getUserProfile()
+    +updateUserProfile(userData)
+    +handleRegistrationForm()
+    +handleLoginForm()
+    +handleProfileUpdateForm()
+  }
+
+  class PackageController {
+    +getPackageTypes()
+    +getPackageOptions(typeId)
+    +validatePromoCode(code)
+    +orderPackage(packageData)
+    +handlePackageSelection()
+    +handlePromoCodeValidation()
+    +handlePackageOrder()
+  }
+
+  class UsageController {
+    +getUserUsageData()
+    +refreshUsageData()
+    +handleUsageDataFilters()
+  }
+
+  class SupportController {
+    +getSupportTickets()
+    +createSupportTicket(ticketData)
+    +updateSupportTicket(ticketId, data)
+    +getChatHistory()
+    +sendChatMessage(message)
+    +handleTicketForm()
+    +handleChatInput()
+  }
+
+  class FeedbackController {
+    +submitFeedback(feedbackData)
+    +handleFeedbackForm()
+  }
+
+  class ApiService {
+    +get(endpoint, params)
+    +post(endpoint, data)
+    +put(endpoint, data)
+    +delete(endpoint)
+    +handleApiError(error)
+  }
+}
+
+package "Backend Controller" #lightgray {
+  class BackendUserController #lightgray
+  class BackendPackageController #lightgray
+  class BackendUsageController #lightgray
+  class BackendSupportController #lightgray
+  class BackendChatController #lightgray
+  class BackendFeedbackController #lightgray
+}
+
+' View to Front Controller relationships
+UserDashboardView ..> UserController : uses
+UserDashboardView ..> UsageController : uses
+UserDashboardView ..> PackageController : uses
+
+PackageView ..> PackageController : uses
+
+SupportView ..> SupportController : uses
+
+FeedbackView ..> FeedbackController : uses
+
+LoginView ..> UserController : uses
+
+' Front Controller to Backend Controller relationships
+UserController --> ApiService : uses
+UserController --> BackendUserController : sends requests to
+
+PackageController --> ApiService : uses
+PackageController --> BackendPackageController : sends requests to
+
+UsageController --> ApiService : uses
+UsageController --> BackendUsageController : sends requests to
+
+SupportController --> ApiService : uses
+SupportController --> BackendSupportController : sends requests to
+SupportController --> BackendChatController : sends requests to
+
+FeedbackController --> ApiService : uses
+FeedbackController --> BackendFeedbackController : sends requests to
+
+' Common dependencies
+CommonComponents <-- UserDashboardView : includes
+CommonComponents <-- PackageView : includes
+CommonComponents <-- SupportView : includes
+CommonComponents <-- FeedbackView : includes
+CommonComponents <-- LoginView : includes
+
+@enduml
