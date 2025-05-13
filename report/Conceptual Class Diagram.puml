@@ -1,0 +1,201 @@
+    @startuml "Conceptual Class Diagram"
+
+' Color definitions for better organization
+!define USER_COLOR #FFEBCD
+!define PACKAGE_COLOR #E0FFFF
+!define USAGE_COLOR #E6E6FA
+!define SUPPORT_COLOR #F0FFF0
+!define FEEDBACK_COLOR #FFF0F5
+!define OTHER_COLOR #F5F5DC
+
+' User Package
+package "User Domain" {
+  class User #USER_COLOR {
+    id: String
+    name: String
+    email: String
+    password: String
+    phone: String
+    accountNumber: String
+    accountType: String
+    registrationDate: String
+    paymentMethod: String
+  }
+
+  class Address #USER_COLOR {
+    street: String
+    city: String
+    state: String
+    zipCode: String
+    country: String
+  }
+
+  class LoginRequest #USER_COLOR {
+    email: String
+    password: String
+    rememberMe: Boolean
+  }
+
+  class RegisterRequest #USER_COLOR {
+    fullName: String
+    email: String
+    password: String
+    confirmPassword: String
+    agreeTerms: Boolean
+  }
+}
+
+' Package Package
+package "Package Domain" {
+  class PackageType #PACKAGE_COLOR {
+    id: String
+    name: String
+    description: String
+    basePrice: Double
+  }
+
+  class Package #PACKAGE_COLOR {
+    id: String
+    type: String
+    name: String
+    plan: String
+    speed: String
+    router: String
+    createdAt: Instant
+  }
+
+  class Option #PACKAGE_COLOR {
+    id: String
+    name: String
+    price: Double
+  }
+
+  class AddOn #PACKAGE_COLOR {
+    id: String
+    name: String
+  }
+
+  class OrderRequest #PACKAGE_COLOR {
+    packageType: String
+    promoCode: String
+  }
+
+  class OrderOptions #PACKAGE_COLOR {
+    speed: String
+    router: String
+    dataPlan: String
+    plan: String
+    addOns: List<String>
+  }
+}
+
+' Usage Package
+package "Usage Domain" {
+  class UsageData #USAGE_COLOR {
+    currentBillingCycle: BillingCycle
+    previousBillingCycles: List<PreviousBillingCycle>
+  }
+
+  class BillingCycle #USAGE_COLOR {
+    startDate: String
+    endDate: String
+  }
+
+  class PackageUsage #USAGE_COLOR {
+    type: String
+    name: String
+    dataUsed: Double
+    dataTotal: Double
+    callMinutesUsed: Int
+    callMinutesTotal: String
+    smsUsed: Int
+    smsTotal: String
+    downloadSpeed: String
+    uploadSpeed: String
+    devices: Int
+  }
+}
+
+' Support Package
+package "Support Domain" {
+  class ChatMessage #SUPPORT_COLOR {
+    type: String
+    text: String
+    time: String
+  }
+
+  class SupportTicket #SUPPORT_COLOR {
+    id: String
+    subject: String
+    status: String
+    createdDate: String
+    lastUpdated: String
+    priority: String
+    resolution: String
+  }
+}
+
+' Feedback Package
+package "Feedback Domain" {
+  class FeedbackEntry #FEEDBACK_COLOR {
+    id: String
+    rating: Int
+    topic: String
+    text: String
+    timestamp: String
+    user: String
+  }
+
+  class FeedbackSummary #FEEDBACK_COLOR {
+    averageRating: Double
+    totalReviews: Int
+  }
+}
+
+' Other Package
+package "Other Domain" {
+  class Notification #OTHER_COLOR {
+    id: String
+    type: String
+    message: String
+    date: String
+    read: Boolean
+  }
+
+  class PromoCode #OTHER_COLOR {
+    code: String
+    discount: Double
+    description: String
+  }
+}
+
+' Relationships
+User "1" -- "1" Address : has >
+User "1" -- "0..*" Package : subscribes >
+User "1" -- "0..*" ChatMessage : sends >
+User "1" -- "0..*" SupportTicket : creates >
+User "1" -- "0..*" FeedbackEntry : submits >
+User "1" -- "0..*" Notification : receives >
+User "1" -- "1" UsageData : has >
+
+LoginRequest ..> User : authenticates >
+RegisterRequest ..> User : creates >
+
+PackageType "1" -- "0..*" Package : defines >
+PackageType "1" -- "0..*" Option : offers >
+
+Package "0..*" -- "0..*" AddOn : includes >
+Package "1" -- "0..*" PackageUsage : tracks >
+
+OrderRequest "1" -- "1" OrderOptions : contains >
+OrderRequest ..> Package : creates >
+OrderRequest ..> PromoCode : uses >
+
+BillingCycle "1" -- "0..*" PackageUsage : contains >
+UsageData "1" -- "1..*" BillingCycle : has >
+
+FeedbackSummary "1" -- "0..*" FeedbackEntry : summarizes >
+
+PromoCode "0..*" -- "0..*" Package : applies to >
+
+@enduml

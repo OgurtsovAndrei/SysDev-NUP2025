@@ -1,0 +1,66 @@
+@startuml "Customer Use Cases"
+
+actor Customer
+
+' Authentication
+rectangle "Authentication" {
+  usecase "Login to Account" as UC1
+  usecase "Register New Account" as UC2
+}
+
+' Profile Management
+rectangle "Profile Management" {
+  usecase "View Profile" as UC3
+  usecase "Update Profile" as UC4
+}
+
+' Package Management
+rectangle "Package Management" {
+  usecase "View Package Types" as UC5
+  usecase "View Package Options" as UC6
+  usecase "Validate Promo Code" as UC7
+  usecase "Place Order" as UC8
+}
+
+' Usage Management
+rectangle "Usage Management" {
+  usecase "View Usage Data" as UC9
+  usecase "Cancel Package" as UC10
+}
+
+' Customer Support
+rectangle "Customer Support" {
+  usecase "View Chat History" as UC11
+  usecase "Send Chat Message" as UC12
+  usecase "View Support Tickets" as UC13
+}
+
+' Feedback
+rectangle "Feedback" {
+  usecase "View Feedback Summary" as UC16
+  usecase "Submit Feedback" as UC17
+}
+
+' Relationships
+Customer --> UC1
+Customer --> UC2
+Customer --> UC3
+Customer --> UC4
+Customer --> UC5
+Customer --> UC6
+Customer --> UC7
+Customer --> UC8
+Customer --> UC9
+Customer --> UC10
+Customer --> UC11
+Customer --> UC12
+Customer --> UC13
+Customer --> UC16
+Customer --> UC17
+
+' Some logical dependencies
+UC1 ..> UC3 : <<include>>
+UC8 ..> UC7 : <<include>>
+UC12 ..> UC11 : <<extend>>
+
+@enduml
