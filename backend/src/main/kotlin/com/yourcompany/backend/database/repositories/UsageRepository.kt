@@ -3,6 +3,7 @@ package com.yourcompany.backend.database.repositories
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
 import com.yourcompany.backend.database.entities.User
+import com.yourcompany.backend.database.repositories.base.Repository
 import com.yourcompany.backend.models.*
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
@@ -15,9 +16,8 @@ import kotlin.reflect.KClass
 /**
  * Repository for usage data-related database operations
  */
-
-class UsageRepository {
-    private val database = DatabaseFactory.getInstance()
+class UsageRepository : Repository {
+    override val database = DatabaseFactory.getInstance()
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     /**
@@ -121,7 +121,7 @@ class UsageRepository {
     /**
      * Initialize the database with mock usage data
      */
-    fun initializeMockData() {
+    override fun initializeMockData() {
         val existingUsageData = database.sequenceOf(UsageDataTable).firstOrNull()
         if (existingUsageData != null) {
             return

@@ -2,6 +2,7 @@ package com.yourcompany.backend.database.repositories
 
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
+import com.yourcompany.backend.database.repositories.base.Repository
 import com.yourcompany.backend.models.*
 import com.yourcompany.backend.models.UserPackage
 import com.yourcompany.backend.models.PackageType as PackageTypeModel
@@ -13,8 +14,8 @@ import java.time.Instant
 /**
  * Repository for package-related database operations
  */
-class PackageRepository {
-    private val database = DatabaseFactory.getInstance()
+class PackageRepository : Repository {
+    override val database = DatabaseFactory.getInstance()
 
     /**
      * Get all package types
@@ -99,7 +100,7 @@ class PackageRepository {
     /**
      * Initialize the database with mock package data
      */
-    fun initializeMockData() {
+    override fun initializeMockData() {
         val existingPackageType = database.sequenceOf(PackageTypes).firstOrNull()
         if (existingPackageType != null) {
             return

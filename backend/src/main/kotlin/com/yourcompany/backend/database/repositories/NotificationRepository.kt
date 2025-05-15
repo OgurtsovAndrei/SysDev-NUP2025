@@ -2,6 +2,7 @@ package com.yourcompany.backend.database.repositories
 
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
+import com.yourcompany.backend.database.repositories.base.Repository
 import com.yourcompany.backend.models.Notification as NotificationModel
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
@@ -11,8 +12,8 @@ import java.time.format.DateTimeFormatter
 /**
  * Repository for notification-related database operations
  */
-class NotificationRepository {
-    private val database = DatabaseFactory.getInstance()
+class NotificationRepository : Repository {
+    override val database = DatabaseFactory.getInstance()
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     /**
@@ -56,7 +57,7 @@ class NotificationRepository {
     /**
      * Initialize the database with mock notification data
      */
-    fun initializeMockData() {
+    override fun initializeMockData() {
         val existingNotification = database.sequenceOf(Notifications).firstOrNull()
         if (existingNotification != null) {
             return // Data already initialized

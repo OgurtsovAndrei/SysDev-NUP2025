@@ -2,6 +2,7 @@ package com.yourcompany.backend.database.repositories
 
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
+import com.yourcompany.backend.database.repositories.base.Repository
 import com.yourcompany.backend.models.Address as AddressModel
 import com.yourcompany.backend.models.UserPackage
 import org.ktorm.dsl.*
@@ -12,8 +13,8 @@ import java.time.format.DateTimeFormatter
 /**
  * Repository for user-related database operations
  */
-class UserRepository {
-    private val database = DatabaseFactory.getInstance()
+class UserRepository : Repository {
+    override val database = DatabaseFactory.getInstance()
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     /**
@@ -169,7 +170,7 @@ class UserRepository {
     /**
      * Initialize the database with mock data
      */
-    fun initializeMockData() {
+    override fun initializeMockData() {
         val existingUser = findUserById("USR12345")
         if (existingUser != null) {
             return

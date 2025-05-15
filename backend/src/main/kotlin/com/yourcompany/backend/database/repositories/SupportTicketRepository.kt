@@ -2,6 +2,7 @@ package com.yourcompany.backend.database.repositories
 
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
+import com.yourcompany.backend.database.repositories.base.Repository
 import com.yourcompany.backend.models.SupportTicket as SupportTicketModel
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
@@ -11,8 +12,8 @@ import java.time.format.DateTimeFormatter
 /**
  * Repository for support ticket-related database operations
  */
-class SupportTicketRepository {
-    private val database = DatabaseFactory.getInstance()
+class SupportTicketRepository : Repository {
+    override val database = DatabaseFactory.getInstance()
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     /**
@@ -45,7 +46,7 @@ class SupportTicketRepository {
     /**
      * Initialize the database with mock support ticket data
      */
-    fun initializeMockData() {
+    override fun initializeMockData() {
         val existingSupportTicket = database.sequenceOf(SupportTickets).firstOrNull()
         if (existingSupportTicket != null) {
             return

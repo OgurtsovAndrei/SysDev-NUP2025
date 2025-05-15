@@ -2,6 +2,7 @@ package com.yourcompany.backend.database.repositories
 
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
+import com.yourcompany.backend.database.repositories.base.Repository
 import com.yourcompany.backend.models.PromoCode as PromoCodeModel
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
@@ -10,8 +11,8 @@ import java.math.BigDecimal
 /**
  * Repository for promo code-related database operations
  */
-class PromoCodeRepository {
-    private val database = DatabaseFactory.getInstance()
+class PromoCodeRepository : Repository {
+    override val database = DatabaseFactory.getInstance()
 
     /**
      * Find a promo code by code
@@ -37,7 +38,7 @@ class PromoCodeRepository {
     /**
      * Initialize the database with mock promo code data
      */
-    fun initializeMockData() {
+    override fun initializeMockData() {
         val existingPromoCode = database.sequenceOf(PromoCodes).firstOrNull()
         if (existingPromoCode != null) {
             return

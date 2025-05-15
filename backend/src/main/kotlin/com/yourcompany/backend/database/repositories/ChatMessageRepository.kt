@@ -2,6 +2,7 @@ package com.yourcompany.backend.database.repositories
 
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
+import com.yourcompany.backend.database.repositories.base.Repository
 import com.yourcompany.backend.models.ChatMessage as ChatMessageModel
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
@@ -10,8 +11,9 @@ import java.time.Instant
 /**
  * Repository for chat message-related database operations
  */
-class ChatMessageRepository {
-    private val database = DatabaseFactory.getInstance()
+class ChatMessageRepository : Repository {
+    override val database = DatabaseFactory.getInstance()
+    override fun initializeMockData() {}
 
     /**
      * Get all chat messages for a user

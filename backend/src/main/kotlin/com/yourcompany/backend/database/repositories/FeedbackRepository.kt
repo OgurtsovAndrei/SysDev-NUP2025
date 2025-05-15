@@ -2,6 +2,7 @@ package com.yourcompany.backend.database.repositories
 
 import com.yourcompany.backend.database.DatabaseFactory
 import com.yourcompany.backend.database.entities.*
+import com.yourcompany.backend.database.repositories.base.Repository
 import com.yourcompany.backend.models.FeedbackEntry
 import com.yourcompany.backend.models.FeedbackSummary
 import com.yourcompany.backend.models.SubmitFeedbackRequest
@@ -13,8 +14,8 @@ import java.util.UUID
 /**
  * Repository for feedback-related database operations
  */
-class FeedbackRepository {
-    private val database = DatabaseFactory.getInstance()
+class FeedbackRepository : Repository {
+    override val database = DatabaseFactory.getInstance()
 
     /**
      * Get feedback summary
@@ -74,7 +75,7 @@ class FeedbackRepository {
     /**
      * Initialize the database with mock feedback data
      */
-    fun initializeMockData() {
+    override fun initializeMockData() {
         val existingFeedback = database.sequenceOf(Feedbacks).firstOrNull()
         if (existingFeedback != null) {
             return

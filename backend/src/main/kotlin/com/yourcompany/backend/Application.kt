@@ -12,6 +12,7 @@ import com.yourcompany.backend.database.repositories.SupportTicketRepository
 import com.yourcompany.backend.database.repositories.NotificationRepository
 import com.yourcompany.backend.database.repositories.UsageRepository
 import com.yourcompany.backend.database.repositories.UserRepository
+import com.yourcompany.backend.registers.PluginsConfigRegister
 
 // Main Ktor application entry point (application.conf)
 fun main(args: Array<String>): Unit = EngineMain.main(args)
@@ -28,24 +29,33 @@ fun Application.module() {
 
     log.info("Database schema initialized successfully. Initializing mock data...")
     try {
-        UserRepository().initializeMockData()
-        PackageRepository().initializeMockData()
-        PromoCodeRepository().initializeMockData()
-        UsageRepository().initializeMockData()
-        SupportTicketRepository().initializeMockData()
-        NotificationRepository().initializeMockData()
-        FeedbackRepository().initializeMockData()
+        val repositories = listOf(
+            UserRepository(),
+            PackageRepository(),
+            PromoCodeRepository(),
+            UsageRepository(),
+            SupportTicketRepository(),
+            NotificationRepository(),
+            FeedbackRepository()
+        )
+
+        // Initialize mock data using the OOP approach
+        repositories.forEach { repository ->
+            repository.initializeMockData()
+        }
+
         log.info("Mock data initialized successfully.")
     } catch (e: Exception) {
         log.error("Error initializing mock data: ${e.message}", e)
         throw e
     }
     // Configuration of all application's parts
-    configureSerialization()
-    configureRouting()
-    configureStatusPages()
-    configureCallLogging()
-    configureCORS()
+    val pluginConfigs = PluginsConfigRegister.registeredObjects
+
+    // Configure plugins using the OOP approach
+    pluginConfigs.forEach { pluginConfig ->
+        pluginConfig.configure(this)
+    }
 
     log.info("G4UltimateMobile CRM Backend Module Started Successfully.")
 }
