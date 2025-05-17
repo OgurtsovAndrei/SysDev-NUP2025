@@ -1,0 +1,23 @@
+@startuml "Package State Chart Diagram"
+
+title Package State Chart Diagram
+
+state "Available" as Available
+state "PendingActivation" as PendingActivation
+state "Active" as Active
+state "Limited" as Limited
+state "Suspended" as Suspended
+state "Canceled" as Canceled
+state "Expired" as Expired
+
+[*] --> Available
+Available --> PendingActivation : orderPackage()
+PendingActivation --> Active : activatePackage()
+Active --> Limited : limitReached()
+Active --> Suspended : suspendPackage()
+Suspended --> Active : resumePackage()
+Active --> Expired : expirePackage()
+Limited --> Expired : expirePackage()
+AnyState --> Canceled : cancelPackage()
+
+@enduml

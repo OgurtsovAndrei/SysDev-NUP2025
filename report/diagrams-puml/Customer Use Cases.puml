@@ -1,4 +1,6 @@
 @startuml "Customer Use Cases"
+top to bottom direction
+skinparam wrapWidth 200
 
 actor Customer
 

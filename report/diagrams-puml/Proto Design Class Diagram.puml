@@ -1,4 +1,4 @@
-@startuml Complete System Class Diagram (MVC)
+@startuml Proto Design Class Diagram (MVC)
 
 top to bottom direction
 skinparam wrapWidth 200

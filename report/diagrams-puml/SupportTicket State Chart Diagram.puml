@@ -1,0 +1,20 @@
+@startuml "SupportTicket State Chart Diagram"
+
+title SupportTicket State Chart Diagram
+
+' Define the states
+state "New" as New
+state "In Progress" as InProgress
+state "Waiting for Customer" as WaitingForCustomer
+state "Resolved" as Resolved
+state "Closed" as Closed
+
+' Define the transitions
+[*] --> New : createTicket()
+New --> InProgress : assignAgent()
+InProgress --> WaitingForCustomer : requestCustomerReply()
+WaitingForCustomer --> InProgress : assignAgent()
+InProgress --> Resolved : resolveTicket()
+Resolved --> Closed : closeTicket()
+
+@enduml
