@@ -1,0 +1,521 @@
+@startuml Telecom_REST_API_Backend_Diagram
+left to right direction
+'skinparam wrapWidth 400
+scale 2
+
+
+' =================== BACKEND PACKAGES ===================
+package "Models"  {
+' =================== USER DOMAIN ===================
+    package "User Domain" #FFEBCD{
+      class User  {
+        -id: String
+        -name: String
+        -email: String
+        -password: String
+        -phone: String
+        -accountNumber: String
+        -accountType: String
+        -registrationDate: String
+        -packages: List<UserPackage>
+        -paymentMethod: String
+        -billingAddress: Address
+      }
+
+      class Address  {
+        -street: String
+        -city: String
+        -state: String
+        -zipCode: String
+        -country: String
+      }
+
+      class Notification  {
+        -id: String
+        -type: String
+        -message: String
+        -date: String
+        -read: Boolean
+      }
+
+      interface User <<Entity>>  {
+        +id: String
+        +name: String
+        +email: String
+        +password: String
+        +phone: String
+        +accountNumber: String
+        +accountType: String
+        +registrationDate: LocalDate
+        +paymentMethod: String
+        +billingAddress: Address
+      }
+
+      interface Address <<Entity>>  {
+        +id: Int
+        +street: String
+        +city: String
+        +state: String
+        +zipCode: String
+        +country: String
+      }
+    }
+
+' =================== PACKAGE DOMAIN ===================
+    package "Package Domain" #FFEBCD{
+      class UserPackage  {
+        -id: String
+        -type: String
+        -name: String
+        -plan: String
+        -speed: String
+        -router: String
+        -addOns: List<String>
+      }
+
+      class PackageType  {
+        -id: String
+        -name: String
+        -description: String
+        -basePrice: Double
+      }
+
+      class Option  {
+        -id: String
+        -name: String
+        -price: Double
+      }
+
+      class PackageOptionsResponse  {
+        -speeds: List<Option>
+        -routers: List<Option>
+        -dataPlans: List<Option>
+        -plans: List<Option>
+        -addOns: List<Option>
+      }
+
+      class PromoCode  {
+        -code: String
+        -discount: Double
+        -description: String
+      }
+
+      interface Package <<Entity>>  {
+        +id: String
+        +type: String
+        +name: String
+        +plan: String
+        +speed: String
+        +router: String
+        +createdAt: Instant
+        +addOns: List<String>
+        +users: List<User>
+      }
+    }
+
+' =================== USAGE DOMAIN ===================
+    package "Usage Domain" #FFEBCD{
+      class UsageDataResponse  {
+        -currentBillingCycle: BillingCycle
+        -previousBillingCycles: List<PreviousBillingCycle>
+      }
+
+      class BillingCycle  {
+        -startDate: String
+        -endDate: String
+        -packages: Map<String, PackageUsage>
+      }
+
+      class PackageUsage  {
+        -type: String
+        -name: String
+        -dataUsed: Double
+        -dataTotal: Double
+        -callMinutesUsed: Int
+        -callMinutesTotal: String
+        -smsUsed: Int
+        -smsTotal: String
+        -downloadSpeed: String
+        -uploadSpeed: String
+        -devices: Int
+      }
+    }
+
+' =================== SUPPORT DOMAIN ===================
+    package "Support Domain" #FFEBCD{
+      class SupportTicket  {
+        -id: String
+        -subject: String
+        -status: String
+        -createdDate: String
+        -lastUpdated: String
+        -priority: String
+        -resolution: String
+      }
+
+      class ChatMessage  {
+        -type: String
+        -text: String
+        -time: String
+      }
+
+      interface SupportTicket <<Entity>>  {
+        +id: String
+        +user: User
+        +subject: String
+        +status: String
+        +createdDate: LocalDate
+        +lastUpdated: LocalDate
+        +priority: String
+        +resolution: String
+      }
+    }
+
+' =================== FEEDBACK DOMAIN ===================
+    package "Feedback Domain" #FFEBCD{
+      class FeedbackEntry  {
+        -id: String
+        -rating: Int
+        -topic: String
+        -text: String
+        -timestamp: String
+        -user: String
+      }
+
+      class FeedbackSummary  {
+        -averageRating: Double
+        -totalReviews: Int
+        -recentFeedback: List<FeedbackEntry>
+      }
+    }
+}
+
+    package "Database"  {
+    package "Tables" #lightblue {
+      class Users <<Table>> {
+        +id: Column<String>
+        +name: Column<String>
+        +email: Column<String>
+        +password: Column<String>
+        +phone: Column<String>
+        +accountNumber: Column<String>
+        +accountType: Column<String>
+        +registrationDate: Column<LocalDate>
+        +paymentMethod: Column<String>
+        +billingAddressId: Column<Int>
+      }
+
+      class Addresses <<Table>> {
+        +id: Column<Int>
+        +street: Column<String>
+        +city: Column<String>
+        +state: Column<String>
+        +zipCode: Column<String>
+        +country: Column<String>
+      }
+
+      class Packages <<Table>> {
+        +id: Column<String>
+        +type: Column<String>
+        +name: Column<String>
+        +plan: Column<String>
+        +speed: Column<String>
+        +router: Column<String>
+        +createdAt: Column<Instant>
+      }
+
+      class UserPackages <<Table>> {
+        +userId: Column<String>
+        +packageId: Column<String>
+      }
+
+      class PackageAddOns <<Table>> {
+        +packageId: Column<String>
+        +addOn: Column<String>
+      }
+
+      class Feedbacks <<Table>> {
+        +id: Column<String>
+        +rating: Column<Int>
+        +topic: Column<String>
+        +text: Column<String>
+        +timestamp: Column<Instant>
+        +userName: Column<String>
+      }
+
+      class SupportTickets <<Table>> {
+        +id: Column<String>
+        +userId: Column<String>
+        +subject: Column<String>
+        +status: Column<String>
+        +createdDate: Column<LocalDate>
+        +lastUpdated: Column<LocalDate>
+        +priority: Column<String>
+        +resolution: Column<String>
+      }
+
+      class UsageDataTable <<Table>> {
+        +id: Column<Int>
+        +userId: Column<String>
+        +packageId: Column<String>
+        +billingCycleStart: Column<LocalDate>
+        +billingCycleEnd: Column<LocalDate>
+        +dataUsed: Column<BigDecimal>
+        +dataTotal: Column<BigDecimal>
+        +callMinutesUsed: Column<Int>
+        +callMinutesTotal: Column<String>
+        +smsUsed: Column<Int>
+        +smsTotal: Column<String>
+        +downloadSpeed: Column<String>
+        +uploadSpeed: Column<String>
+        +devices: Column<Int>
+      }
+
+      class PackageOptions <<Table>> {
+        +id: Column<Int>
+        +packageTypeId: Column<String>
+        +optionType: Column<String>
+        +optionId: Column<String>
+        +name: Column<String>
+        +price: Column<BigDecimal>
+      }
+    }
+
+    package "Repositories" #F0FFF0 {
+      interface Repository {
+        +database: Database
+        +initializeMockData()
+      }
+
+      class UserRepository {
+        -database: Database
+        +findUserById(id: String): User
+        +findUserByEmail(email: String): User
+        +createUser(...): User
+        +updateUser(...): Boolean
+        +getUserPackages(userId: String): List<Package>
+        +toModel(user: User): User
+        +initializeMockData()
+      }
+
+      class FeedbackRepository {
+        -database: Database
+        +getFeedbackSummary(): FeedbackSummary
+        +submitFeedback(request: SubmitFeedbackRequest)
+        +initializeMockData()
+      }
+
+      class ChatMessageRepository {
+        -database: Database
+        +getChatHistory(userId: String): List<ChatMessage>
+        +addMessage(userId: String, message: String, isFromUser: Boolean): ChatMessage
+        +initializeMockData()
+      }
+
+      class NotificationRepository {
+        -database: Database
+        +getNotifications(userId: String): List<Notification>
+        +markAsRead(notificationId: String): Boolean
+        +createNotification(userId: String, type: String, message: String): Notification
+        +initializeMockData()
+      }
+
+      class PackageRepository {
+        -database: Database
+        +getPackageTypes(): List<PackageType>
+        +getPackageOptions(typeId: String): PackageOptionsResponse
+        +createPackage(request: CreatePackageRequest): Package
+        +initializeMockData()
+      }
+
+      class PromoCodeRepository {
+        -database: Database
+        +validatePromoCode(code: String): PromoCode
+        +initializeMockData()
+      }
+
+      class SupportTicketRepository {
+        -database: Database
+        +getTickets(userId: String): List<SupportTicket>
+        +createTicket(userId: String, subject: String, priority: String): SupportTicket
+        +updateTicket(ticketId: String, status: String, resolution: String?): Boolean
+        +initializeMockData()
+      }
+
+      class UsageRepository {
+        -database: Database
+        +getUserUsage(userId: String): UsageDataResponse
+        +initializeMockData()
+      }
+    }
+
+    class DatabaseFactory {
+      -instance: Database
+      +{static} getInstance(): Database
+      -{static} init()
+    }
+}
+
+' =================== API ROUTES ===================
+interface "API ROUTES" as ApiRoutes #orange {
+  /users/**
+  /packages/**
+  /usage/**
+  /tickets/**
+  /chat/**
+  /feedback/**
+}
+
+
+package "Routes" #lightcyan {
+    interface RouteConfigurable {
+      +configure(route: Route)
+    }
+
+    abstract class RouteConfigBase {
+      #SAFE_DELIMITER: String
+      +configure(route: Route)
+      #{abstract} Route.configureRoutes()
+    }
+
+    class AuthRoutes {
+      +Route.configureRoutes()
+    }
+
+    class FeedbackRoutes {
+      -feedbackRepository: FeedbackRepository
+      +Route.configureRoutes()
+    }
+
+    class ChatRoutes {
+      -chatMessageRepository: ChatMessageRepository
+      +Route.configureRoutes()
+    }
+
+    class OtherUserDataRoutes {
+      -userRepository: UserRepository
+      -notificationRepository: NotificationRepository
+      +Route.configureRoutes()
+    }
+
+    class PackagesRoutes {
+      -packageRepository: PackageRepository
+      -promoCodeRepository: PromoCodeRepository
+      +Route.configureRoutes()
+    }
+
+    class UsageRoutes {
+      -usageRepository: UsageRepository
+      +Route.configureRoutes()
+    }
+
+    class UserProfileRoutes {
+      -userRepository: UserRepository
+      +Route.configureRoutes()
+    }
+}
+
+package "Configs" #lightcyan {
+    interface PluginConfigurable {
+      +configure(application: Application)
+    }
+
+    abstract class PluginConfigBase {
+      +configure(application: Application)
+      #{abstract} Application.configurePlugin()
+    }
+
+    class CallLoggingConfig {
+      +Application.configurePlugin()
+    }
+
+    class CorsConfig {
+      +Application.configurePlugin()
+    }
+
+    class RoutingConfig {
+      -routesConfigRegister: RoutesConfigRegister
+      +Application.configurePlugin()
+    }
+
+    class SerializationConfig {
+      +Application.configurePlugin()
+    }
+
+    class StatusPagesConfig {
+      +Application.configurePlugin()
+    }
+}
+
+' =================== BACKEND RELATIONSHIPS ===================
+
+' Backend inheritance relationships (Generalization)
+Repository <|-- UserRepository : extends (1-to-1)
+Repository <|-- FeedbackRepository : extends (1-to-1)
+Repository <|-- ChatMessageRepository : extends (1-to-1)
+Repository <|-- NotificationRepository : extends (1-to-1)
+Repository <|-- PackageRepository : extends (1-to-1)
+Repository <|-- PromoCodeRepository : extends (1-to-1)
+Repository <|-- SupportTicketRepository : extends (1-to-1)
+Repository <|-- UsageRepository : extends (1-to-1)
+
+RouteConfigurable <|-- RouteConfigBase : extends (1-to-1)
+RouteConfigBase <|-- AuthRoutes : extends (1-to-1)
+RouteConfigBase <|-- FeedbackRoutes : extends (1-to-1)
+RouteConfigBase <|-- ChatRoutes : extends (1-to-1)
+RouteConfigBase <|-- OtherUserDataRoutes : extends (1-to-1)
+RouteConfigBase <|-- PackagesRoutes : extends (1-to-1)
+RouteConfigBase <|-- UsageRoutes : extends (1-to-1)
+RouteConfigBase <|-- UserProfileRoutes : extends (1-to-1)
+
+PluginConfigurable <|-- PluginConfigBase : extends (1-to-1)
+PluginConfigBase <|-- CallLoggingConfig : extends (1-to-1)
+PluginConfigBase <|-- CorsConfig : extends (1-to-1)
+PluginConfigBase <|-- RoutingConfig : extends (1-to-1)
+PluginConfigBase <|-- SerializationConfig : extends (1-to-1)
+PluginConfigBase <|-- StatusPagesConfig : extends (1-to-1)
+
+UserRepository "1" ..> "1" Users : uses for storage
+UserRepository "1" ..> "1" Addresses : uses for storage
+UserRepository "1" ..> "1" Packages : uses for storage
+UserRepository "1" ..> "1" UserPackages : uses for storage
+UserRepository "1" ..> "1" PackageAddOns : uses for storage
+UserRepository "1" ..> "*" User : returns
+
+FeedbackRepository "1" ..> "1" Feedbacks : uses for storage
+FeedbackRepository "1" ..> "*" FeedbackEntry : returns
+FeedbackRepository "1" ..> "1" FeedbackSummary : returns
+
+ChatMessageRepository "1" ..> "1" ChatMessage : uses for storage
+ChatMessageRepository "1" ..> "*" ChatMessage : returns
+
+NotificationRepository "1" ..> "1" Notification : uses for storage
+NotificationRepository "1" ..> "*" Notification : returns
+
+PackageRepository "1" ..> "1" Packages : uses for storage
+PackageRepository "1" ..> "1" PackageType : uses for storage
+PackageRepository "1" ..> "1" PackageOptions : uses for storage
+PackageRepository "1" ..> "*" PackageType : returns
+PackageRepository "1" ..> "*" Option : returns
+PackageRepository "1" ..> "1" PackageOptionsResponse : returns
+
+PromoCodeRepository "1" ..> "1" PromoCode : uses for storage
+PromoCodeRepository "1" ..> "*" PromoCode : returns
+
+SupportTicketRepository "1" ..> "1" SupportTickets : uses for storage
+SupportTicketRepository "1" ..> "*" SupportTicket : returns
+
+UsageRepository "1" ..> "1" UsageDataTable : uses for storage
+UsageRepository "1" ..> "1" UsageDataResponse : returns
+DatabaseFactory "1" ..> "*" Repository : creates
+
+' Cross-layer relationships (Dependency)
+ApiRoutes "1" ..> "1" AuthRoutes : routes to
+ApiRoutes "1" ..> "1" FeedbackRoutes : routes to
+ApiRoutes "1" ..> "1" ChatRoutes : routes to
+ApiRoutes "1" ..> "1" OtherUserDataRoutes : routes to
+ApiRoutes "1" ..> "1" PackagesRoutes : routes to
+ApiRoutes "1" ..> "1" UsageRoutes : routes to
+ApiRoutes "1" ..> "1" UserProfileRoutes : routes to
+
+@enduml

@@ -1,0 +1,201 @@
+@startuml Frontend_REST_API_Diagram
+
+top to bottom direction
+skinparam wrapWidth 200
+
+' =================== FRONTEND VIEW LAYER ===================
+package "Frontend View" #lightpink {
+  class UserDashboardView {
+    +renderUserProfile()
+    +renderUsageData()
+    +renderPackages()
+    +renderBillingInfo()
+  }
+
+  class PackageView {
+    +renderAvailablePackages()
+    +renderPackageDetails()
+    +renderOrderForm()
+    +renderPromoCodeInput()
+  }
+
+  class SupportView {
+    +renderTicketList()
+    +renderTicketDetails()
+    +renderCreateTicketForm()
+    +renderChatInterface()
+  }
+
+  class FeedbackView {
+    +renderFeedbackForm()
+  }
+
+  class LoginView {
+    +renderLoginForm()
+    +renderRegistrationForm()
+    +renderForgotPasswordForm()
+  }
+
+  class HtmlPages {
+    +index.html
+    +dashboard.html
+    +packages.html
+    +support.html
+    +feedback.html
+    +login.html
+    +register.html
+    +profile.html
+    +usage.html
+  }
+}
+
+' =================== FRONTEND CONTROLLER LAYER ===================
+package "Frontend Controller" #lightyellow {
+  class UserController {
+    +registerUser(userData)
+    +loginUser(credentials)
+    +logoutUser()
+    +getUserProfile()
+    +updateUserProfile(userData)
+    +handleRegistrationForm()
+    +handleLoginForm()
+    +handleProfileUpdateForm()
+  }
+
+  class PackageController {
+    +getPackageTypes()
+    +getPackageOptions(typeId)
+    +validatePromoCode(code)
+    +orderPackage(packageData)
+    +handlePackageSelection()
+    +handlePromoCodeValidation()
+    +handlePackageOrder()
+  }
+
+  class UsageController {
+    +getUserUsageData()
+    +refreshUsageData()
+    +handleUsageDataFilters()
+    +initializeUsagePage()
+    +createPackageSection(pkg)
+    +deletePackage(packageId)
+  }
+
+  class SupportController {
+    +getSupportTickets()
+    +createSupportTicket(ticketData)
+    +updateSupportTicket(ticketId, data)
+    +getChatHistory()
+    +sendChatMessage(message)
+    +handleTicketForm()
+    +handleChatInput()
+  }
+
+  class FeedbackController {
+    +submitFeedback(feedbackData)
+    +handleFeedbackForm()
+  }
+}
+
+' =================== FRONTEND CLIENT API MODEL LAYER ===================
+package "Frontend Client Api model" #lightgreen {
+  class ApiService {
+    +get(endpoint, params)
+    +post(endpoint, data)
+    +put(endpoint, data)
+    +delete(endpoint)
+    +handleApiResponse(response)
+    +getAuthHeaders()
+  }
+
+  class UserModel {
+    +loginUser(email, password, rememberMe)
+    +registerUser(fullName, email, password, confirmPassword, agreeTerms)
+    +getUserProfile()
+    +updateUserProfile(profileData)
+    +getUserSupportTickets()
+    +getUserNotifications()
+    +markNotificationAsRead(notificationId)
+  }
+
+  class PackageModel {
+    +getPackageTypes()
+    +getPackageOptions(packageTypeId)
+    +validatePromoCode(promoCode)
+    +submitOrder(orderDetails)
+  }
+
+  class UsageModel {
+    +getUserUsage()
+    +deletePackage(packageId)
+  }
+
+  class FeedbackModel {
+    +getFeedbackSummary()
+    +submitFeedback(feedbackData)
+  }
+
+  class ChatModel {
+    +getChatHistory()
+    +sendChatMessage(messageText)
+  }
+}
+
+' =================== REST API INTERFACE ===================
+interface "REST API" as RestApi #orange {
+  /users/**
+  /packages/**
+  /usage/**
+  /tickets/**
+  /chat/**
+  /feedback/**
+}
+
+' =================== FRONTEND RELATIONSHIPS ===================
+
+' Frontend View to Frontend Controller relationships (Aggregation)
+UserDashboardView "1" o-- "1" UserController : uses >
+UserDashboardView "1" o-- "1" UsageController : uses >
+UserDashboardView "1" o-- "1" PackageController : uses >
+
+PackageView "1" o-- "1" PackageController : uses >
+
+SupportView "1" o-- "1" SupportController : uses >
+
+FeedbackView "1" o-- "1" FeedbackController : uses >
+
+LoginView "1" o-- "1" UserController : uses >
+
+' Frontend Controller to Frontend Client Api model relationships (Aggregation)
+UserController "1" o-- "1" UserModel : uses >
+PackageController "1" o-- "1" PackageModel : uses >
+UsageController "1" o-- "1" UsageModel : uses >
+SupportController "1" o-- "1" UserModel : uses >
+SupportController "1" o-- "1" ChatModel : uses >
+FeedbackController "1" o-- "1" FeedbackModel : uses >
+
+' Frontend Client Api model to API Service relationships (Aggregation)
+UserModel "1" o-- "1" ApiService : uses >
+PackageModel "1" o-- "1" ApiService : uses >
+UsageModel "1" o-- "1" ApiService : uses >
+FeedbackModel "1" o-- "1" ApiService : uses >
+ChatModel "1" o-- "1" ApiService : uses >
+
+' HTML Pages to View components relationships (Aggregation)
+HtmlPages "1" o-- "1" UserDashboardView : rendered by >
+HtmlPages "1" o-- "1" PackageView : rendered by >
+HtmlPages "1" o-- "1" SupportView : rendered by >
+HtmlPages "1" o-- "1" FeedbackView : rendered by >
+HtmlPages "1" o-- "1" LoginView : rendered by >
+
+' Frontend Client Api model data relationships (Aggregation)
+UserModel "1" o-- "*" PackageModel : user has packages >
+UserModel "1" o-- "*" UsageModel : user has usage data >
+UserModel "1" o-- "*" FeedbackModel : user submits feedback >
+UserModel "1" o-- "*" ChatModel : user has chat history >
+PackageModel "1" o-- "*" UsageModel : package tracks usage >
+
+' Frontend to Backend connection via REST API (Aggregation)
+ApiService "1" o-- "1" RestApi : sends requests to >
+
+@enduml

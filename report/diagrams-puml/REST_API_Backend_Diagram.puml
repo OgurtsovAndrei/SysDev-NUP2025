@@ -1,0 +1,317 @@
+@startuml REST_API_Backend_Diagram
+
+top to bottom direction
+skinparam wrapWidth 200
+
+' =================== REST API INTERFACE ===================
+interface "REST API" as RestApi #orange {
+  /users/**
+  /packages/**
+  /usage/**
+  /tickets/**
+  /chat/**
+  /feedback/**
+}
+
+' =================== DATABASE LAYER ===================
+package "Data Base" #pink {
+  class Database {
+    +connection: Connection
+    +connect(): Boolean
+    +disconnect(): void
+    +executeQuery(query: String): ResultSet
+    +executeUpdate(query: String): int
+    +beginTransaction(): void
+    +commitTransaction(): void
+    +rollbackTransaction(): void
+  }
+
+  class Connection {
+    +url: String
+    +username: String
+    +password: String
+    +isConnected: Boolean
+    +connect(): Boolean
+    +disconnect(): void
+  }
+
+  ' Core database tables
+  class UsersTable {
+    +id: Column<String>
+    +email: Column<String>
+    +password: Column<String>
+    +name: Column<String>
+    +findById(id: String): ResultSet
+    +findByEmail(email: String): ResultSet
+    +insert(user: Map<String, Any>): int
+    +update(id: String, user: Map<String, Any>): int
+    +delete(id: String): int
+  }
+
+  class PackagesTable {
+    +id: Column<String>
+    +name: Column<String>
+    +type: Column<String>
+    +price: Column<Double>
+    +features: Column<String>
+    +isActive: Column<Boolean>
+    +findById(id: String): ResultSet
+    +findAll(): ResultSet
+    +findByType(type: String): ResultSet
+    +insert(pkg: Map<String, Any>): int
+    +update(id: String, pkg: Map<String, Any>): int
+    +delete(id: String): int
+  }
+
+  class UserPackagesTable {
+    +id: Column<String>
+    +userId: Column<String>
+    +packageId: Column<String>
+    +startDate: Column<Date>
+    +endDate: Column<Date>
+    +status: Column<String>
+    +findById(id: String): ResultSet
+    +findByUserId(userId: String): ResultSet
+    +findByPackageId(packageId: String): ResultSet
+    +insert(userPackage: Map<String, Any>): int
+    +update(id: String, userPackage: Map<String, Any>): int
+    +delete(id: String): int
+  }
+}
+
+' =================== BACKEND MODEL LAYER ===================
+package "Backend Model" #lightblue {
+  ' Entity base interface
+  interface Entity<T> {
+    +companion object Factory<T>
+  }
+
+  ' Core entity interfaces
+  interface User extends Entity {
+    -id: String
+    -email: String
+    -password: String
+    -name: String
+    +getId(): String
+    +getEmail(): String
+    +getName(): String
+  }
+
+  interface Package extends Entity {
+    -id: String
+    -name: String
+    -type: PackageType
+    -price: Double
+    -features: List<String>
+    -isActive: Boolean
+    +getId(): String
+    +getName(): String
+    +getType(): PackageType
+    +getPrice(): Double
+    +getFeatures(): List<String>
+    +isActive(): Boolean
+  }
+
+  interface UserPackage extends Entity {
+    -id: String
+    -userId: String
+    -packageId: String
+    -startDate: Date
+    -endDate: Date
+    -status: PackageStatus
+    +getId(): String
+    +getUserId(): String
+    +getPackageId(): String
+    +getStartDate(): Date
+    +getEndDate(): Date
+    +getStatus(): PackageStatus
+  }
+
+  ' Core enumerations
+  enum PackageType {
+    BASIC
+    STANDARD
+    PREMIUM
+    ENTERPRISE
+  }
+
+  enum PackageStatus {
+    ACTIVE
+    SUSPENDED
+    CANCELLED
+    EXPIRED
+  }
+}
+
+' =================== BACKEND CONTROLLER LAYER ===================
+package "Backend Controller" #lightcyan {
+  ' Base interfaces
+  interface Repository {
+    +database: Database
+    +initializeMockData(): void
+  }
+
+  interface RouteConfigurable {
+    +configure(route: Route): void
+  }
+
+  interface PluginConfigurable {
+    +configure(application: Application): void
+  }
+
+  ' Base abstract classes
+  abstract class RouteConfigBase implements RouteConfigurable {
+    #SAFE_DELIMITER: String
+    +configure(route: Route): void
+    #{abstract} Route.configureRoutes(): void
+  }
+
+  abstract class PluginConfigBase implements PluginConfigurable {
+    +configure(application: Application): void
+    #{abstract} Application.configurePlugin(): void
+  }
+
+  ' Repository implementations
+  class UserRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getUserById(id: String): User?
+    +getUserByEmail(email: String): User?
+    +createUser(user: User): User
+    +updateUser(user: User): Boolean
+    +getUserPackages(userId: String): List<Package>
+    +toUserModel(user: User): UserModel
+  }
+
+  class PackageRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getAllPackageTypes(): List<PackageTypeModel>
+    +getPackageOptions(packageTypeId: String): PackageOptionsResponse?
+    +validatePromoCode(code: String): PromoCode?
+    +orderPackage(userId: String, request: OrderRequest): Boolean
+    +toPackageTypeModel(packageType: PackageType): PackageTypeModel
+    +toPackageOptionModel(option: PackageOption): Option
+  }
+
+  class UsageRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getUserUsageData(userId: String): UsageDataResponse
+    +deletePackage(userId: String, packageId: String): Boolean
+  }
+
+  class SupportTicketRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getUserTickets(userId: String): List<SupportTicket>
+    +getTicketById(ticketId: String): SupportTicket?
+    +createTicket(ticket: SupportTicket): SupportTicket
+    +updateTicket(ticket: SupportTicket): Boolean
+    +toSupportTicketModel(ticket: SupportTicket): SupportTicketModel
+  }
+
+  class ChatMessageRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getTicketChatHistory(ticketId: String): List<ChatMessage>
+    +sendChatMessage(message: ChatMessage): ChatMessage
+    +toChatMessageModel(message: ChatMessage): ChatMessageModel
+  }
+
+  class FeedbackRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +submitFeedback(feedback: Feedback): Feedback
+    +getFeedbackById(feedbackId: String): Feedback?
+    +getUserFeedback(userId: String): List<Feedback>
+    +toFeedbackEntryModel(feedback: Feedback): FeedbackEntry
+  }
+
+  ' Route implementations
+  class AuthRoutes extends RouteConfigBase {
+    -userRepository: UserRepository
+    #Route.configureRoutes(): void
+  }
+
+  class UserProfileRoutes extends RouteConfigBase {
+    -userRepository: UserRepository
+    #Route.configureRoutes(): void
+  }
+
+  class PackagesRoutes extends RouteConfigBase {
+    -packageRepository: PackageRepository
+    #Route.configureRoutes(): void
+  }
+
+  class UsageRoutes extends RouteConfigBase {
+    -usageRepository: UsageRepository
+    #Route.configureRoutes(): void
+  }
+
+  class ChatRoutes extends RouteConfigBase {
+    -chatMessageRepository: ChatMessageRepository
+    #Route.configureRoutes(): void
+  }
+
+  class FeedbackRoutes extends RouteConfigBase {
+    -feedbackRepository: FeedbackRepository
+    #Route.configureRoutes(): void
+  }
+
+  ' Main application server
+  class ApiServer {
+    +port: Integer
+    +host: String
+    +plugins: List<PluginConfigurable>
+    +start(): void
+    +stop(): void
+    +configurePlugins(): void
+  }
+}
+
+' =================== BACKEND RELATIONSHIPS ===================
+
+' Database relationships (Aggregation)
+Database "1" o-- "1" Connection : uses >
+Database "1" o-- "1" UsersTable : contains >
+Database "1" o-- "1" PackagesTable : contains >
+Database "1" o-- "1" UserPackagesTable : contains >
+
+' Database to Backend Model relationships (Aggregation)
+UsersTable "1" o-- "*" User : persists >
+PackagesTable "1" o-- "*" Package : persists >
+UserPackagesTable "1" o-- "*" UserPackage : persists >
+
+' Core Repository to Entity relationships (Aggregation)
+UserRepository "1" o-- "*" User : manages >
+PackageRepository "1" o-- "*" Package : manages >
+UsageRepository "1" o-- "*" UserPackage : manages >
+
+' Repository to Database relationships (Aggregation)
+UserRepository "1" o-- "1" Database : uses >
+PackageRepository "1" o-- "1" Database : uses >
+UsageRepository "1" o-- "1" Database : uses >
+
+' Core Route to Repository relationships (Aggregation)
+AuthRoutes "1" o-- "1" UserRepository : uses >
+PackagesRoutes "1" o-- "1" PackageRepository : uses >
+UsageRoutes "1" o-- "1" UsageRepository : uses >
+
+' Core Entity inheritance relationships (Generalization)
+User --|> Entity
+Package --|> Entity
+UserPackage --|> Entity
+
+' Core Backend Model relationship notations (Aggregation)
+User "1" o-- "*" UserPackage : subscribes to >
+Package "1" o-- "*" UserPackage : subscribed by >
+
+' Core Backend Type enumerations (Association)
+Package "1" --> "1" PackageType : has type >
+UserPackage "1" --> "1" PackageStatus : has status >
+
+' REST API to ApiServer relationship (Aggregation)
+RestApi "1" o-- "1" ApiServer : exposes and handles >
+
+@enduml
