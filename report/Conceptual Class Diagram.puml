@@ -1,4 +1,4 @@
-    @startuml "Conceptual Class Diagram"
+@startuml "Conceptual Class Diagram"
 
 ' Color definitions for better organization
 !define USER_COLOR #FFEBCD
@@ -8,194 +8,188 @@
 !define FEEDBACK_COLOR #FFF0F5
 !define OTHER_COLOR #F5F5DC
 
-' User Package
-package "User Domain" {
-  class User #USER_COLOR {
-    id: String
-    name: String
-    email: String
-    password: String
-    phone: String
-    accountNumber: String
-    accountType: String
-    registrationDate: String
-    paymentMethod: String
+' =================== USER DOMAIN ===================
+package "User Domain"  {
+  class User #USER_COLOR  {
+    -id
+    -name
+    -email
+    -password
+    -phone
+    -accountNumber
+    -registrationDate
+    -paymentMethod
   }
 
-  class Address #USER_COLOR {
-    street: String
-    city: String
-    state: String
-    zipCode: String
-    country: String
+  class Address {
+    -street
+    -city
+    -state
+    -zipCode
+    -country
   }
 
-  class LoginRequest #USER_COLOR {
-    email: String
-    password: String
-    rememberMe: Boolean
-  }
-
-  class RegisterRequest #USER_COLOR {
-    fullName: String
-    email: String
-    password: String
-    confirmPassword: String
-    agreeTerms: Boolean
+  class Notification {
+    -id
+    -type
+    -message
+    -date
+    -read
   }
 }
 
-' Package Package
-package "Package Domain" {
-  class PackageType #PACKAGE_COLOR {
-    id: String
-    name: String
-    description: String
-    basePrice: Double
+' =================== PACKAGE DOMAIN ===================
+package "Package Domain"{
+  class Package  #PACKAGE_COLOR {
+    -id
+    -type
+    -name
+    -plan
+    -speed
+    -router
+    -addOns
+    -price
+    -features
+    -isActive
   }
 
-  class Package #PACKAGE_COLOR {
-    id: String
-    type: String
-    name: String
-    plan: String
-    speed: String
-    router: String
-    createdAt: Instant
+  class PackageType {
+    -id
+    -name
+    -description
+    -basePrice
   }
 
-  class Option #PACKAGE_COLOR {
-    id: String
-    name: String
-    price: Double
+  class PackageOption {
+    -id
+    -optionType
+    -optionId
+    -name
+    -price
   }
 
-  class AddOn #PACKAGE_COLOR {
-    id: String
-    name: String
+  class PackageAddOn {
+    -addOn
   }
 
-  class OrderRequest #PACKAGE_COLOR {
-    packageType: String
-    promoCode: String
+  class UserPackage {
+    -id
+    -startDate
+    -endDate
+    -status
   }
 
-  class OrderOptions #PACKAGE_COLOR {
-    speed: String
-    router: String
-    dataPlan: String
-    plan: String
-    addOns: List<String>
+  class PromoCode {
+    -code
+    -discount
+    -expiryDate
+    -isValid
   }
 }
 
-' Usage Package
+' =================== USAGE DOMAIN ===================
 package "Usage Domain" {
   class UsageData #USAGE_COLOR {
-    currentBillingCycle: BillingCycle
-    previousBillingCycles: List<PreviousBillingCycle>
+    -id
+    -usageType
+    -amount
+    -date
   }
 
-  class BillingCycle #USAGE_COLOR {
-    startDate: String
-    endDate: String
+  class BillingCycle {
+    -startDate
+    -endDate
   }
 
-  class PackageUsage #USAGE_COLOR {
-    type: String
-    name: String
-    dataUsed: Double
-    dataTotal: Double
-    callMinutesUsed: Int
-    callMinutesTotal: String
-    smsUsed: Int
-    smsTotal: String
-    downloadSpeed: String
-    uploadSpeed: String
-    devices: Int
-  }
-}
-
-' Support Package
-package "Support Domain" {
-  class ChatMessage #SUPPORT_COLOR {
-    type: String
-    text: String
-    time: String
+  class PackageUsage {
+    -type
+    -name
+    -dataUsed
+    -dataTotal
+    -callMinutesUsed
+    -callMinutesTotal
+    -smsUsed
+    -smsTotal
+    -downloadSpeed
+    -uploadSpeed
+    -devices
   }
 
-  class SupportTicket #SUPPORT_COLOR {
-    id: String
-    subject: String
-    status: String
-    createdDate: String
-    lastUpdated: String
-    priority: String
-    resolution: String
+  enum UsageType {
+    DATA
+    VOICE
+    SMS
+    ROAMING
   }
 }
 
-' Feedback Package
-package "Feedback Domain" {
-  class FeedbackEntry #FEEDBACK_COLOR {
-    id: String
-    rating: Int
-    topic: String
-    text: String
-    timestamp: String
-    user: String
+' =================== SUPPORT DOMAIN ===================
+package "Support Domain"{
+  class SupportTicket  #SUPPORT_COLOR {
+    -id
+    -subject
+    -description
+    -status
+    -createdDate
+    -lastUpdated
+    -priority
+    -resolution
   }
 
-  class FeedbackSummary #FEEDBACK_COLOR {
-    averageRating: Double
-    totalReviews: Int
-  }
-}
-
-' Other Package
-package "Other Domain" {
-  class Notification #OTHER_COLOR {
-    id: String
-    type: String
-    message: String
-    date: String
-    read: Boolean
+  class ChatMessage {
+    -id
+    -type
+    -text
+    -time
+    -senderId
   }
 
-  class PromoCode #OTHER_COLOR {
-    code: String
-    discount: Double
-    description: String
+  enum TicketStatus {
+    OPEN
+    IN_PROGRESS
+    RESOLVED
+    CLOSED
   }
 }
 
-' Relationships
+' =================== FEEDBACK DOMAIN ===================
+package "Feedback Domain"  {
+  class Feedback #FEEDBACK_COLOR{
+    -id
+    -rating
+    -topic
+    -text
+    -timestamp
+  }
+}
+
+' =================== RELATIONSHIPS ===================
+
+' User relationships
 User "1" -- "1" Address : has >
-User "1" -- "0..*" Package : subscribes >
-User "1" -- "0..*" ChatMessage : sends >
-User "1" -- "0..*" SupportTicket : creates >
-User "1" -- "0..*" FeedbackEntry : submits >
-User "1" -- "0..*" Notification : receives >
-User "1" -- "1" UsageData : has >
+User "1" -- "*" Notification : receives >
+User "1" -- "*" UserPackage : subscribes to >
+User "1" -- "*" UsageData : generates >
+User "1" -- "*" SupportTicket : creates >
+User "1" -- "*" Feedback : submits >
 
-LoginRequest ..> User : authenticates >
-RegisterRequest ..> User : creates >
+' Package relationships
+Package "1" -- "1" PackageType : has type >
+Package "1" -- "*" UserPackage : subscribed by >
+Package "1" -- "*" UsageData : tracked in >
+Package "1" -- "*" PackageAddOn : has >
+PackageType "1" -- "*" PackageOption : has options >
+UserPackage "*" -- "1" User : belongs to >
+PromoCode -- Package : applies to >
 
-PackageType "1" -- "0..*" Package : defines >
-PackageType "1" -- "0..*" Option : offers >
+' Usage relationships
+UsageData "1" -- "1" UsageType : has type >
+BillingCycle "1" -- "*" PackageUsage : contains >
+PackageUsage "*" -- "1" UserPackage : measures >
 
-Package "0..*" -- "0..*" AddOn : includes >
-Package "1" -- "0..*" PackageUsage : tracks >
-
-OrderRequest "1" -- "1" OrderOptions : contains >
-OrderRequest ..> Package : creates >
-OrderRequest ..> PromoCode : uses >
-
-BillingCycle "1" -- "0..*" PackageUsage : contains >
-UsageData "1" -- "1..*" BillingCycle : has >
-
-FeedbackSummary "1" -- "0..*" FeedbackEntry : summarizes >
-
-PromoCode "0..*" -- "0..*" Package : applies to >
+' Support relationships
+SupportTicket "1" -- "1" TicketStatus : has status >
+SupportTicket "1" -- "*" ChatMessage : contains >
+ChatMessage "*" -- "1" User : sent by >
 
 @enduml

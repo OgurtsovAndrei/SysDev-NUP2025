@@ -1,0 +1,94 @@
+@startuml "Send Chat Message Sequence Diagram"
+
+actor Customer
+participant SupportView
+participant SupportController
+participant ChatModel
+participant ApiService
+participant ChatRoutes
+participant ChatMessageRepository
+database "ChatMessage" as ChatMessageTable
+
+title Send Chat Message Sequence Diagram
+
+Customer -> SupportView : Write message in chat
+activate SupportView
+
+' Optional extend relationship - get chat history
+opt View chat history first
+  SupportView -> SupportController : getChatHistory()
+  activate SupportController
+  
+  SupportController -> ChatModel : getChatHistory()
+  activate ChatModel
+  
+  ChatModel -> ApiService : get("/chat/history")
+  activate ApiService
+  
+  ApiService -> ChatRoutes : GET /chat/history
+  activate ChatRoutes
+  
+  ChatRoutes -> ChatMessageRepository : getChatHistory()
+  activate ChatMessageRepository
+  
+  ChatMessageRepository -> ChatMessageTable : query chat messages
+  activate ChatMessageTable
+  ChatMessageTable --> ChatMessageRepository : return messages
+  deactivate ChatMessageTable
+  
+  ChatMessageRepository --> ChatRoutes : return chat history
+  deactivate ChatMessageRepository
+  
+  ChatRoutes --> ApiService : return chat history
+  deactivate ChatRoutes
+  
+  ApiService --> ChatModel : return chat history response
+  deactivate ApiService
+  
+  ChatModel --> SupportController : return chat history
+  deactivate ChatModel
+  
+  SupportController --> SupportView : display chat history
+  deactivate SupportController
+end
+
+' Main flow - send message
+SupportView -> SupportController : handleChatInput(messageText)
+activate SupportController
+
+SupportController -> ChatModel : sendChatMessage(messageText)
+activate ChatModel
+
+ChatModel -> ApiService : post("/chat/send", messageData)
+activate ApiService
+
+ApiService -> ChatRoutes : POST /chat/send
+activate ChatRoutes
+
+ChatRoutes -> ChatMessageRepository : addMessage(message)
+activate ChatMessageRepository
+
+ChatMessageRepository -> ChatMessageTable : save message
+activate ChatMessageTable
+ChatMessageTable --> ChatMessageRepository : confirm save
+deactivate ChatMessageTable
+
+ChatMessageRepository --> ChatRoutes : return saved message
+deactivate ChatMessageRepository
+
+ChatRoutes --> ApiService : return message confirmation
+deactivate ChatRoutes
+
+ApiService --> ChatModel : return message response
+deactivate ApiService
+
+ChatModel --> SupportController : return message result
+deactivate ChatModel
+
+SupportController --> SupportView : update chat with new message
+deactivate SupportController
+
+SupportView --> Customer : Display sent message in chat
+deactivate SupportView
+
+@enduml

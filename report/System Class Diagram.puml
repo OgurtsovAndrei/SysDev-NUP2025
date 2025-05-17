@@ -1,5 +1,8 @@
 @startuml Complete System Class Diagram (MVC)
 
+top to bottom direction
+skinparam wrapWidth 200
+
 ' =================== FRONTEND VIEW LAYER ===================
 package "Frontend View" #lightpink {
   class UserDashboardView {
@@ -148,90 +151,91 @@ interface "REST API" as RestApi #orange {
   /feedback/**
 }
 
-' =================== BACKEND CONTROLLER LAYER ===================
-package "Backend Controller" #lightcyan {
-  class ApiServer {
-    +port: Integer
-    +host: String
-    +routes: Map<String, Object>
-    +start(): void
-    +stop(): void
-    +handleRequest(request: Request): Response
-    +registerRoute(path: String, method: String, handler: Function): void
-    +getRoutesInfo(): List<RouteInfo>
-    +getServerStatus(): ServerStatus
+' =================== DATABASE LAYER ===================
+package "Data Base" #pink {
+  class Database {
+    +connection: Connection
+    +connect(): Boolean
+    +disconnect(): void
+    +executeQuery(query: String): ResultSet
+    +executeUpdate(query: String): int
+    +beginTransaction(): void
+    +commitTransaction(): void
+    +rollbackTransaction(): void
   }
 
-  class BackendUserController {
-    +register(request: UserRegistrationRequest): Response
-    +login(request: LoginRequest): Response
-    +logout(request: LogoutRequest): Response
-    +getUserProfile(userId: String): Response
-    +updateUserProfile(userId: String, data: UserProfileUpdateRequest): Response
+  class Connection {
+    +url: String
+    +username: String
+    +password: String
+    +isConnected: Boolean
+    +connect(): Boolean
+    +disconnect(): void
   }
 
-  class BackendPackageController {
-    +getAllPackages(): Response
-    +getPackageById(id: String): Response
-    +getPackageTypes(): Response
-    +getPackagesByType(typeId: String): Response
-    +getUserPackages(userId: String): Response
-    +orderPackage(request: PackageOrderRequest): Response
-    +validatePromoCode(code: String): Response
+  ' Core database tables
+  class UsersTable {
+    +id: Column<String>
+    +email: Column<String>
+    +password: Column<String>
+    +name: Column<String>
+    +findById(id: String): ResultSet
+    +findByEmail(email: String): ResultSet
+    +insert(user: Map<String, Any>): int
+    +update(id: String, user: Map<String, Any>): int
+    +delete(id: String): int
   }
 
-  class BackendUsageController {
-    +getUserUsageData(userId: String): Response
-    +getUserUsageByType(userId: String, type: UsageType): Response
-    +getUserUsageByDateRange(userId: String, startDate: Date, endDate: Date): Response
+  class PackagesTable {
+    +id: Column<String>
+    +name: Column<String>
+    +type: Column<String>
+    +price: Column<Double>
+    +features: Column<String>
+    +isActive: Column<Boolean>
+    +findById(id: String): ResultSet
+    +findAll(): ResultSet
+    +findByType(type: String): ResultSet
+    +insert(pkg: Map<String, Any>): int
+    +update(id: String, pkg: Map<String, Any>): int
+    +delete(id: String): int
   }
 
-  class BackendSupportController {
-    +getUserTickets(userId: String): Response
-    +getTicketById(ticketId: String): Response
-    +createTicket(request: TicketCreateRequest): Response
-    +updateTicket(ticketId: String, request: TicketUpdateRequest): Response
-  }
-
-  class BackendChatController {
-    +getTicketChatHistory(ticketId: String): Response
-    +sendChatMessage(request: ChatMessageRequest): Response
-  }
-
-  class BackendFeedbackController {
-    +submitFeedback(request: FeedbackRequest): Response
-    +getFeedbackById(feedbackId: String): Response
-    +getUserFeedback(userId: String): Response
+  class UserPackagesTable {
+    +id: Column<String>
+    +userId: Column<String>
+    +packageId: Column<String>
+    +startDate: Column<Date>
+    +endDate: Column<Date>
+    +status: Column<String>
+    +findById(id: String): ResultSet
+    +findByUserId(userId: String): ResultSet
+    +findByPackageId(packageId: String): ResultSet
+    +insert(userPackage: Map<String, Any>): int
+    +update(id: String, userPackage: Map<String, Any>): int
+    +delete(id: String): int
   }
 }
 
-' =================== BACKEND MODEL LAYER (DATABASE) ===================
+' =================== BACKEND MODEL LAYER ===================
 package "Backend Model" #lightblue {
-  class User {
+  ' Entity base interface
+  interface Entity<T> {
+    +companion object Factory<T>
+  }
+
+  ' Core entity interfaces
+  interface User extends Entity {
     -id: String
     -email: String
     -password: String
     -name: String
-    -profile: UserProfile
     +getId(): String
     +getEmail(): String
     +getName(): String
-    +getProfile(): UserProfile
-    +setProfile(profile: UserProfile)
   }
 
-  class UserProfile {
-    -userId: String
-    -address: String
-    -phoneNumber: String
-    -preferences: Map<String, Object>
-    +getUserId(): String
-    +getAddress(): String
-    +getPhoneNumber(): String
-    +getPreferences(): Map<String, Object>
-  }
-
-  class Package {
+  interface Package extends Entity {
     -id: String
     -name: String
     -type: PackageType
@@ -246,7 +250,7 @@ package "Backend Model" #lightblue {
     +isActive(): Boolean
   }
 
-  class UserPackage {
+  interface UserPackage extends Entity {
     -id: String
     -userId: String
     -packageId: String
@@ -261,64 +265,7 @@ package "Backend Model" #lightblue {
     +getStatus(): PackageStatus
   }
 
-  class UsageData {
-    -id: String
-    -userId: String
-    -packageId: String
-    -usageType: UsageType
-    -amount: Double
-    -date: Date
-    +getId(): String
-    +getUserId(): String
-    +getPackageId(): String
-    +getUsageType(): UsageType
-    +getAmount(): Double
-    +getDate(): Date
-  }
-
-  class SupportTicket {
-    -id: String
-    -userId: String
-    -subject: String
-    -description: String
-    -status: TicketStatus
-    -createdAt: Date
-    -updatedAt: Date
-    +getId(): String
-    +getUserId(): String
-    +getSubject(): String
-    +getDescription(): String
-    +getStatus(): TicketStatus
-    +getCreatedAt(): Date
-    +getUpdatedAt(): Date
-  }
-
-  class ChatMessage {
-    -id: String
-    -ticketId: String
-    -senderId: String
-    -message: String
-    -timestamp: Date
-    +getId(): String
-    +getTicketId(): String
-    +getSenderId(): String
-    +getMessage(): String
-    +getTimestamp(): Date
-  }
-
-  class Feedback {
-    -id: String
-    -userId: String
-    -rating: Integer
-    -comments: String
-    -submittedDate: Date
-    +getId(): String
-    +getUserId(): String
-    +getRating(): Integer
-    +getComments(): String
-    +getSubmittedDate(): Date
-  }
-
+  ' Core enumerations
   enum PackageType {
     BASIC
     STANDARD
@@ -332,19 +279,174 @@ package "Backend Model" #lightblue {
     CANCELLED
     EXPIRED
   }
+}
 
-  enum UsageType {
-    DATA
-    VOICE
-    SMS
-    ROAMING
+' =================== BACKEND CONTROLLER LAYER ===================
+package "Backend Controller" #lightcyan {
+  ' Base interfaces
+  interface Repository {
+    +database: Database
+    +initializeMockData(): void
   }
 
-  enum TicketStatus {
-    OPEN
-    IN_PROGRESS
-    RESOLVED
-    CLOSED
+  interface RouteConfigurable {
+    +configure(route: Route): void
+  }
+
+  interface PluginConfigurable {
+    +configure(application: Application): void
+  }
+
+  ' Base abstract classes
+  abstract class RouteConfigBase implements RouteConfigurable {
+    #SAFE_DELIMITER: String
+    +configure(route: Route): void
+    #{abstract} Route.configureRoutes(): void
+  }
+
+  abstract class PluginConfigBase implements PluginConfigurable {
+    +configure(application: Application): void
+    #{abstract} Application.configurePlugin(): void
+  }
+
+  ' Repository implementations
+  class UserRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getUserById(id: String): User?
+    +getUserByEmail(email: String): User?
+    +createUser(user: User): User
+    +updateUser(user: User): Boolean
+    +getUserPackages(userId: String): List<Package>
+    +toUserModel(user: User): UserModel
+  }
+
+  class PackageRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getAllPackageTypes(): List<PackageTypeModel>
+    +getPackageOptions(packageTypeId: String): PackageOptionsResponse?
+    +validatePromoCode(code: String): PromoCode?
+    +orderPackage(userId: String, request: OrderRequest): Boolean
+    +toPackageTypeModel(packageType: PackageType): PackageTypeModel
+    +toPackageOptionModel(option: PackageOption): Option
+  }
+
+  class UsageRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getUserUsageData(userId: String): UsageDataResponse
+    +deletePackage(userId: String, packageId: String): Boolean
+  }
+
+  class SupportTicketRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getUserTickets(userId: String): List<SupportTicket>
+    +getTicketById(ticketId: String): SupportTicket?
+    +createTicket(ticket: SupportTicket): SupportTicket
+    +updateTicket(ticket: SupportTicket): Boolean
+    +toSupportTicketModel(ticket: SupportTicket): SupportTicketModel
+  }
+
+  class ChatMessageRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getTicketChatHistory(ticketId: String): List<ChatMessage>
+    +sendChatMessage(message: ChatMessage): ChatMessage
+    +toChatMessageModel(message: ChatMessage): ChatMessageModel
+  }
+
+  class FeedbackRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +submitFeedback(feedback: Feedback): Feedback
+    +getFeedbackById(feedbackId: String): Feedback?
+    +getUserFeedback(userId: String): List<Feedback>
+    +toFeedbackEntryModel(feedback: Feedback): FeedbackEntry
+  }
+
+  class PromoCodeRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getPromoCodeByCode(code: String): PromoCode?
+    +toPromoCodeModel(promoCode: PromoCode): PromoCodeModel
+  }
+
+  class NotificationRepository implements Repository {
+    +database: Database
+    +initializeMockData(): void
+    +getUserNotifications(userId: String): List<Notification>
+    +markNotificationAsRead(notificationId: String): Boolean
+    +toNotificationModel(notification: Notification): NotificationModel
+  }
+
+  ' Route implementations
+  class AuthRoutes extends RouteConfigBase {
+    -userRepository: UserRepository
+    #Route.configureRoutes(): void
+  }
+
+  class UserProfileRoutes extends RouteConfigBase {
+    -userRepository: UserRepository
+    #Route.configureRoutes(): void
+  }
+
+  class PackagesRoutes extends RouteConfigBase {
+    -packageRepository: PackageRepository
+    #Route.configureRoutes(): void
+  }
+
+  class UsageRoutes extends RouteConfigBase {
+    -usageRepository: UsageRepository
+    #Route.configureRoutes(): void
+  }
+
+  class ChatRoutes extends RouteConfigBase {
+    -chatMessageRepository: ChatMessageRepository
+    #Route.configureRoutes(): void
+  }
+
+  class FeedbackRoutes extends RouteConfigBase {
+    -feedbackRepository: FeedbackRepository
+    #Route.configureRoutes(): void
+  }
+
+  class OtherUserDataRoutes extends RouteConfigBase {
+    -notificationRepository: NotificationRepository
+    #Route.configureRoutes(): void
+  }
+
+  ' Plugin configurations
+  class RoutingConfig extends PluginConfigBase {
+    -routes: List<RouteConfigurable>
+    #Application.configurePlugin(): void
+  }
+
+  class SerializationConfig extends PluginConfigBase {
+    #Application.configurePlugin(): void
+  }
+
+  class CorsConfig extends PluginConfigBase {
+    #Application.configurePlugin(): void
+  }
+
+  class CallLoggingConfig extends PluginConfigBase {
+    #Application.configurePlugin(): void
+  }
+
+  class StatusPagesConfig extends PluginConfigBase {
+    #Application.configurePlugin(): void
+  }
+
+  ' Main application server
+  class ApiServer {
+    +port: Integer
+    +host: String
+    +plugins: List<PluginConfigurable>
+    +start(): void
+    +stop(): void
+    +configurePlugins(): void
   }
 }
 
@@ -394,40 +496,53 @@ PackageModel "1" --o "*" UsageModel : package tracks usage >
 
 ' =================== BACKEND RELATIONSHIPS ===================
 
-' Backend Controller to Backend Model relationships
-BackendUserController "1" --o "1..*" User : manages >
-BackendUserController "1" --o "1..*" UserProfile : manages >
-BackendPackageController "1" --o "1..*" Package : manages >
-BackendPackageController "1" --o "1..*" UserPackage : manages >
-BackendUsageController "1" --o "1..*" UsageData : manages >
-BackendSupportController "1" --o "1..*" SupportTicket : manages >
-BackendChatController "1" --o "1..*" ChatMessage : manages >
-BackendFeedbackController "1" --o "1..*" Feedback : manages >
+' Database relationships
+Database "1" --o "1" Connection : uses >
+Database "1" --o "1" UsersTable : contains >
+Database "1" --o "1" PackagesTable : contains >
+Database "1" --o "1" UserPackagesTable : contains >
 
-' REST API to Backend Controller relationships
+' Database to Backend Model relationships
+UsersTable "1" --o "*" User : persists >
+PackagesTable "1" --o "*" Package : persists >
+UserPackagesTable "1" --o "*" UserPackage : persists >
+
+' Core Repository to Entity relationships
+UserRepository "1" --o "*" User : manages >
+PackageRepository "1" --o "*" Package : manages >
+UsageRepository "1" --o "*" UserPackage : manages >
+
+' Repository to Database relationships
+UserRepository "1" --o "1" Database : uses >
+PackageRepository "1" --o "1" Database : uses >
+UsageRepository "1" --o "1" Database : uses >
+
+' Core Route to Repository relationships
+AuthRoutes "1" --o "1" UserRepository : uses >
+PackagesRoutes "1" --o "1" PackageRepository : uses >
+UsageRoutes "1" --o "1" UsageRepository : uses >
+
+' Plugin to Route relationships
+RoutingConfig "1" --o "*" RouteConfigurable : configures >
+
+' ApiServer to Plugin relationships
+ApiServer "1" --o "*" PluginConfigurable : uses >
+
+' REST API to ApiServer relationship
 RestApi "1" --o "1" ApiServer : exposes and handles >
-ApiServer "1" --o "1" BackendUserController : routes requests to >
-ApiServer "1" --o "1" BackendPackageController : routes requests to >
-ApiServer "1" --o "1" BackendUsageController : routes requests to >
-ApiServer "1" --o "1" BackendSupportController : routes requests to >
-ApiServer "1" --o "1" BackendChatController : routes requests to >
-ApiServer "1" --o "1" BackendFeedbackController : routes requests to >
 
-' Backend Model relationship notations
-User "1" --o "1" UserProfile : has >
+' Core Entity inheritance relationships
+User --|> Entity
+Package --|> Entity
+UserPackage --|> Entity
+
+' Core Backend Model relationship notations
 User "1" --o "*" UserPackage : subscribes to >
 Package "1" --o "*" UserPackage : subscribed by >
-User "1" --o "*" UsageData : generates >
-Package "1" --o "*" UsageData : tracked in >
-User "1" --o "*" SupportTicket : creates >
-SupportTicket "1" --o "*" ChatMessage : contains >
-User "1" --o "*" Feedback : submits >
 
-' Backend Type enumerations
+' Core Backend Type enumerations
 Package "1" -- "1" PackageType : has type >
 UserPackage "1" -- "1" PackageStatus : has status >
-UsageData "1" -- "1" UsageType : has type >
-SupportTicket "1" -- "1" TicketStatus : has status >
 
 ' =================== FRONTEND-BACKEND CONNECTION ===================
 

@@ -1,547 +1,688 @@
-@startuml "Design Class Diagram Example"
+@startuml "Telecom System Design Class Diagram"
+top to bottom direction
+skinparam wrapWidth 200
 
-' Color definitions for better organization
-!define FRONTEND_VIEW_COLOR #FFEBCD
-!define FRONTEND_CONTROLLER_COLOR #E0FFFF
-!define FRONTEND_MODEL_COLOR #E6E6FA
-!define BACKEND_CONTROLLER_COLOR #F0FFF0
-!define BACKEND_MODEL_COLOR #FFF0F5
-!define DATABASE_COLOR #F5F5DC
+' =================== BACKEND PACKAGES ===================
+package "Backend" {
+  package "Models"  {
+    ' =================== USER DOMAIN ===================
+    package "User Domain" #FFEBCD{
+      class User  {
+        -id: String
+        -name: String
+        -email: String
+        -password: String
+        -phone: String
+        -accountNumber: String
+        -accountType: String
+        -registrationDate: String
+        -packages: List<UserPackage>
+        -paymentMethod: String
+        -billingAddress: Address
+      }
 
-' =================== FRONTEND VIEW LAYER ===================
-package "Frontend View" {
-  class UserDashboardView #FRONTEND_VIEW_COLOR {
-    +renderUserProfile()
-    +renderUsageData()
-    +renderPackages()
-    +renderBillingInfo()
+      class Address  {
+        -street: String
+        -city: String
+        -state: String
+        -zipCode: String
+        -country: String
+      }
+
+      class Notification  {
+        -id: String
+        -type: String
+        -message: String
+        -date: String
+        -read: Boolean
+      }
+
+      interface User <<Entity>>  {
+        +id: String
+        +name: String
+        +email: String
+        +password: String
+        +phone: String
+        +accountNumber: String
+        +accountType: String
+        +registrationDate: LocalDate
+        +paymentMethod: String
+        +billingAddress: Address
+      }
+
+      interface Address <<Entity>>  {
+        +id: Int
+        +street: String
+        +city: String
+        +state: String
+        +zipCode: String
+        +country: String
+      }
+    }
+
+    ' =================== PACKAGE DOMAIN ===================
+    package "Package Domain" #FFEBCD{
+      class UserPackage  {
+        -id: String
+        -type: String
+        -name: String
+        -plan: String
+        -speed: String
+        -router: String
+        -addOns: List<String>
+      }
+
+      class PackageType  {
+        -id: String
+        -name: String
+        -description: String
+        -basePrice: Double
+      }
+
+      class Option  {
+        -id: String
+        -name: String
+        -price: Double
+      }
+
+      class PackageOptionsResponse  {
+        -speeds: List<Option>
+        -routers: List<Option>
+        -dataPlans: List<Option>
+        -plans: List<Option>
+        -addOns: List<Option>
+      }
+
+      class PromoCode  {
+        -code: String
+        -discount: Double
+        -description: String
+      }
+
+      interface Package <<Entity>>  {
+        +id: String
+        +type: String
+        +name: String
+        +plan: String
+        +speed: String
+        +router: String
+        +createdAt: Instant
+        +addOns: List<String>
+        +users: List<User>
+      }
+    }
+
+    ' =================== USAGE DOMAIN ===================
+    package "Usage Domain" #FFEBCD{
+      class UsageDataResponse  {
+        -currentBillingCycle: BillingCycle
+        -previousBillingCycles: List<PreviousBillingCycle>
+      }
+
+      class BillingCycle  {
+        -startDate: String
+        -endDate: String
+        -packages: Map<String, PackageUsage>
+      }
+
+      class PackageUsage  {
+        -type: String
+        -name: String
+        -dataUsed: Double
+        -dataTotal: Double
+        -callMinutesUsed: Int
+        -callMinutesTotal: String
+        -smsUsed: Int
+        -smsTotal: String
+        -downloadSpeed: String
+        -uploadSpeed: String
+        -devices: Int
+      }
+    }
+
+    ' =================== SUPPORT DOMAIN ===================
+    package "Support Domain" #FFEBCD{
+      class SupportTicket  {
+        -id: String
+        -subject: String
+        -status: String
+        -createdDate: String
+        -lastUpdated: String
+        -priority: String
+        -resolution: String
+      }
+
+      class ChatMessage  {
+        -type: String
+        -text: String
+        -time: String
+      }
+
+      interface SupportTicket <<Entity>>  {
+        +id: String
+        +user: User
+        +subject: String
+        +status: String
+        +createdDate: LocalDate
+        +lastUpdated: LocalDate
+        +priority: String
+        +resolution: String
+      }
+    }
+
+    ' =================== FEEDBACK DOMAIN ===================
+    package "Feedback Domain" #FFEBCD{
+      class FeedbackEntry  {
+        -id: String
+        -rating: Int
+        -topic: String
+        -text: String
+        -timestamp: String
+        -user: String
+      }
+
+      class FeedbackSummary  {
+        -averageRating: Double
+        -totalReviews: Int
+        -recentFeedback: List<FeedbackEntry>
+      }
+    }
+
   }
 
-  class PackageView #FRONTEND_VIEW_COLOR {
-    +renderAvailablePackages()
-    +renderPackageDetails()
-    +renderOrderForm()
-    +renderPromoCodeInput()
+  package "Database"  {
+
+    package "Tables" #lightblue {
+      class Users <<Table>> {
+        +id: Column<String>
+        +name: Column<String>
+        +email: Column<String>
+        +password: Column<String>
+        +phone: Column<String>
+        +accountNumber: Column<String>
+        +accountType: Column<String>
+        +registrationDate: Column<LocalDate>
+        +paymentMethod: Column<String>
+        +billingAddressId: Column<Int>
+      }
+
+      class Addresses <<Table>> {
+        +id: Column<Int>
+        +street: Column<String>
+        +city: Column<String>
+        +state: Column<String>
+        +zipCode: Column<String>
+        +country: Column<String>
+      }
+
+      class Packages <<Table>> {
+        +id: Column<String>
+        +type: Column<String>
+        +name: Column<String>
+        +plan: Column<String>
+        +speed: Column<String>
+        +router: Column<String>
+        +createdAt: Column<Instant>
+      }
+
+      class UserPackages <<Table>> {
+        +userId: Column<String>
+        +packageId: Column<String>
+      }
+
+      class PackageAddOns <<Table>> {
+        +packageId: Column<String>
+        +addOn: Column<String>
+      }
+
+      class Feedbacks <<Table>> {
+        +id: Column<String>
+        +rating: Column<Int>
+        +topic: Column<String>
+        +text: Column<String>
+        +timestamp: Column<Instant>
+        +userName: Column<String>
+      }
+
+      class SupportTickets <<Table>> {
+        +id: Column<String>
+        +userId: Column<String>
+        +subject: Column<String>
+        +status: Column<String>
+        +createdDate: Column<LocalDate>
+        +lastUpdated: Column<LocalDate>
+        +priority: Column<String>
+        +resolution: Column<String>
+      }
+
+      class UsageDataTable <<Table>> {
+        +id: Column<Int>
+        +userId: Column<String>
+        +packageId: Column<String>
+        +billingCycleStart: Column<LocalDate>
+        +billingCycleEnd: Column<LocalDate>
+        +dataUsed: Column<BigDecimal>
+        +dataTotal: Column<BigDecimal>
+        +callMinutesUsed: Column<Int>
+        +callMinutesTotal: Column<String>
+        +smsUsed: Column<Int>
+        +smsTotal: Column<String>
+        +downloadSpeed: Column<String>
+        +uploadSpeed: Column<String>
+        +devices: Column<Int>
+      }
+
+      class PackageOptions <<Table>> {
+        +id: Column<Int>
+        +packageTypeId: Column<String>
+        +optionType: Column<String>
+        +optionId: Column<String>
+        +name: Column<String>
+        +price: Column<BigDecimal>
+      }
+    }
+
+    package "Repositories" #F0FFF0 {
+      interface Repository {
+        +database: Database
+        +initializeMockData()
+      }
+
+      class UserRepository {
+        -database: Database
+        +findUserById(id: String): User
+        +findUserByEmail(email: String): User
+        +createUser(...): User
+        +updateUser(...): Boolean
+        +getUserPackages(userId: String): List<Package>
+        +toModel(user: User): User
+        +initializeMockData()
+      }
+
+      class FeedbackRepository {
+        -database: Database
+        +getFeedbackSummary(): FeedbackSummary
+        +submitFeedback(request: SubmitFeedbackRequest)
+        +initializeMockData()
+      }
+
+      class ChatMessageRepository {
+        -database: Database
+        +getChatHistory(userId: String): List<ChatMessage>
+        +addMessage(userId: String, message: String, isFromUser: Boolean): ChatMessage
+        +initializeMockData()
+      }
+
+      class NotificationRepository {
+        -database: Database
+        +getNotifications(userId: String): List<Notification>
+        +markAsRead(notificationId: String): Boolean
+        +createNotification(userId: String, type: String, message: String): Notification
+        +initializeMockData()
+      }
+
+      class PackageRepository {
+        -database: Database
+        +getPackageTypes(): List<PackageType>
+        +getPackageOptions(typeId: String): PackageOptionsResponse
+        +createPackage(request: CreatePackageRequest): Package
+        +initializeMockData()
+      }
+
+      class PromoCodeRepository {
+        -database: Database
+        +validatePromoCode(code: String): PromoCode
+        +initializeMockData()
+      }
+
+      class SupportTicketRepository {
+        -database: Database
+        +getTickets(userId: String): List<SupportTicket>
+        +createTicket(userId: String, subject: String, priority: String): SupportTicket
+        +updateTicket(ticketId: String, status: String, resolution: String?): Boolean
+        +initializeMockData()
+      }
+
+      class UsageRepository {
+        -database: Database
+        +getUserUsage(userId: String): UsageDataResponse
+        +initializeMockData()
+      }
+    }
+
+    class DatabaseFactory {
+      -instance: Database
+      +{static} getInstance(): Database
+      -{static} init()
+    }
   }
 
-  class SupportView #FRONTEND_VIEW_COLOR {
-    +renderTicketList()
-    +renderTicketDetails()
-    +renderCreateTicketForm()
-    +renderChatInterface()
+  package "Routes" #lightcyan {
+    interface RouteConfigurable {
+      +configure(route: Route)
+    }
+
+    abstract class RouteConfigBase {
+      #SAFE_DELIMITER: String
+      +configure(route: Route)
+      #{abstract} Route.configureRoutes()
+    }
+
+    class AuthRoutes {
+      +Route.configureRoutes()
+    }
+
+    class FeedbackRoutes {
+      -feedbackRepository: FeedbackRepository
+      +Route.configureRoutes()
+    }
+
+    class ChatRoutes {
+      -chatMessageRepository: ChatMessageRepository
+      +Route.configureRoutes()
+    }
+
+    class OtherUserDataRoutes {
+      -userRepository: UserRepository
+      -notificationRepository: NotificationRepository
+      +Route.configureRoutes()
+    }
+
+    class PackagesRoutes {
+      -packageRepository: PackageRepository
+      -promoCodeRepository: PromoCodeRepository
+      +Route.configureRoutes()
+    }
+
+    class UsageRoutes {
+      -usageRepository: UsageRepository
+      +Route.configureRoutes()
+    }
+
+    class UserProfileRoutes {
+      -userRepository: UserRepository
+      +Route.configureRoutes()
+    }
   }
 
-  class FeedbackView #FRONTEND_VIEW_COLOR {
-    +renderFeedbackForm()
-    +renderThankYouPage()
-  }
+  package "Configs" #lightcyan {
+    interface PluginConfigurable {
+      +configure(application: Application)
+    }
 
-  class LoginView #FRONTEND_VIEW_COLOR {
-    +renderLoginForm()
-    +renderRegistrationForm()
-    +renderForgotPasswordForm()
-  }
+    abstract class PluginConfigBase {
+      +configure(application: Application)
+      #{abstract} Application.configurePlugin()
+    }
 
-  class CommonComponents #FRONTEND_VIEW_COLOR {
-    +renderHeader()
-    +renderFooter()
-    +renderNavigation()
-    +renderNotification()
-    +renderLoading()
-    +renderError()
+    class CallLoggingConfig {
+      +Application.configurePlugin()
+    }
+
+    class CorsConfig {
+      +Application.configurePlugin()
+    }
+
+    class RoutingConfig {
+      -routesConfigRegister: RoutesConfigRegister
+      +Application.configurePlugin()
+    }
+
+    class SerializationConfig {
+      +Application.configurePlugin()
+    }
+
+    class StatusPagesConfig {
+      +Application.configurePlugin()
+    }
   }
 }
 
-' =================== FRONTEND CONTROLLER LAYER ===================
-package "Frontend Controller" {
-  class UserController #FRONTEND_CONTROLLER_COLOR {
-    +registerUser(userData)
-    +loginUser(credentials)
-    +logoutUser()
-    +getUserProfile()
-    +updateUserProfile(userData)
-    +handleRegistrationForm()
-    +handleLoginForm()
-    +handleProfileUpdateForm()
-  }
-
-  class PackageController #FRONTEND_CONTROLLER_COLOR {
-    +getPackageTypes()
-    +getPackageOptions(typeId)
-    +validatePromoCode(code)
-    +orderPackage(packageData)
-    +handlePackageSelection()
-    +handlePromoCodeValidation()
-    +handlePackageOrder()
-  }
-
-  class UsageController #FRONTEND_CONTROLLER_COLOR {
-    +getUserUsageData()
-    +refreshUsageData()
-    +handleUsageDataFilters()
-    +initializeUsagePage()
-    +createPackageSection(pkg)
-    +deletePackage(packageId)
-  }
-
-  class SupportController #FRONTEND_CONTROLLER_COLOR {
-    +getSupportTickets()
-    +createSupportTicket(ticketData)
-    +updateSupportTicket(ticketId, data)
-    +getChatHistory()
-    +sendChatMessage(message)
-    +handleTicketForm()
-    +handleChatInput()
-  }
-
-  class FeedbackController #FRONTEND_CONTROLLER_COLOR {
-    +submitFeedback(feedbackData)
-    +handleFeedbackForm()
-  }
-}
-
-' =================== FRONTEND MODEL LAYER ===================
-package "Frontend Model" {
-  class ApiService #FRONTEND_MODEL_COLOR {
-    -API_BASE_URL: String
-    +get(endpoint, params)
-    +post(endpoint, data)
-    +put(endpoint, data)
-    +delete(endpoint)
-    +handleApiResponse(response)
-    +getAuthHeaders()
-  }
-
-  class UserModel #FRONTEND_MODEL_COLOR {
-    +loginUser(email, password, rememberMe)
-    +registerUser(fullName, email, password, confirmPassword, agreeTerms)
-    +getUserProfile()
-    +updateUserProfile(profileData)
-    +getUserSupportTickets()
-    +getUserNotifications()
-    +markNotificationAsRead(notificationId)
-  }
-
-  class PackageModel #FRONTEND_MODEL_COLOR {
-    +getPackageTypes()
-    +getPackageOptions(packageTypeId)
-    +validatePromoCode(promoCode)
-    +submitOrder(orderDetails)
-  }
-
-  class UsageModel #FRONTEND_MODEL_COLOR {
-    +getUserUsage()
-    +deletePackage(packageId)
-  }
-
-  class FeedbackModel #FRONTEND_MODEL_COLOR {
-    +getFeedbackSummary()
-    +submitFeedback(feedbackData)
-  }
-
-  class ChatModel #FRONTEND_MODEL_COLOR {
-    +getChatHistory()
-    +sendChatMessage(messageText)
-  }
-}
-
-' =================== REST API INTERFACE ===================
-interface "REST API" as RestApi {
-  /auth/**
-  /user/**
+' =================== API ROUTES ===================
+interface "API ROUTES" as ApiRoutes #orange {
+  /users/**
   /packages/**
-  /orders/**
-  /promo-codes/**
-  /feedback/**
+  /usage/**
+  /tickets/**
   /chat/**
+  /feedback/**
 }
 
-' =================== BACKEND CONTROLLER LAYER ===================
-package "Backend Controller" {
-  class ApiServer #BACKEND_CONTROLLER_COLOR {
-    +port: Integer
-    +host: String
-    +routes: Map<String, Object>
-    +start(): void
-    +stop(): void
-    +handleRequest(request: Request): Response
-    +registerRoute(path: String, method: String, handler: Function): void
+' =================== FRONTEND PACKAGES ===================
+package "Frontend" {
+  package "View" #lightpink {
+    class UserDashboardView {
+      +renderUserProfile()
+      +renderUsageData()
+      +renderPackages()
+      +renderBillingInfo()
+    }
+
+    class PackageView {
+      +renderAvailablePackages()
+      +renderPackageDetails()
+      +renderOrderForm()
+      +renderPromoCodeInput()
+    }
+
+    class SupportView {
+      +renderTicketList()
+      +renderTicketDetails()
+      +renderCreateTicketForm()
+      +renderChatInterface()
+    }
+
+    class FeedbackView {
+      +renderFeedbackForm()
+      +renderThankYouPage()
+    }
+
+    class LoginView {
+      +renderLoginForm()
+      +renderRegistrationForm()
+      +renderForgotPasswordForm()
+    }
+
+    class CommonComponents {
+      +renderHeader()
+      +renderFooter()
+      +renderNavigation()
+      +renderNotification()
+      +renderLoading()
+      +renderError()
+    }
   }
 
-  class BackendUserController #BACKEND_CONTROLLER_COLOR {
-    +register(request: RegisterRequest): Response
-    +login(request: LoginRequest): Response
-    +logout(request: LogoutRequest): Response
-    +getUserProfile(userId: String): Response
-    +updateUserProfile(userId: String, data: UserProfileUpdateRequest): Response
-    +getUserSupportTickets(userId: String): Response
-    +getUserNotifications(userId: String): Response
-    +markNotificationAsRead(userId: String, notificationId: String): Response
+  package "Controller" #lightyellow {
+    class UserController {
+      +registerUser(userData)
+      +loginUser(credentials)
+      +logoutUser()
+      +getUserProfile()
+      +updateUserProfile(userData)
+      +handleRegistrationForm()
+      +handleLoginForm()
+      +handleProfileUpdateForm()
+    }
+
+    class PackageController {
+      +getPackageTypes()
+      +getPackageOptions(typeId)
+      +validatePromoCode(code)
+      +orderPackage(packageData)
+      +handlePackageSelection()
+      +handlePromoCodeValidation()
+      +handlePackageOrder()
+    }
+
+    class UsageController {
+      +getUserUsageData()
+      +refreshUsageData()
+      +handleUsageDataFilters()
+      +initializeUsagePage()
+      +createPackageSection(pkg)
+      +deletePackage(packageId)
+    }
+
+    class SupportController {
+      +getSupportTickets()
+      +createSupportTicket(ticketData)
+      +updateSupportTicket(ticketId, data)
+      +getChatHistory()
+      +sendChatMessage(message)
+      +handleTicketForm()
+      +handleChatInput()
+    }
+
+    class FeedbackController {
+      +submitFeedback(feedbackData)
+      +handleFeedbackForm()
+    }
   }
 
-  class BackendPackageController #BACKEND_CONTROLLER_COLOR {
-    +getAllPackages(): Response
-    +getPackageById(id: String): Response
-    +getPackageTypes(): Response
-    +getPackagesByType(typeId: String): Response
-    +getUserPackages(userId: String): Response
-    +orderPackage(request: OrderRequest): Response
-  }
+  package "Model" #lightgreen {
+    class ApiService {
+      +get(endpoint, params)
+      +post(endpoint, data)
+      +put(endpoint, data)
+      +delete(endpoint)
+      +handleApiResponse(response)
+      +getAuthHeaders()
+    }
 
-  class BackendPromoCodeController #BACKEND_CONTROLLER_COLOR {
-    +validatePromoCode(code: String): Response
-  }
+    class UserModel {
+      +loginUser(email, password, rememberMe)
+      +registerUser(fullName, email, password, confirmPassword, agreeTerms)
+      +getUserProfile()
+      +updateUserProfile(profileData)
+      +getUserSupportTickets()
+      +getUserNotifications()
+      +markNotificationAsRead(notificationId)
+    }
 
-  class BackendUsageController #BACKEND_CONTROLLER_COLOR {
-    +getUserUsageData(userId: String): Response
-    +deletePackage(userId: String, packageId: String): Response
-  }
+    class PackageModel {
+      +getPackageTypes()
+      +getPackageOptions(packageTypeId)
+      +validatePromoCode(promoCode)
+      +submitOrder(orderDetails)
+    }
 
-  class BackendSupportController #BACKEND_CONTROLLER_COLOR {
-    +getUserTickets(userId: String): Response
-    +getTicketById(ticketId: String): Response
-    +createTicket(request: TicketCreateRequest): Response
-    +updateTicket(ticketId: String, request: TicketUpdateRequest): Response
-  }
+    class UsageModel {
+      +getUserUsage()
+      +deletePackage(packageId)
+    }
 
-  class BackendChatController #BACKEND_CONTROLLER_COLOR {
-    +getTicketChatHistory(ticketId: String): Response
-    +sendChatMessage(request: ChatMessageRequest): Response
-  }
+    class FeedbackModel {
+      +getFeedbackSummary()
+      +submitFeedback(feedbackData)
+    }
 
-  class BackendFeedbackController #BACKEND_CONTROLLER_COLOR {
-    +submitFeedback(request: FeedbackRequest): Response
-    +getFeedbackSummary(): Response
-  }
-}
-
-' =================== BACKEND MODEL LAYER ===================
-package "Backend Model" {
-  class User #BACKEND_MODEL_COLOR {
-    -id: String
-    -email: String
-    -password: String
-    -name: String
-    -phone: String
-    -accountNumber: String
-    -accountType: String
-    -registrationDate: LocalDate
-    -paymentMethod: String
-    +getId(): String
-    +getEmail(): String
-    +getName(): String
-    +getPhone(): String
-    +getAccountNumber(): String
-    +getAccountType(): String
-    +getRegistrationDate(): LocalDate
-    +getPaymentMethod(): String
-  }
-
-  class Address #BACKEND_MODEL_COLOR {
-    -id: Int
-    -street: String
-    -city: String
-    -state: String
-    -zipCode: String
-    -country: String
-    +getId(): Int
-    +getStreet(): String
-    +getCity(): String
-    +getState(): String
-    +getZipCode(): String
-    +getCountry(): String
-  }
-
-  class Package #BACKEND_MODEL_COLOR {
-    -id: String
-    -type: String
-    -name: String
-    -plan: String
-    -speed: String
-    -router: String
-    -createdAt: Instant
-    -addOns: List<String>
-    +getId(): String
-    +getType(): String
-    +getName(): String
-    +getPlan(): String
-    +getSpeed(): String
-    +getRouter(): String
-    +getCreatedAt(): Instant
-    +getAddOns(): List<String>
-  }
-
-  class PackageType #BACKEND_MODEL_COLOR {
-    -id: String
-    -name: String
-    -description: String
-    -basePrice: Double
-    +getId(): String
-    +getName(): String
-    +getDescription(): String
-    +getBasePrice(): Double
-  }
-
-  class PromoCode #BACKEND_MODEL_COLOR {
-    -code: String
-    -discount: BigDecimal
-    -description: String
-    +getCode(): String
-    +getDiscount(): BigDecimal
-    +getDescription(): String
-  }
-
-  class UsageData #BACKEND_MODEL_COLOR {
-    -id: Int
-    -user: User
-    -package: Package
-    -billingCycleStart: LocalDate
-    -billingCycleEnd: LocalDate
-    -dataUsed: BigDecimal
-    -dataTotal: BigDecimal
-    -callMinutesUsed: Int
-    -callMinutesTotal: String
-    -smsUsed: Int
-    -smsTotal: String
-    -downloadSpeed: String
-    -uploadSpeed: String
-    -devices: Int
-    +getId(): Int
-    +getUser(): User
-    +getPackage(): Package
-    +getBillingCycleStart(): LocalDate
-    +getBillingCycleEnd(): LocalDate
-    +getDataUsed(): BigDecimal
-    +getDataTotal(): BigDecimal
-  }
-
-  class SupportTicket #BACKEND_MODEL_COLOR {
-    -id: String
-    -user: User
-    -subject: String
-    -status: String
-    -createdDate: LocalDate
-    -lastUpdated: LocalDate
-    -priority: String
-    -resolution: String
-    +getId(): String
-    +getUser(): User
-    +getSubject(): String
-    +getStatus(): String
-    +getCreatedDate(): LocalDate
-    +getLastUpdated(): LocalDate
-    +getPriority(): String
-    +getResolution(): String
-  }
-
-  class ChatMessage #BACKEND_MODEL_COLOR {
-    -id: Int
-    -user: User
-    -message: String
-    -timestamp: Instant
-    -isFromUser: Boolean
-    +getId(): Int
-    +getUser(): User
-    +getMessage(): String
-    +getTimestamp(): Instant
-    +isFromUser(): Boolean
-  }
-
-  class Feedback #BACKEND_MODEL_COLOR {
-    -id: String
-    -rating: Int
-    -topic: String
-    -text: String
-    -timestamp: Instant
-    -userName: String
-    +getId(): String
-    +getRating(): Int
-    +getTopic(): String
-    +getText(): String
-    +getTimestamp(): Instant
-    +getUserName(): String
-  }
-
-  class Notification #BACKEND_MODEL_COLOR {
-    -id: String
-    -user: User
-    -type: String
-    -message: String
-    -date: LocalDate
-    -read: Boolean
-    +getId(): String
-    +getUser(): User
-    +getType(): String
-    +getMessage(): String
-    +getDate(): LocalDate
-    +isRead(): Boolean
+    class ChatModel {
+      +getChatHistory()
+      +sendChatMessage(messageText)
+    }
   }
 }
 
-' =================== DATABASE LAYER ===================
-package "Database" {
-  class DatabaseFactory #DATABASE_COLOR {
-    -database: Database
-    +init(application: Application)
-    +getInstance(): Database
-  }
+' =================== RELATIONSHIPS ===================
 
-  class Schema #DATABASE_COLOR {
-    +init(application: Application)
-  }
+' Backend relationships
+Repository <|-- UserRepository
+Repository <|-- FeedbackRepository
+Repository <|-- ChatMessageRepository
+Repository <|-- NotificationRepository
+Repository <|-- PackageRepository
+Repository <|-- PromoCodeRepository
+Repository <|-- SupportTicketRepository
+Repository <|-- UsageRepository
 
-  class UserRepository #DATABASE_COLOR {
-    -database: Database
-    +findUserById(id: String): User?
-    +findUserByEmail(email: String): User?
-    +createUser(...): User?
-    +updateUser(...): Boolean
-    +getUserPackages(userId: String): List<Package>
-  }
+RouteConfigurable <|-- RouteConfigBase
+RouteConfigBase <|-- AuthRoutes
+RouteConfigBase <|-- FeedbackRoutes
+RouteConfigBase <|-- ChatRoutes
+RouteConfigBase <|-- OtherUserDataRoutes
+RouteConfigBase <|-- PackagesRoutes
+RouteConfigBase <|-- UsageRoutes
+RouteConfigBase <|-- UserProfileRoutes
 
-  class PackageRepository #DATABASE_COLOR {
-    -database: Database
-    +getAllPackageTypes(): List<PackageType>
-    +getPackageOptions(packageTypeId: String): PackageOptions
-    +createPackage(userId: String, orderRequest: OrderRequest): String
-  }
+PluginConfigurable <|-- PluginConfigBase
+PluginConfigBase <|-- CallLoggingConfig
+PluginConfigBase <|-- CorsConfig
+PluginConfigBase <|-- RoutingConfig
+PluginConfigBase <|-- SerializationConfig
+PluginConfigBase <|-- StatusPagesConfig
 
-  class PromoCodeRepository #DATABASE_COLOR {
-    -database: Database
-    +findPromoCodeByCode(code: String): PromoCode?
-  }
+UserRepository --> Users : uses for storage
+UserRepository --> Addresses : uses for storage
+UserRepository --> Packages : uses for storage
+UserRepository --> UserPackages : uses for storage
+UserRepository --> PackageAddOns : uses for storage
+UserRepository ..> User : returns
 
-  class UsageRepository #DATABASE_COLOR {
-    -database: Database
-    +getUserUsageData(userId: String): UsageData
-    +deletePackage(userId: String, packageId: String): Boolean
-  }
+FeedbackRepository --> Feedbacks : uses for storage
+FeedbackRepository ..> FeedbackEntry : returns
+FeedbackRepository ..> FeedbackSummary : returns
 
-  class SupportTicketRepository #DATABASE_COLOR {
-    -database: Database
-    +getUserSupportTickets(userId: String): List<SupportTicket>
-  }
+ChatMessageRepository --> ChatMessage : uses for storage
+ChatMessageRepository ..> ChatMessage : returns
 
-  class ChatMessageRepository #DATABASE_COLOR {
-    -database: Database
-    +getChatMessagesForUser(userId: String): List<ChatMessage>
-    +addChatMessage(userId: String, text: String, isFromUser: Boolean)
-  }
+NotificationRepository --> Notification : uses for storage
+NotificationRepository ..> Notification : returns
 
-  class FeedbackRepository #DATABASE_COLOR {
-    -database: Database
-    +getFeedbackSummary(): FeedbackSummary
-    +submitFeedback(feedbackRequest: FeedbackRequest)
-  }
+PackageRepository --> Packages : uses for storage
+PackageRepository --> PackageType : uses for storage
+PackageRepository --> PackageOptions : uses for storage
+PackageRepository ..> PackageType : returns
+PackageRepository ..> Option : returns
+PackageRepository ..> PackageOptionsResponse : returns
 
-  class NotificationRepository #DATABASE_COLOR {
-    -database: Database
-    +getUserNotifications(userId: String): List<Notification>
-    +markNotificationAsRead(userId: String, notificationId: String): Boolean
-  }
-}
+PromoCodeRepository --> PromoCode : uses for storage
+PromoCodeRepository ..> PromoCode : returns
 
-' =================== FRONTEND RELATIONSHIPS ===================
+SupportTicketRepository --> SupportTickets : uses for storage
+SupportTicketRepository ..> SupportTicket : returns
 
-' Frontend View to Frontend Controller relationships
-UserDashboardView "1" --o "1" UserController : uses >
-UserDashboardView "1" --o "1" UsageController : uses >
-UserDashboardView "1" --o "1" PackageController : uses >
+UsageRepository --> UsageDataTable : uses for storage
+UsageRepository ..> UsageDataResponse : returns
+DatabaseFactory --> Repository : creates
 
-PackageView "1" --o "1" PackageController : uses >
+' Frontend relationships
+UserDashboardView --> UserController : uses
+UserDashboardView --> UsageController : uses
+UserDashboardView --> PackageController : uses
 
-SupportView "1" --o "1" SupportController : uses >
+PackageView --> PackageController : uses
+SupportView --> SupportController : uses
+FeedbackView --> FeedbackController : uses
+LoginView --> UserController : uses
 
-FeedbackView "1" --o "1" FeedbackController : uses >
+UserController --> UserModel : uses
+PackageController --> PackageModel : uses
+UsageController --> UsageModel : uses
+SupportController --> UserModel : uses
+SupportController --> ChatModel : uses
+FeedbackController --> FeedbackModel : uses
 
-LoginView "1" --o "1" UserController : uses >
+UserModel --> ApiService : uses
+PackageModel --> ApiService : uses
+UsageModel --> ApiService : uses
+FeedbackModel --> ApiService : uses
+ChatModel --> ApiService : uses
 
-' Common components relationships
-CommonComponents "1" --* "1..*" UserDashboardView : included in >
-CommonComponents "1" --* "1..*" PackageView : included in >
-CommonComponents "1" --* "1..*" SupportView : included in >
-CommonComponents "1" --* "1..*" FeedbackView : included in >
-CommonComponents "1" --* "1..*" LoginView : included in >
+CommonComponents --* UserDashboardView : included in
+CommonComponents --* PackageView : included in
+CommonComponents --* SupportView : included in
+CommonComponents --* FeedbackView : included in
+CommonComponents --* LoginView : included in
 
-' Frontend Controller to Frontend Model relationships
-UserController "1" --o "1" UserModel : uses >
-PackageController "1" --o "1" PackageModel : uses >
-UsageController "1" --o "1" UsageModel : uses >
-SupportController "1" --o "1" UserModel : uses >
-SupportController "1" --o "1" ChatModel : uses >
-FeedbackController "1" --o "1" FeedbackModel : uses >
-
-' Frontend Model to API Service relationships
-UserModel "1" --o "1" ApiService : uses >
-PackageModel "1" --o "1" ApiService : uses >
-UsageModel "1" --o "1" ApiService : uses >
-FeedbackModel "1" --o "1" ApiService : uses >
-ChatModel "1" --o "1" ApiService : uses >
-
-' Frontend Model data relationships
-UserModel "1" --o "*" PackageModel : user has packages >
-UserModel "1" --o "*" UsageModel : user has usage data >
-UserModel "1" --o "*" FeedbackModel : user submits feedback >
-UserModel "1" --o "*" ChatModel : user has chat history >
-PackageModel "1" --o "*" UsageModel : package tracks usage >
-
-' =================== BACKEND RELATIONSHIPS ===================
-
-' API Service to REST API relationship
-ApiService "1" --o "1" RestApi : sends requests to >
-
-' REST API to Backend Controller relationships
-RestApi "1" --o "1" ApiServer : exposes and handles >
-ApiServer "1" --o "1" BackendUserController : routes requests to >
-ApiServer "1" --o "1" BackendPackageController : routes requests to >
-ApiServer "1" --o "1" BackendPromoCodeController : routes requests to >
-ApiServer "1" --o "1" BackendUsageController : routes requests to >
-ApiServer "1" --o "1" BackendSupportController : routes requests to >
-ApiServer "1" --o "1" BackendChatController : routes requests to >
-ApiServer "1" --o "1" BackendFeedbackController : routes requests to >
-
-' Backend Controller to Repository relationships
-BackendUserController "1" --o "1" UserRepository : uses >
-BackendPackageController "1" --o "1" PackageRepository : uses >
-BackendPromoCodeController "1" --o "1" PromoCodeRepository : uses >
-BackendUsageController "1" --o "1" UsageRepository : uses >
-BackendSupportController "1" --o "1" SupportTicketRepository : uses >
-BackendChatController "1" --o "1" ChatMessageRepository : uses >
-BackendFeedbackController "1" --o "1" FeedbackRepository : uses >
-BackendUserController "1" --o "1" NotificationRepository : uses >
-
-' Repository to Database Factory relationships
-UserRepository "1" --o "1" DatabaseFactory : uses >
-PackageRepository "1" --o "1" DatabaseFactory : uses >
-PromoCodeRepository "1" --o "1" DatabaseFactory : uses >
-UsageRepository "1" --o "1" DatabaseFactory : uses >
-SupportTicketRepository "1" --o "1" DatabaseFactory : uses >
-ChatMessageRepository "1" --o "1" DatabaseFactory : uses >
-FeedbackRepository "1" --o "1" DatabaseFactory : uses >
-NotificationRepository "1" --o "1" DatabaseFactory : uses >
-
-' Repository to Model relationships
-UserRepository "1" --o "*" User : manages >
-UserRepository "1" --o "*" Address : manages >
-PackageRepository "1" --o "*" Package : manages >
-PackageRepository "1" --o "*" PackageType : manages >
-PromoCodeRepository "1" --o "*" PromoCode : manages >
-UsageRepository "1" --o "*" UsageData : manages >
-SupportTicketRepository "1" --o "*" SupportTicket : manages >
-ChatMessageRepository "1" --o "*" ChatMessage : manages >
-FeedbackRepository "1" --o "*" Feedback : manages >
-NotificationRepository "1" --o "*" Notification : manages >
-
-' Model relationships
-User "1" -- "1" Address : has >
-User "1" -- "*" Package : subscribes to >
-Package "1" -- "1" PackageType : has type >
-User "1" -- "*" UsageData : generates >
-Package "1" -- "*" UsageData : tracked in >
-User "1" -- "*" SupportTicket : creates >
-SupportTicket "1" -- "*" ChatMessage : contains >
-User "1" -- "*" Feedback : submits >
-User "1" -- "*" Notification : receives >
-Package "1" -- "*" PromoCode : applies to >
+' Cross-layer relationships
+ApiService ..> ApiRoutes : sends requests to
+ApiRoutes ..> AuthRoutes : routes to
+ApiRoutes ..> FeedbackRoutes : routes to
+ApiRoutes ..> ChatRoutes : routes to
+ApiRoutes ..> OtherUserDataRoutes : routes to
+ApiRoutes ..> PackagesRoutes : routes to
+ApiRoutes ..> UsageRoutes : routes to
+ApiRoutes ..> UserProfileRoutes : routes to
 
 @enduml

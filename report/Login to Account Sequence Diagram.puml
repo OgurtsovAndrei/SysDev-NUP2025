@@ -1,0 +1,65 @@
+@startuml "Login to Account Sequence Diagram"
+
+actor Customer
+participant LoginView
+participant UserController
+participant UserModel
+participant ApiService
+participant AuthRoutes
+participant UserRepository
+database Users
+
+title Login to Account Sequence Diagram
+
+Customer -> LoginView : Enter email and password
+activate LoginView
+
+LoginView -> UserController : loginUser(email, password)
+activate UserController
+
+UserController -> UserModel : loginUser(email, password)
+activate UserModel
+
+UserModel -> ApiService : post("/users/login", credentials)
+activate ApiService
+
+ApiService -> AuthRoutes : POST /users/login
+activate AuthRoutes
+
+AuthRoutes -> UserRepository : findUserByEmail(email)
+activate UserRepository
+
+UserRepository -> Users : query user by email
+activate Users
+Users --> UserRepository : return user data
+deactivate Users
+
+UserRepository --> AuthRoutes : return user
+deactivate UserRepository
+
+note right of AuthRoutes
+  Check if password matches
+  the stored password hash
+end note
+
+alt Password matches
+  AuthRoutes --> ApiService : return success response with user data
+  ApiService --> UserModel : return success response
+  UserModel --> UserController : return success response
+  UserController --> LoginView : return success response
+  LoginView --> Customer : Display success message and redirect to dashboard
+else Password does not match
+  AuthRoutes --> ApiService : return authentication error
+  ApiService --> UserModel : return error response
+  UserModel --> UserController : return error response
+  UserController --> LoginView : return error response
+  LoginView --> Customer : Display error message
+end
+
+deactivate AuthRoutes
+deactivate ApiService
+deactivate UserModel
+deactivate UserController
+deactivate LoginView
+
+@enduml

@@ -1,0 +1,81 @@
+@startuml "Place Order Sequence Diagram"
+
+actor Customer
+participant PackageView
+participant PackageController
+participant PackageModel
+participant ApiService
+participant PackagesRoutes
+participant PromoCodeRepository
+participant PackageRepository
+database Packages
+
+title Place Order Sequence Diagram
+
+Customer -> PackageView : Select package and enter promo code
+activate PackageView
+
+PackageView -> PackageController : handlePackageOrder(packageData, promoCode)
+activate PackageController
+
+' First validate promo code
+PackageController -> PackageModel : validatePromoCode(promoCode)
+activate PackageModel
+
+PackageModel -> ApiService : get("/packages/promo?code=" + promoCode)
+activate ApiService
+
+ApiService -> PackagesRoutes : GET /packages/promo?code=...
+activate PackagesRoutes
+
+PackagesRoutes -> PromoCodeRepository : validatePromoCode(code)
+activate PromoCodeRepository
+PromoCodeRepository --> PackagesRoutes : return promo code details
+deactivate PromoCodeRepository
+
+PackagesRoutes --> ApiService : return promo code validation result
+deactivate PackagesRoutes
+
+ApiService --> PackageModel : return validation response
+deactivate ApiService
+
+PackageModel --> PackageController : return validation result
+deactivate PackageModel
+
+' Then submit the order
+PackageController -> PackageModel : submitOrder(packageData, validatedPromoCode)
+activate PackageModel
+
+PackageModel -> ApiService : post("/packages/order", orderData)
+activate ApiService
+
+ApiService -> PackagesRoutes : POST /packages/order
+activate PackagesRoutes
+
+PackagesRoutes -> PackageRepository : createPackage(orderData)
+activate PackageRepository
+
+PackageRepository -> Packages : save package order
+activate Packages
+Packages --> PackageRepository : confirm save
+deactivate Packages
+
+PackageRepository --> PackagesRoutes : return created package
+deactivate PackageRepository
+
+PackagesRoutes --> ApiService : return order confirmation
+deactivate PackagesRoutes
+
+ApiService --> PackageModel : return order response
+deactivate ApiService
+
+PackageModel --> PackageController : return order result
+deactivate PackageModel
+
+PackageController --> PackageView : return order status
+deactivate PackageController
+
+PackageView --> Customer : Display order confirmation
+deactivate PackageView
+
+@enduml
