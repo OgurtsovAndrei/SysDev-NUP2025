@@ -1,8 +1,8 @@
 @startuml Telecom_REST_API_Backend_Diagram
 left to right direction
-'skinparam wrapWidth 400
-scale 2
-
+skinparam wrapWidth 200
+scale max 1600 width
+scale max 3200 height
 
 ' =================== BACKEND PACKAGES ===================
 package "Models"  {
